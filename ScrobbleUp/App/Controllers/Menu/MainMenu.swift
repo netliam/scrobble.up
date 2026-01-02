@@ -1,5 +1,11 @@
+//
+//  MainMenu.swift
+//  ScrobbleUp
+//
+//  Created by Liam Smith-Gales on 12/26/25.
+//
+
 import AppKit
-import Defaults
 
 final class MainMenu {
   let mainMenu: NSMenu
@@ -70,13 +76,14 @@ final class MainMenu {
 
     if shouldShowPlayerSection {
       for item in mainMenu.items where item.action == #selector(setPlayerOverride(_:)) {
+        let playerOverride = UserDefaults.standard.get(\.playerOverride)
         switch item.tag {
         case 0:
-          item.image = Defaults[.playerOverride] == .none ? checkmark : automaticIcon
+            item.image = playerOverride == .none ? checkmark : automaticIcon
         case 1:
-          item.image = Defaults[.playerOverride] == .appleMusic ? checkmark : appleMusicIcon
+          item.image = playerOverride == .appleMusic ? checkmark : appleMusicIcon
         case 2:
-          item.image = Defaults[.playerOverride] == .spotify ? checkmark : spotifyIcon
+          item.image = playerOverride == .spotify ? checkmark : spotifyIcon
         default:
           break
         }
@@ -138,6 +145,8 @@ final class MainMenu {
 
   private func addPlayerSelectionIfNeeded() {
     guard areBothPlayersRunning() else { return }
+      
+    let playerOverride = UserDefaults.standard.get(\.playerOverride)
 
     let playerHeader = NSMenuItem.sectionHeader(title: "Active Player")
     playerHeader.attributedTitle = NSAttributedString(
@@ -153,7 +162,7 @@ final class MainMenu {
     )
     automaticItem.target = self
     automaticItem.tag = 0
-    automaticItem.image = Defaults[.playerOverride] == .none ? checkmark : automaticIcon
+    automaticItem.image = playerOverride == PlayerOverride.none ? checkmark : automaticIcon
     mainMenu.addItem(automaticItem)
 
     let appleMusicItem = NSMenuItem(
@@ -163,7 +172,7 @@ final class MainMenu {
     )
     appleMusicItem.target = self
     appleMusicItem.tag = 1
-    appleMusicItem.image = Defaults[.playerOverride] == .appleMusic ? checkmark : appleMusicIcon
+    appleMusicItem.image = playerOverride == .appleMusic ? checkmark : appleMusicIcon
     mainMenu.addItem(appleMusicItem)
 
     let spotifyItem = NSMenuItem(
@@ -173,7 +182,7 @@ final class MainMenu {
     )
     spotifyItem.target = self
     spotifyItem.tag = 2
-    spotifyItem.image = Defaults[.playerOverride] == .spotify ? checkmark : spotifyIcon
+    spotifyItem.image = playerOverride == .spotify ? checkmark : spotifyIcon
     mainMenu.addItem(spotifyItem)
 
     mainMenu.addItem(NSMenuItem.separator())
@@ -221,11 +230,11 @@ final class MainMenu {
 
     switch sender.tag {
     case 0:
-      Defaults[.playerOverride] = .none
+        UserDefaults.standard.set(.none, for: \.playerOverride)
     case 1:
-      Defaults[.playerOverride] = .appleMusic
+        UserDefaults.standard.set(.appleMusic, for: \.playerOverride)
     case 2:
-      Defaults[.playerOverride] = .spotify
+        UserDefaults.standard.set(.spotify, for: \.playerOverride)
     default:
       break
     }

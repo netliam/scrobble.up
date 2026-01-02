@@ -6,7 +6,6 @@
 //
 
 import AppKit
-import Defaults
 import ScriptingBridge
 
 final class UnifiedMusicManager {
@@ -57,8 +56,8 @@ final class UnifiedMusicManager {
   // MARK: - Player Selection Logic
 
   private func shouldAcceptTrack(from source: MusicSource) -> Bool {
-    let override = Defaults[.playerOverride]
-
+      let override = UserDefaults.standard.get(\.playerOverride)
+      
     switch override {
     case .appleMusic:
       return source == .appleMusic
@@ -72,8 +71,8 @@ final class UnifiedMusicManager {
   }
 
   private func shouldAcceptBasedOnPreference(from source: MusicSource) -> Bool {
-    let preference = Defaults[.playerSwitching]
-
+      let preference = UserDefaults.standard.get(\.playerSwitching)
+      
     switch preference {
     case .automatic:
       return true

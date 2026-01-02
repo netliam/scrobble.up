@@ -5,7 +5,6 @@
 //  Created by Liam Smith-Gales on 12/31/25.
 //
 
-import Defaults
 import Settings
 import SwiftUI
 
@@ -118,8 +117,8 @@ struct ListenBrainzTokenInputView: View {
 struct ListenBrainzConnectedView: View {
   @ObservedObject var listenBrainz: ListenBrainzManager
 
-  @Default(.listenBrainzEnabled) private var listenBrainzEnabled
-
+    @AppStorage(\.listenBrainzEnabled) private var listenBrainzEnabled
+    
   var body: some View {
     Form {
       Section {

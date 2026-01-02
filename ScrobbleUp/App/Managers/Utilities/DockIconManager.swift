@@ -6,7 +6,7 @@
 //
 
 import AppKit
-import Defaults
+import Foundation
 
 final class DockIconManager {
   static let shared = DockIconManager()
@@ -19,7 +19,7 @@ final class DockIconManager {
   }
 
   func updateDockIcon(with artwork: NSImage?) {
-    guard Defaults[.showArtworkInDock] else {
+      guard UserDefaults.standard.get(\.showArtworkInDock) else {
       resetToDefaultIcon()
       return
     }

@@ -1,3 +1,10 @@
+//
+//  RecentlyPlayedMenu.swift
+//  ScrobbleUp
+//
+//  Created by Liam Smith-Gales on 12/26/25.
+//
+
 import AppKit
 import LastFM
 

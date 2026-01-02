@@ -1,7 +1,6 @@
 import AppKit
 import Combine
 import CoreData
-import Defaults
 import Foundation
 
 @MainActor
@@ -81,7 +80,7 @@ final class UnifiedScrobbleManager: ObservableObject {
 
           await playerManager.fetchLoveStateForCurrentTrack()
 
-          if Defaults[.showArtworkInDock] {
+        if UserDefaults.standard.get(\.showArtworkInDock) {
             DockIconManager.shared.updateDockIcon(
               with: appState.currentTrack.image
             )
@@ -100,7 +99,7 @@ final class UnifiedScrobbleManager: ObservableObject {
       {
         let played = Int(Date().timeIntervalSince(start))
         let threshold = min(
-          max(30, duration * Defaults[.scrobbleTrackAt] / 100),
+            max(30, duration * UserDefaults.standard.get(\.scrobbleTrackAt) / 100),
           240
         )
         if played >= threshold { fireScrobble() }
@@ -129,7 +128,7 @@ final class UnifiedScrobbleManager: ObservableObject {
     var anySent = false
 
     // Last.fm
-    if Defaults[.lastFmEnabled] && lastFm.username != nil {
+    if UserDefaults.standard.get(\.lastFmEnabled) &&  lastFm.username != nil {
       do {
         try await lastFm.updateNowPlaying(
           artist: artist,
@@ -144,7 +143,7 @@ final class UnifiedScrobbleManager: ObservableObject {
     }
 
     // ListenBrainz
-    if Defaults[.listenBrainzEnabled] && listenBrainz.username != nil {
+    if UserDefaults.standard.get(\.listenBrainzEnabled) && listenBrainz.username != nil {
       do {
         try await listenBrainz.updateNowPlaying(
           artist: artist,
@@ -173,7 +172,7 @@ final class UnifiedScrobbleManager: ObservableObject {
     guard duration > 30 else { return }
 
     let threshold = min(
-      max(30, duration * Defaults[.scrobbleTrackAt] / 100),
+      max(30, duration * UserDefaults.standard.get(\.scrobbleTrackAt) / 100),
       240
     )
     scrobbleTimer = Timer.scheduledTimer(
@@ -217,7 +216,7 @@ final class UnifiedScrobbleManager: ObservableObject {
     var anyScrobbled = false
 
     // Last.fm
-    if Defaults[.lastFmEnabled] && lastFm.username != nil {
+    if UserDefaults.standard.get(\.lastFmEnabled) && lastFm.username != nil {
       do {
         try await lastFm.scrobble(
           artist: artist,
@@ -233,7 +232,7 @@ final class UnifiedScrobbleManager: ObservableObject {
     }
 
     // ListenBrainz
-    if Defaults[.listenBrainzEnabled] && listenBrainz.username != nil {
+      if UserDefaults.standard.get(\.listenBrainzEnabled) && listenBrainz.username != nil {
       do {
         try await listenBrainz.scrobble(
           artist: artist,

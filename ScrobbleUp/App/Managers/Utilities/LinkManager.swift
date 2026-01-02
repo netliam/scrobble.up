@@ -6,7 +6,6 @@
 //
 
 import AppKit
-import Defaults
 import Foundation
 import LastFM
 
@@ -20,8 +19,8 @@ final class LinkManager {
   // MARK: - Public API
 
   func openArtist(artist: String) async {
-    let preference = Defaults[.openLinksWith]
-
+    let preference = UserDefaults.standard.get(\.openLinksWith)
+      
     guard let url = await resolveArtistURL(artist: artist, preference: preference) else {
       print("Failed to resolve artist URL")
       return
@@ -31,8 +30,8 @@ final class LinkManager {
   }
 
   func openTrack(artist: String, track: String, album: String? = nil) async {
-    let preference = Defaults[.openLinksWith]
-
+      let preference = UserDefaults.standard.get(\.openLinksWith)
+      
     guard
       let url = await resolveTrackURL(
         track: track,

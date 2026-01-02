@@ -5,13 +5,12 @@
 //  Created by Liam Smith-Gales on 12/31/25.
 //
 
-import Defaults
 import Settings
 import SwiftUI
 
 struct ScrobblerSettingsPane: View {
-  @Default(.syncLikes) private var syncLikes
-  @Default(.scrobbleTrackAt) private var scrobbleTrackAt
+    @AppStorage(\.syncLikes) private var syncLikes
+    @AppStorage(\.scrobbleTrackAt) private var scrobbleTrackAt
 
   var body: some View {
     Form {

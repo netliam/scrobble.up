@@ -5,17 +5,17 @@
 //  Created by Liam Smith-Gales on 12/23/25.
 //
 
-import Defaults
 import LaunchAtLogin
 import SwiftUI
 
 struct GeneralSettingsPane: View {
   @StateObject private var updaterViewModel = UpdaterViewModel()
 
-  @Default(.playerSwitching) private var playerSwitching
-  @Default(.openLinksWith) private var openLinksWith
-  @Default(.showIconInDock) private var showIconInDock
-  @Default(.showArtworkInDock) private var showArtworkInDock
+    @AppStorage(\.playerSwitching) private var playerSwitching
+    @AppStorage(\.openLinksWith) private var openLinksWith
+    @AppStorage(\.showIconInDock) private var showIconInDock
+    @AppStorage(\.showArtworkInDock) private var showArtworkInDock
+
 
   var body: some View {
     Form {

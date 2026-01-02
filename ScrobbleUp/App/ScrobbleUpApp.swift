@@ -1,8 +1,9 @@
 import AppKit
 import CoreData
-import Defaults
 import Sparkle
 import SwiftUI
+import Combine
+import Foundation
 
 @main
 struct ScrobbleUpApp: App {
@@ -36,6 +37,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
   private var statusItem: NSStatusItem?
   private var mainWindowController: NSWindowController?
+  private var cancellables = Set<AnyCancellable>()
+
 
   private let core: CoreDataStack = .shared
   private let appState: AppState = .shared
@@ -59,20 +62,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 
     // Observe showIconInDock changes
-    Defaults.observe(.showIconInDock) { [weak self] change in
-      self?.updateActivationPolicy()
-    }
-    .tieToLifetime(of: self)
+      UserDefaults.standard.observe(\.showIconInDock) { [weak self] newValue in
+          self?.updateActivationPolicy()
+      }
+      .store(in: &cancellables)
 
     // Observe showArtworkInDock changes
-    Defaults.observe(.showArtworkInDock) { [weak self] change in
-      if !change.newValue {
-        DockIconManager.shared.resetToDefaultIcon()
-      } else {
-        self?.updateDockIconWithCurrentTrack()
+      UserDefaults.standard.observe(\.showArtworkInDock) { [weak self] newValue in
+          if !newValue {
+              DockIconManager.shared.resetToDefaultIcon()
+          } else {
+              self?.updateDockIconWithCurrentTrack()
+          }
       }
-    }
-    .tieToLifetime(of: self)
+      .store(in: &cancellables)
 
     // Observe app launches/quits
     NSWorkspace.shared.notificationCenter.addObserver(
@@ -119,7 +122,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
   }
 
   private func updateActivationPolicy() {
-    if Defaults[.showIconInDock] {
+    if UserDefaults.standard.bool(forKey: "showIconInDock") {
       NSApp.setActivationPolicy(.regular)
     } else {
       NSApp.setActivationPolicy(.accessory)
@@ -130,7 +133,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     // Hide instead of close
     sender.orderOut(nil)
 
-    if !Defaults[.showIconInDock] {
+    if !UserDefaults.standard.bool(forKey: "showIconInDock") {
       NSApp.setActivationPolicy(.accessory)
     }
 

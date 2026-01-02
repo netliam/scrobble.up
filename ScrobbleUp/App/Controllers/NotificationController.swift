@@ -6,7 +6,6 @@
 //
 
 import AppKit
-import Defaults
 import SwiftUI
 import UserNotifications
 
@@ -37,7 +36,7 @@ class NotificationController: NSObject, UNUserNotificationCenterDelegate {
   // MARK: - HUD Notifications
 
   func loveTrack(trackName: String, loved: Bool, artwork: NSImage? = nil) {
-    guard Defaults[.ratingAndLoveStatusInHUD] == true else { return }
+      guard UserDefaults.standard.get(\.ratingAndLoveStatus) else { return }
     if loved {
       showHUD(symbol: "heart", text: "Loved", subtitle: trackName, artwork: artwork)
     } else {
@@ -47,7 +46,7 @@ class NotificationController: NSObject, UNUserNotificationCenterDelegate {
   }
 
   func infoCopiedToClipboard(type: CopiedLink) {
-    guard Defaults[.infoCopiedToClipboardInHUD] == true else { return }
+      guard UserDefaults.standard.get(\.infoCopiedToClipboard) else { return }
     var text: String
 
     switch type {

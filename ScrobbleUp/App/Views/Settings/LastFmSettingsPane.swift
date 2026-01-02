@@ -6,7 +6,6 @@
 //
 
 import Combine
-import Defaults
 import LastFM
 import Settings
 import SwiftUI
@@ -126,7 +125,7 @@ struct LastFmProfileView: View {
   @State private var isLoading: Bool = true
   @State private var profileImageURL: URL?
 
-  @Default(.lastFmEnabled) private var lastFmEnabled
+    @AppStorage(\.lastFmEnabled) private var lastFmEnabled
 
   var body: some View {
 

@@ -5,8 +5,6 @@
 //  Created by Liam Smith-Gales on 12/25/25.
 //
 
-import Defaults
-
 // MARK: - PlayerSwitching
 
 enum PlayerSwitching: String, CaseIterable, Codable, Equatable {
@@ -15,8 +13,6 @@ enum PlayerSwitching: String, CaseIterable, Codable, Equatable {
   case preferSpotify = "preferSpotify"
 }
 
-extension PlayerSwitching: Defaults.Serializable {}
-
 // MARK: - PlayerOverride
 
 enum PlayerOverride: String, CaseIterable, Codable, Equatable {
@@ -24,8 +20,6 @@ enum PlayerOverride: String, CaseIterable, Codable, Equatable {
   case appleMusic = "appleMusic"
   case spotify = "spotify"
 }
-
-extension PlayerOverride: Defaults.Serializable {}
 
 // MARK: - OpenLinksWith
 
@@ -37,8 +31,6 @@ enum OpenLinksWith: String, CaseIterable, Codable, Equatable {
   case alwaysInSpotify = "alwaysInSpotify"
 }
 
-extension OpenLinksWith: Defaults.Serializable {}
-
 // MARK: - CopiedLink
 
 enum CopiedLink: String, CaseIterable, Codable, Equatable {
@@ -46,5 +38,3 @@ enum CopiedLink: String, CaseIterable, Codable, Equatable {
   case appleMusic = "appleMusic"
   case spotify = "spotify"
 }
-
-extension CopiedLink: Defaults.Serializable {}

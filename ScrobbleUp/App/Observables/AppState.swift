@@ -7,7 +7,6 @@
 
 import AppKit
 import Combine
-import Defaults
 import KeyboardShortcuts
 import Settings
 

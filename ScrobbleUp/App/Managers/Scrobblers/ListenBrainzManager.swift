@@ -6,7 +6,6 @@
 //
 
 import Combine
-import Defaults
 import Foundation
 
 final class ListenBrainzManager: ObservableObject {
@@ -22,7 +21,7 @@ final class ListenBrainzManager: ObservableObject {
   private init() {
     self.token = KeychainHelper.shared.get("listenbrainz_token")
     self.username = KeychainHelper.shared.get("listenbrainz_username")
-    self.baseURL = Defaults[.listenBrainzBaseURL]
+      self.baseURL = UserDefaults.standard.get(\.listenBrainzBaseURL)
   }
 
   // MARK: - Authentication
@@ -64,7 +63,7 @@ final class ListenBrainzManager: ObservableObject {
 
     if let baseURL = baseURL {
       self.baseURL = baseURL.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-      Defaults[.listenBrainzBaseURL] = self.baseURL
+        UserDefaults.standard.set(self.baseURL, forKey: "listenBrainzBaseURL")
     }
 
     KeychainHelper.shared.set(token, for: "listenbrainz_token")
@@ -78,7 +77,7 @@ final class ListenBrainzManager: ObservableObject {
 
     KeychainHelper.shared.remove("listenbrainz_token")
     KeychainHelper.shared.remove("listenbrainz_username")
-    Defaults[.listenBrainzBaseURL] = Self.defaultBaseURL
+    UserDefaults.standard.set(Self.defaultBaseURL, forKey: "listenBrainzBaseURL")
   }
 
   // MARK: - Scrobbling

@@ -7,7 +7,6 @@
 
 import AppKit
 import Combine
-import Defaults
 import Foundation
 
 @MainActor
@@ -64,13 +63,13 @@ final class PlayerManager: ObservableObject {
 
     var results = LoveOperationResults()
 
-    if Defaults[.syncLikes] {
+    if UserDefaults.standard.get(\.syncLikes) {
       _ = await appleMusic.requestAutomationPermissionIfNeeded()
       await appleMusic.setFavorite(loved)
       results.appleMusicSuccess = true
     }
 
-    if Defaults[.lastFmEnabled] && lastFm.username != nil {
+      if UserDefaults.standard.get(\.lastFmEnabled) && lastFm.username != nil {
       do {
         if loved {
           try await lastFm.loveTrack(track: track.title, artist: track.artist)
@@ -85,7 +84,7 @@ final class PlayerManager: ObservableObject {
       }
     }
 
-    if Defaults[.listenBrainzEnabled] && listenBrainz.username != nil {
+      if UserDefaults.standard.get(\.lastFmEnabled) && listenBrainz.username != nil {
       do {
         if loved {
           try await listenBrainz.loveTrack(artist: track.artist, track: track.title)
@@ -125,17 +124,17 @@ final class PlayerManager: ObservableObject {
 
     var newState = TrackLoveState()
 
-    if Defaults[.lastFmEnabled] && lastFm.username != nil {
+      if UserDefaults.standard.get(\.lastFmEnabled) && lastFm.username != nil {
       let isLoved = await lastFm.isTrackLoved(artist: track.artist, track: track.title)
       newState.lastFm = isLoved
     }
 
-    if Defaults[.listenBrainzEnabled] && listenBrainz.username != nil {
+      if UserDefaults.standard.get(\.listenBrainzEnabled) && listenBrainz.username != nil {
       let isLoved = await listenBrainz.isTrackLoved(artist: track.artist, track: track.title)
       newState.listenBrainz = isLoved
     }
 
-    if Defaults[.syncLikes] {
+      if UserDefaults.standard.get(\.syncLikes) {
       let isLoved = await appleMusic.currentFavoriteState()
       newState.appleMusic = isLoved ?? false
     }

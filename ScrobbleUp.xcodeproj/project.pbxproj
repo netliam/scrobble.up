@@ -9,8 +9,6 @@
 /* Begin PBXBuildFile section */
 		2D050FCB2EFDCEAE00DFE18C /* Settings in Frameworks */ = {isa = PBXBuildFile; productRef = 2D050FCA2EFDCEAE00DFE18C /* Settings */; };
 		2D050FDA2EFDD70800DFE18C /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 2D050FD92EFDD70800DFE18C /* LaunchAtLogin */; };
-		2D07AC442F036FA200CDCF93 /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = 2D07AC432F036FA200CDCF93 /* Defaults */; };
-		2D07AC462F036FA200CDCF93 /* DefaultsMacros in Frameworks */ = {isa = PBXBuildFile; productRef = 2D07AC452F036FA200CDCF93 /* DefaultsMacros */; };
 		2D07ACB72F04458600CDCF93 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 2D07ACB62F04458600CDCF93 /* README.md */; };
 		2D5CDFEB2F061DA00056B4CF /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 2D5CDFEA2F061DA00056B4CF /* Sparkle */; };
 		2DB6C9B22F076BF100B52B00 /* ExportOptions.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2DB6C9B12F076BEA00B52B00 /* ExportOptions.plist */; };
@@ -75,11 +73,9 @@
 				2DF0282F2EFDE34B00AE9026 /* LastFM in Frameworks */,
 				2D050FCB2EFDCEAE00DFE18C /* Settings in Frameworks */,
 				9F4C57C72EA31C66000ED6A2 /* ServiceManagement.framework in Frameworks */,
-				2D07AC462F036FA200CDCF93 /* DefaultsMacros in Frameworks */,
 				2D050FDA2EFDD70800DFE18C /* LaunchAtLogin in Frameworks */,
 				9F4C57C92EA31C6F000ED6A2 /* CoreServices.framework in Frameworks */,
 				2DF028452EFE25EF00AE9026 /* KeyboardShortcuts in Frameworks */,
-				2D07AC442F036FA200CDCF93 /* Defaults in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -141,8 +137,6 @@
 				2D050FD92EFDD70800DFE18C /* LaunchAtLogin */,
 				2DF0282E2EFDE34B00AE9026 /* LastFM */,
 				2DF028442EFE25EF00AE9026 /* KeyboardShortcuts */,
-				2D07AC432F036FA200CDCF93 /* Defaults */,
-				2D07AC452F036FA200CDCF93 /* DefaultsMacros */,
 				2D5CDFEA2F061DA00056B4CF /* Sparkle */,
 			);
 			productName = NowPlaying;
@@ -178,7 +172,6 @@
 				2D050FD82EFDD70800DFE18C /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
 				2DF0282D2EFDE34B00AE9026 /* XCRemoteSwiftPackageReference "LastFM" */,
 				2DF028432EFE25EF00AE9026 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
-				2D07AC422F036FA200CDCF93 /* XCRemoteSwiftPackageReference "Defaults" */,
 				2D5CDFE92F061DA00056B4CF /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -385,7 +378,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.6;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.netliam.ScrobbleUp;
 				PRODUCT_DEFINITION_PLIST = ScrobbleUp/Info.plist;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -449,7 +442,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.6;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.netliam.ScrobbleUp;
 				PRODUCT_DEFINITION_PLIST = ScrobbleUp/Info.plist;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -510,14 +503,6 @@
 				kind = branch;
 			};
 		};
-		2D07AC422F036FA200CDCF93 /* XCRemoteSwiftPackageReference "Defaults" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/sindresorhus/Defaults";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 9.0.6;
-			};
-		};
 		2D5CDFE92F061DA00056B4CF /* XCRemoteSwiftPackageReference "Sparkle" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sparkle-project/Sparkle";
@@ -554,16 +539,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 2D050FD82EFDD70800DFE18C /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */;
 			productName = LaunchAtLogin;
-		};
-		2D07AC432F036FA200CDCF93 /* Defaults */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 2D07AC422F036FA200CDCF93 /* XCRemoteSwiftPackageReference "Defaults" */;
-			productName = Defaults;
-		};
-		2D07AC452F036FA200CDCF93 /* DefaultsMacros */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 2D07AC422F036FA200CDCF93 /* XCRemoteSwiftPackageReference "Defaults" */;
-			productName = DefaultsMacros;
 		};
 		2D5CDFEA2F061DA00056B4CF /* Sparkle */ = {
 			isa = XCSwiftPackageProductDependency;
