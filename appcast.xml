@@ -5,38 +5,8 @@
     <link>https://github.com/netliam/scrobble.up</link>
     <description>Most recent changes with links to updates.</description>
     <language>en</language>
-    <item>
-      <title>Version 1.0.1</title>
-      <description><![CDATA[
-Test Update
-      ]]></description>
-      <pubDate>Wed, 31 Dec 2025 22:42:28 -0500</pubDate>
-      <sparkle:version>1</sparkle:version>
-      <sparkle:shortVersionString>1.0.1</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <enclosure
-        url="https://codeberg.org/netliam/scrobble.up/releases/download/v1.0.1/ScrobbleUp-v1.0.1.zip"
-        sparkle:edSignature="sparkle:edSignature="CjV1EVVyYsA+Zr7T3LvLGcO8Kc7DNZN8CBS5Ya61qAuKRtEQVH70pBzHreiKvR4Evgbm9V/wKKzmBv26jyQHCQ==" length="4308705""
-        length="4308705"
-        type="application/octet-stream"/>
-    </item>
-<item>
-  <title>Version 1.0.0</title>
-  <pubDate>Fri, 02 Jan 2026 08:00:13 +0000</pubDate>
-  <enclosure url="https://github.com/netliam/scrobble.up/releases/download/v1.0.0/scrobble.up.zip" sparkle:version="1.0.0" sparkle:edSignature="sparkle:edSignature="hVmVGmgIhwzHlvHprfs5bdOHJfJl5KFw8H5eNHL2NDN3HHItYoo3FHxXVZZVjyg7kaZK2M3fYkdKqXyWA3DwAQ==" length="4676653"" length="4676653" type="application/octet-stream"/>
-</item>
-<item>
-  <title>Version 1.0.1</title>
-  <pubDate>Fri, 02 Jan 2026 19:35:45 +0000</pubDate>
-  <enclosure url="https://github.com/netliam/scrobble.up/releases/download/v1.0.1/scrobble.up.zip" sparkle:version="1.0.1" sparkle:edSignature="sparkle:edSignature="HnCeKgugV3Gq5q7yPcqdLYVZnJsGyqoGYGCmVI47YibyjaITt12BRMj+jmuYb3z4MtGtIjzs3BRit8rhvAUsAw==" length="4440331"" length="4440331" type="application/octet-stream"/>
-</item>
-<item>
-  <title>Version 1.0.1</title>
-  <pubDate>Fri, 02 Jan 2026 19:35:49 +0000</pubDate>
-  <enclosure url="https://github.com/netliam/scrobble.up/releases/download/v1.0.1/scrobble.up.zip" sparkle:version="1.0.1" sparkle:edSignature="sparkle:edSignature="HnCeKgugV3Gq5q7yPcqdLYVZnJsGyqoGYGCmVI47YibyjaITt12BRMj+jmuYb3z4MtGtIjzs3BRit8rhvAUsAw==" length="4440331"" length="4440331" type="application/octet-stream"/>
-</item>
   </channel>
-<item>
+  <item>
   <title>Version 1.0.2</title>
   <pubDate>$(date -R)</pubDate>
   <enclosure
