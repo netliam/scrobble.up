@@ -147,7 +147,7 @@ jobs:
           ID=$(cat notarization.json | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4)
 
           if [ "$STATUS" != "Accepted" ]; then
-            echo "❌ Notarization failed with status: $STATUS"
+            echo "Notarization failed with status: $STATUS"
             echo "Fetching log..."
             xcrun notarytool log "$ID" \
               --apple-id "$APPLE_ID" \
