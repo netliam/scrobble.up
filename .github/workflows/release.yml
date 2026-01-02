@@ -181,7 +181,7 @@ jobs:
             "$RUNNER_TEMP/$APP_NAME.dmg" \
             "$RUNNER_TEMP/export/$APP_NAME.app"
 
-      - name: Create Sparkle ZIP & sign
+      - name: Create Sparkle ZIP & generate appcast
         env:
           SPARKLE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
         run: |
@@ -189,14 +189,24 @@ jobs:
           curl -L -o /tmp/Sparkle.tar.xz https://github.com/sparkle-project/Sparkle/releases/download/2.6.4/Sparkle-2.6.4.tar.xz
           tar -xf /tmp/Sparkle.tar.xz -C /tmp
 
-          ditto -c -k --keepParent "$RUNNER_TEMP/export/$APP_NAME.app" "$RUNNER_TEMP/$APP_NAME.zip"
+          # Create release directory structure
+          mkdir -p "$RUNNER_TEMP/releases"
+          ditto -c -k --keepParent "$RUNNER_TEMP/export/$APP_NAME.app" "$RUNNER_TEMP/releases/$APP_NAME.zip"
 
+          # Set up Sparkle private key
           echo "$SPARKLE_KEY" > "$RUNNER_TEMP/sparkle_key"
-          SIGNATURE=$(/tmp/bin/sign_update "$RUNNER_TEMP/$APP_NAME.zip" -f "$RUNNER_TEMP/sparkle_key")
+
+          # Generate appcast using Sparkle's tool
+          /tmp/bin/generate_appcast \
+            --ed-key-file "$RUNNER_TEMP/sparkle_key" \
+            --download-url-prefix "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/" \
+            -o "$RUNNER_TEMP/appcast.xml" \
+            "$RUNNER_TEMP/releases"
+
           rm "$RUNNER_TEMP/sparkle_key"
 
-          echo "SIGNATURE=$SIGNATURE" >> $GITHUB_ENV
-          echo "ZIP_SIZE=$(stat -f%z "$RUNNER_TEMP/$APP_NAME.zip")" >> $GITHUB_ENV
+          # Copy zip to expected location for release upload
+          cp "$RUNNER_TEMP/releases/$APP_NAME.zip" "$RUNNER_TEMP/$APP_NAME.zip"
 
       - name: Get version
         run: |
@@ -219,18 +229,16 @@ jobs:
           git checkout main
           git pull origin main
 
-          PUB_DATE=$(date -R)
-
-          # Insert new item before </channel>
-          sed -i '' "s|</channel>|  <item>\\
-            <title>Version ${{ env.VERSION }}</title>\\
-            <pubDate>${PUB_DATE}</pubDate>\\
-            <enclosure url=\"https://github.com/${{ github.repository }}/releases/download/${{ env.TAG_NAME }}/${APP_NAME}.zip\" sparkle:version=\"${{ env.VERSION }}\" sparkle:edSignature=\"${{ env.SIGNATURE }}\" length=\"${{ env.ZIP_SIZE }}\" type=\"application/octet-stream\"/>\\
-          </item>\\
-          </channel>|" appcast.xml
+          cp "$RUNNER_TEMP/appcast.xml" appcast.xml
 
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add appcast.xml
           git commit -m "Update appcast for ${{ env.TAG_NAME }}"
           git push origin main
+
+      - name: Get version
+        run: |
+          VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "$RUNNER_TEMP/export/$APP_NAME.app/Contents/Info.plist")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "TAG_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
