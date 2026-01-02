@@ -17,7 +17,7 @@
 	<key>SUFeedURL</key>
 	<string>https://raw.githubusercontent.com/netliam/scrobble.up/refs/heads/main/appcast.xml</string>
 	<key>SUPublicEDKey</key>
-	<string>5YnPPWKrwQPg1cJAcFO+8z1BB5PW/IPCfgpCcnlVkLw=</string>
+	<string>m8uUvgDKoeV0Rgz/EtnVOKDsUsPcoUOLLeLjWpTD8o0=</string>
 	<key>SUEnableInstallerLauncherService</key>
 	<true/>
 </dict>

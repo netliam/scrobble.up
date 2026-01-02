@@ -193,8 +193,8 @@ jobs:
           mkdir -p "$RUNNER_TEMP/releases"
           ditto -c -k --keepParent "$RUNNER_TEMP/export/$APP_NAME.app" "$RUNNER_TEMP/releases/$APP_NAME.zip"
 
-          # Set up Sparkle private key
-          echo "$SPARKLE_KEY" > "$RUNNER_TEMP/sparkle_key"
+          # Set up Sparkle private key (use printf to avoid trailing newline)
+          printf '%s' "$SPARKLE_KEY" > "$RUNNER_TEMP/sparkle_key"
 
           # Generate appcast using Sparkle's tool
           /tmp/bin/generate_appcast \
@@ -236,9 +236,3 @@ jobs:
           git add appcast.xml
           git commit -m "Update appcast for ${{ env.TAG_NAME }}"
           git push origin main
-
-      - name: Get version
-        run: |
-          VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "$RUNNER_TEMP/export/$APP_NAME.app/Contents/Info.plist")
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "TAG_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
