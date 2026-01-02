@@ -21,7 +21,7 @@ Finally an open source macOS music tracker for ListenBrainz and Last.fm
 ---
 
 ### Manual Installation (Currently the only option)
-<a href="https://github.com/netliam/scrobble.up/releases/download/latest/ScrobbleUp.dmg" target="_self"><img width="200" src="Assets/Download_for_MacOS.png" alt="Download for macOS" /></a>
+<a href="https://github.com/netliam/scrobble.up/releases/latest/download/scrobble.up.dmg" target="_self"><img width="200" src="Assets/Download_for_MacOS.png" alt="Download for macOS" /></a>
 
 ### Using scrobble.up
 - Launch the app
