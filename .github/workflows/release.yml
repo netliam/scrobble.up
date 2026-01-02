@@ -197,17 +197,6 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "TAG_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
 
-      - name: Update appcast.xml
-        run: |
-          # Insert new item before </channel>
-          sed -i '' '/<\/channel>/i\
-          <item>\
-            <title>Version ${{ env.VERSION }}</title>\
-            <pubDate>'"$(date -R)"'</pubDate>\
-            <enclosure url="https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/'$APP_NAME'.zip" sparkle:version="${{ env.VERSION }}" sparkle:edSignature="${{ env.SIGNATURE }}" length="${{ env.ZIP_SIZE }}" type="application/octet-stream"/>\
-          </item>
-          ' appcast.xml
-
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
@@ -223,14 +212,22 @@ jobs:
           git checkout main
           git pull origin main
 
-          # Update appcast
-          sed -i '' '/<\/channel>/i\
-          <item>\
-            <title>Version ${{ env.VERSION }}</title>\
-            <pubDate>'"$(date -R)"'</pubDate>\
-            <enclosure url="https://github.com/${{ github.repository }}/releases/download/${{ env.TAG_NAME }}/'$APP_NAME'.zip" sparkle:version="${{ env.VERSION }}" sparkle:edSignature="${{ env.SIGNATURE }}" length="${{ env.ZIP_SIZE }}" type="application/octet-stream"/>\
+          # Create properly formatted item
+          cat >> /tmp/new_item.txt << 'EOF'
+          <item>
+            <title>Version ${{ env.VERSION }}</title>
+            <pubDate>$(date -R)</pubDate>
+            <enclosure
+              url="https://github.com/${{ github.repository }}/releases/download/${{ env.TAG_NAME }}/${{ env.APP_NAME }}.zip"
+              sparkle:version="${{ env.VERSION }}"
+              sparkle:edSignature="${{ env.SIGNATURE }}"
+              length="${{ env.ZIP_SIZE }}"
+              type="application/octet-stream"/>
           </item>
-          ' appcast.xml
+          EOF
+
+          # Insert before </channel>
+          sed -i '' '/<\/channel>/r /tmp/new_item.txt' appcast.xml
 
           git config user.name "github-actions"
           git config user.email "actions@github.com"
