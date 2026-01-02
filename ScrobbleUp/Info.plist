@@ -15,7 +15,7 @@
 	<key>NSAppleEventsUsageDescription</key>
 	<string>scrobble.up needs the permission to get info about currently playing music.</string>
 	<key>SUFeedURL</key>
-	<string>https://codeberg.org/netliam/scrobble.up/raw/branch/main/appcast.xml</string>
+	<string>https://raw.githubusercontent.com/netliam/scrobble.up/refs/heads/main/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>5YnPPWKrwQPg1cJAcFO+8z1BB5PW/IPCfgpCcnlVkLw=</string>
 </dict>
