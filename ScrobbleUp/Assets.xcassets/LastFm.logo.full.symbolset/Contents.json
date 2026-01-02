@@ -1,0 +1,12 @@
+{
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  },
+  "symbols" : [
+    {
+      "filename" : "Lastfm_Logo_full.symbols.svg",
+      "idiom" : "universal"
+    }
+  ]
+}
