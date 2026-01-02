@@ -20,5 +20,10 @@ Test Update
         length="4308705"
         type="application/octet-stream"/>
     </item>
+<item>
+  <title>Version 1.0.0</title>
+  <pubDate>Fri, 02 Jan 2026 08:00:13 +0000</pubDate>
+  <enclosure url="https://github.com/netliam/scrobble.up/releases/download/v1.0.0/scrobble.up.zip" sparkle:version="1.0.0" sparkle:edSignature="sparkle:edSignature="hVmVGmgIhwzHlvHprfs5bdOHJfJl5KFw8H5eNHL2NDN3HHItYoo3FHxXVZZVjyg7kaZK2M3fYkdKqXyWA3DwAQ==" length="4676653"" length="4676653" type="application/octet-stream"/>
+</item>
   </channel>
 </rss>
