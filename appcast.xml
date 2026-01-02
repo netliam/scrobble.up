@@ -6,6 +6,16 @@
     <description>Most recent changes with links to updates.</description>
     <language>en</language>
   </channel>
+<item>
+  <title>Version 1.0.3</title>
+  <pubDate>$(date -R)</pubDate>
+  <enclosure
+    url="https://github.com/netliam/scrobble.up/releases/download/v1.0.3/scrobble.up.zip"
+    sparkle:version="1.0.3"
+    sparkle:edSignature="sparkle:edSignature="6o7MjYPyvcuJYb1Psg7Z9/fy2SzihjtjlDfsgYBsVftL9ADwddF5kzF6dhED6egRqphpQqloQOv5VZXwT0LzCQ==" length="4440337""
+    length="4440337"
+    type="application/octet-stream"/>
+</item>
   <item>
   <title>Version 1.0.2</title>
   <pubDate>$(date -R)</pubDate>
