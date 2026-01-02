@@ -12,24 +12,24 @@ import SwiftUI
 
 struct HotkeysSettingsPane: View {
 
-  var body: some View {
+	var body: some View {
 
-    Form {
-      Section("Keyboard Shortcuts") {
+		Form {
+			Section("Keyboard Shortcuts") {
 
-        HStack {
-          KeyboardShortcuts.Recorder("Love/Unlove Track", name: .loveTrack)
-        }
+				HStack {
+					KeyboardShortcuts.Recorder("Love/Unlove Track", name: .loveTrack)
+				}
 
-        Text("Hotkeys work system-wide while the app is running.")
-          .font(.caption)
-          .foregroundStyle(.secondary)
-      }
-    }
-    .formStyle(.grouped)
-  }
+				Text("Hotkeys work system-wide while the app is running.")
+					.font(.caption)
+					.foregroundStyle(.secondary)
+			}
+		}
+		.formStyle(.grouped)
+	}
 }
 
 #Preview {
-  HotkeysSettingsPane()
+	HotkeysSettingsPane()
 }

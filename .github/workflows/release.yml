@@ -68,6 +68,13 @@ jobs:
           # Verify
           security find-identity -v -p codesigning
 
+      - name: Create Secrets.xcconfig
+        run: |
+          cat > Configs/Secrets.xcconfig << EOF
+          LASTFM_API_KEY = ${{ secrets.LASTFM_API_KEY }}
+          LASTFM_API_SECRET = ${{ secrets.LASTFM_API_SECRET }}
+          EOF
+
       - name: Build dependencies
         run: |
           xcodebuild build \

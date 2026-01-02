@@ -8,11 +8,11 @@
 import Foundation
 
 struct Secrets {
-  static var lastFmApiKey: String {
-    return Bundle.main.object(forInfoDictionaryKey: "LastFmApiKey") as? String ?? ""
-  }
+	static var lastFmApiKey: String {
+		return Bundle.main.object(forInfoDictionaryKey: "LastFmApiKey") as? String ?? ""
+	}
 
-  static var lastFmApiSecret: String {
-    return Bundle.main.object(forInfoDictionaryKey: "LastFmApiSecret") as? String ?? ""
-  }
+	static var lastFmApiSecret: String {
+		return Bundle.main.object(forInfoDictionaryKey: "LastFmApiSecret") as? String ?? ""
+	}
 }

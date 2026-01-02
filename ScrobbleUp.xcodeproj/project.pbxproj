@@ -10,6 +10,7 @@
 		2D050FCB2EFDCEAE00DFE18C /* Settings in Frameworks */ = {isa = PBXBuildFile; productRef = 2D050FCA2EFDCEAE00DFE18C /* Settings */; };
 		2D050FDA2EFDD70800DFE18C /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 2D050FD92EFDD70800DFE18C /* LaunchAtLogin */; };
 		2D07ACB72F04458600CDCF93 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 2D07ACB62F04458600CDCF93 /* README.md */; };
+		2D469F632F0865FD002F379B /* swift-format.json in Resources */ = {isa = PBXBuildFile; fileRef = 2D469F622F0865F7002F379B /* swift-format.json */; };
 		2D5CDFEB2F061DA00056B4CF /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 2D5CDFEA2F061DA00056B4CF /* Sparkle */; };
 		2DB6C9B22F076BF100B52B00 /* ExportOptions.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2DB6C9B12F076BEA00B52B00 /* ExportOptions.plist */; };
 		2DF0282F2EFDE34B00AE9026 /* LastFM in Frameworks */ = {isa = PBXBuildFile; productRef = 2DF0282E2EFDE34B00AE9026 /* LastFM */; };
@@ -21,6 +22,7 @@
 /* Begin PBXFileReference section */
 		2D07AC2D2F0310D100CDCF93 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		2D07ACB62F04458600CDCF93 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		2D469F622F0865F7002F379B /* swift-format.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "swift-format.json"; sourceTree = "<group>"; };
 		2DB6C9B12F076BEA00B52B00 /* ExportOptions.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = ExportOptions.plist; sourceTree = "<group>"; };
 		9F3642A22E7E538B00D4E680 /* scrobble.up.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = scrobble.up.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F4C57C62EA31C66000ED6A2 /* ServiceManagement.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ServiceManagement.framework; path = System/Library/Frameworks/ServiceManagement.framework; sourceTree = SDKROOT; };
@@ -85,6 +87,7 @@
 		9F3642992E7E538B00D4E680 = {
 			isa = PBXGroup;
 			children = (
+				2D469F622F0865F7002F379B /* swift-format.json */,
 				2DB6C9B12F076BEA00B52B00 /* ExportOptions.plist */,
 				2DE33E8A2EFCEB5F002E2BBF /* Configs */,
 				9F3642A42E7E538B00D4E680 /* ScrobbleUp */,
@@ -189,6 +192,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2D469F632F0865FD002F379B /* swift-format.json in Resources */,
 				2D07ACB72F04458600CDCF93 /* README.md in Resources */,
 				2DB6C9B22F076BF100B52B00 /* ExportOptions.plist in Resources */,
 			);

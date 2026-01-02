@@ -8,38 +8,38 @@
 import AppKit
 
 enum MusicSource: String, Codable {
-  case appleMusic = "Apple Music"
-  case spotify = "Spotify"
+	case appleMusic = "Apple Music"
+	case spotify = "Spotify"
 }
 
 enum MusicState: String, Codable, Equatable {
-  case playing = "playing"
-  case paused = "paused"
-  case stopped = "stopped"
+	case playing = "playing"
+	case paused = "paused"
+	case stopped = "stopped"
 }
 
 struct MusicInfo {
-  let state: MusicState?
-  let title: String?
-  let artist: String?
-  let album: String?
-  let duration: Int?
-  let source: MusicSource?
-  let timestamp: Date = Date()
+	let state: MusicState?
+	let title: String?
+	let artist: String?
+	let album: String?
+	let duration: Int?
+	let source: MusicSource?
+	let timestamp: Date = Date()
 
-  init(
-    state: MusicState?,
-    title: String?,
-    artist: String?,
-    album: String?,
-    duration: Int?,
-    source: MusicSource?,
-  ) {
-    self.state = state
-    self.title = title
-    self.artist = artist
-    self.album = album
-    self.duration = duration
-    self.source = source
-  }
+	init(
+		state: MusicState?,
+		title: String?,
+		artist: String?,
+		album: String?,
+		duration: Int?,
+		source: MusicSource?,
+	) {
+		self.state = state
+		self.title = title
+		self.artist = artist
+		self.album = album
+		self.duration = duration
+		self.source = source
+	}
 }

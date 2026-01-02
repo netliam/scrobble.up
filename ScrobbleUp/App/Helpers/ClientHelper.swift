@@ -9,9 +9,9 @@ import Foundation
 import LastFM
 
 func bestImageURL(images: LastFMImages) -> URL? {
-  return images.mega
-    ?? images.extraLarge
-    ?? images.large
-    ?? images.medium
-    ?? images.small
+	return images.mega
+		?? images.extraLarge
+		?? images.large
+		?? images.medium
+		?? images.small
 }

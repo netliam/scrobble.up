@@ -10,270 +10,274 @@ import Foundation
 import LastFM
 
 final class LinkManager {
-  static let shared = LinkManager()
+	static let shared = LinkManager()
 
-  private let lastFm: LastFmManager = .shared
+	private let lastFm: LastFmManager = .shared
 
-  private init() {}
+	private init() {}
 
-  // MARK: - Public API
+	// MARK: - Public API
 
-  func openArtist(artist: String) async {
-    let preference = UserDefaults.standard.get(\.openLinksWith)
-      
-    guard let url = await resolveArtistURL(artist: artist, preference: preference) else {
-      print("Failed to resolve artist URL")
-      return
-    }
+	func openArtist(artist: String) async {
+		let preference = UserDefaults.standard.get(\.openLinksWith)
 
-    openURL(url, forPreference: preference)
-  }
+		guard let url = await resolveArtistURL(artist: artist, preference: preference) else {
+			print("Failed to resolve artist URL")
+			return
+		}
 
-  func openTrack(artist: String, track: String, album: String? = nil) async {
-      let preference = UserDefaults.standard.get(\.openLinksWith)
-      
-    guard
-      let url = await resolveTrackURL(
-        track: track,
-        artist: artist,
-        album: album,
-        preference: preference
-      )
-    else {
-      print("Failed to resolve track URL")
-      return
-    }
+		openURL(url, forPreference: preference)
+	}
 
-    openURL(url, forPreference: preference)
-  }
+	func openTrack(artist: String, track: String, album: String? = nil) async {
+		let preference = UserDefaults.standard.get(\.openLinksWith)
 
-  // MARK: - URL Resolution
+		guard
+			let url = await resolveTrackURL(
+				track: track,
+				artist: artist,
+				album: album,
+				preference: preference
+			)
+		else {
+			print("Failed to resolve track URL")
+			return
+		}
 
-  private func resolveArtistURL(artist: String, preference: OpenLinksWith) async -> URL? {
-    switch preference {
-    case .currentActivePlayerOrLastFm:
-      if let url = await artistURLForCurrentPlayer(artist: artist) {
-        return url
-      }
-      return await fetchArtistLinkLastFm(artist: artist)
+		openURL(url, forPreference: preference)
+	}
 
-    case .currentActivePlayerOrAppleMusic:
-      if let url = await artistURLForCurrentPlayer(artist: artist) {
-        return url
-      }
-      return await fetchArtistLinkMusic(artist: artist)
+	// MARK: - URL Resolution
 
-    case .currentActivePlayerOrSpotify:
-      if let url = await artistURLForCurrentPlayer(artist: artist) {
-        return url
-      }
-      return await fetchArtistLinkSpotify(artist: artist)
+	private func resolveArtistURL(artist: String, preference: OpenLinksWith) async -> URL? {
+		switch preference {
+		case .currentActivePlayerOrLastFm:
+			if let url = await artistURLForCurrentPlayer(artist: artist) {
+				return url
+			}
+			return await fetchArtistLinkLastFm(artist: artist)
 
-    case .alwaysInAppleMusic:
-      return await fetchArtistLinkMusic(artist: artist)
+		case .currentActivePlayerOrAppleMusic:
+			if let url = await artistURLForCurrentPlayer(artist: artist) {
+				return url
+			}
+			return await fetchArtistLinkMusic(artist: artist)
 
-    case .alwaysInSpotify:
-      return await fetchArtistLinkSpotify(artist: artist)
-    }
-  }
+		case .currentActivePlayerOrSpotify:
+			if let url = await artistURLForCurrentPlayer(artist: artist) {
+				return url
+			}
+			return await fetchArtistLinkSpotify(artist: artist)
 
-  private func resolveTrackURL(
-    track: String,
-    artist: String,
-    album: String?,
-    preference: OpenLinksWith
-  ) async -> URL? {
-    switch preference {
-    case .currentActivePlayerOrLastFm:
-      if let url = await trackURLForCurrentPlayer(track: track, artist: artist, album: album) {
-        return url
-      }
-      return await fetchTrackLinkLastFm(artist: artist, track: track)
+		case .alwaysInAppleMusic:
+			return await fetchArtistLinkMusic(artist: artist)
 
-    case .currentActivePlayerOrAppleMusic:
-      if let url = await trackURLForCurrentPlayer(track: track, artist: artist, album: album) {
-        return url
-      }
-      return await fetchTrackLinkMusic(artist: artist, track: track, album: album)
+		case .alwaysInSpotify:
+			return await fetchArtistLinkSpotify(artist: artist)
+		}
+	}
 
-    case .currentActivePlayerOrSpotify:
-      if let url = await trackURLForCurrentPlayer(track: track, artist: artist, album: album) {
-        return url
-      }
-      return await fetchTrackLinkSpotify(artist: artist, title: track, album: album)
+	private func resolveTrackURL(
+		track: String,
+		artist: String,
+		album: String?,
+		preference: OpenLinksWith
+	) async -> URL? {
+		switch preference {
+		case .currentActivePlayerOrLastFm:
+			if let url = await trackURLForCurrentPlayer(track: track, artist: artist, album: album)
+			{
+				return url
+			}
+			return await fetchTrackLinkLastFm(artist: artist, track: track)
 
-    case .alwaysInAppleMusic:
-      return await fetchTrackLinkMusic(artist: artist, track: track, album: album)
+		case .currentActivePlayerOrAppleMusic:
+			if let url = await trackURLForCurrentPlayer(track: track, artist: artist, album: album)
+			{
+				return url
+			}
+			return await fetchTrackLinkMusic(artist: artist, track: track, album: album)
 
-    case .alwaysInSpotify:
-      return await fetchTrackLinkSpotify(artist: artist, title: track, album: album)
-    }
-  }
+		case .currentActivePlayerOrSpotify:
+			if let url = await trackURLForCurrentPlayer(track: track, artist: artist, album: album)
+			{
+				return url
+			}
+			return await fetchTrackLinkSpotify(artist: artist, title: track, album: album)
 
-  private func artistURLForCurrentPlayer(artist: String) async -> URL? {
-    guard let currentPlayer = AppState.shared.currentActivePlayer else { return nil }
+		case .alwaysInAppleMusic:
+			return await fetchTrackLinkMusic(artist: artist, track: track, album: album)
 
-    switch currentPlayer {
-    case .appleMusic:
-      return await fetchArtistLinkMusic(artist: artist)
-    case .spotify:
-      return await fetchArtistLinkSpotify(artist: artist)
-    }
-  }
+		case .alwaysInSpotify:
+			return await fetchTrackLinkSpotify(artist: artist, title: track, album: album)
+		}
+	}
 
-  private func trackURLForCurrentPlayer(
-    track: String,
-    artist: String,
-    album: String?
-  ) async -> URL? {
-    guard let currentPlayer = AppState.shared.currentActivePlayer else { return nil }
+	private func artistURLForCurrentPlayer(artist: String) async -> URL? {
+		guard let currentPlayer = AppState.shared.currentActivePlayer else { return nil }
 
-    switch currentPlayer {
-    case .appleMusic:
-      return await fetchTrackLinkMusic(artist: artist, track: track, album: album)
-    case .spotify:
-      return await fetchTrackLinkSpotify(artist: artist, title: track, album: album)
-    }
-  }
+		switch currentPlayer {
+		case .appleMusic:
+			return await fetchArtistLinkMusic(artist: artist)
+		case .spotify:
+			return await fetchArtistLinkSpotify(artist: artist)
+		}
+	}
 
-  // MARK: - Open URL
+	private func trackURLForCurrentPlayer(
+		track: String,
+		artist: String,
+		album: String?
+	) async -> URL? {
+		guard let currentPlayer = AppState.shared.currentActivePlayer else { return nil }
 
-  private func openURL(_ url: URL, forPreference preference: OpenLinksWith) {
-    let appURL = applicationURL(for: url, preference: preference)
+		switch currentPlayer {
+		case .appleMusic:
+			return await fetchTrackLinkMusic(artist: artist, track: track, album: album)
+		case .spotify:
+			return await fetchTrackLinkSpotify(artist: artist, title: track, album: album)
+		}
+	}
 
-    let configuration = NSWorkspace.OpenConfiguration()
-    configuration.activates = true
+	// MARK: - Open URL
 
-    if let appURL = appURL {
-      NSWorkspace.shared.open(
-        [url],
-        withApplicationAt: appURL,
-        configuration: configuration
-      ) { _, error in
-        if let error = error {
-          print("Failed to open link: \(error)")
-        }
-      }
-    } else {
-      NSWorkspace.shared.open(url)
-    }
-  }
+	private func openURL(_ url: URL, forPreference preference: OpenLinksWith) {
+		let appURL = applicationURL(for: url, preference: preference)
 
-  private func applicationURL(for url: URL, preference: OpenLinksWith) -> URL? {
-    switch url.scheme {
-    case "music":
-      return URL(fileURLWithPath: "/System/Applications/Music.app")
-    case "spotify":
-      return NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.spotify.client")
-    default:
-      switch preference {
-      case .alwaysInAppleMusic, .currentActivePlayerOrAppleMusic:
-        if url.host?.contains("apple.com") == true || url.host?.contains("itunes") == true {
-          return URL(fileURLWithPath: "/System/Applications/Music.app")
-        }
-      case .alwaysInSpotify, .currentActivePlayerOrSpotify:
-        if url.host?.contains("spotify.com") == true {
-          return NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.spotify.client")
-        }
-      case .currentActivePlayerOrLastFm:
-        break
-      }
-      return nil
-    }
-  }
+		let configuration = NSWorkspace.OpenConfiguration()
+		configuration.activates = true
 
-  // MARK: - Last.Fm Links
+		if let appURL = appURL {
+			NSWorkspace.shared.open(
+				[url],
+				withApplicationAt: appURL,
+				configuration: configuration
+			) { _, error in
+				if let error = error {
+					print("Failed to open link: \(error)")
+				}
+			}
+		} else {
+			NSWorkspace.shared.open(url)
+		}
+	}
 
-  private func fetchArtistLinkLastFm(artist: String) async -> URL? {
-    do {
-      return try await lastFm.fetchArtistInfo(artist: artist)?.url
-    } catch {
-      print("Error fetching Last.fm artist: \(error)")
-      return nil
-    }
-  }
+	private func applicationURL(for url: URL, preference: OpenLinksWith) -> URL? {
+		switch url.scheme {
+		case "music":
+			return URL(fileURLWithPath: "/System/Applications/Music.app")
+		case "spotify":
+			return NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.spotify.client")
+		default:
+			switch preference {
+			case .alwaysInAppleMusic, .currentActivePlayerOrAppleMusic:
+				if url.host?.contains("apple.com") == true || url.host?.contains("itunes") == true {
+					return URL(fileURLWithPath: "/System/Applications/Music.app")
+				}
+			case .alwaysInSpotify, .currentActivePlayerOrSpotify:
+				if url.host?.contains("spotify.com") == true {
+					return NSWorkspace.shared.urlForApplication(
+						withBundleIdentifier: "com.spotify.client")
+				}
+			case .currentActivePlayerOrLastFm:
+				break
+			}
+			return nil
+		}
+	}
 
-  private func fetchTrackLinkLastFm(artist: String, track: String) async -> URL? {
-    do {
-      return try await lastFm.fetchTrackInfo(artist: artist, track: track)?.url
-    } catch {
-      print("Error fetching Last.fm track: \(error)")
-      return nil
-    }
-  }
+	// MARK: - Last.Fm Links
 
-  // MARK: - Apple Music Links
+	private func fetchArtistLinkLastFm(artist: String) async -> URL? {
+		do {
+			return try await lastFm.fetchArtistInfo(artist: artist)?.url
+		} catch {
+			print("Error fetching Last.fm artist: \(error)")
+			return nil
+		}
+	}
 
-  private func fetchArtistLinkMusic(artist: String) async -> URL? {
-    let query = artist.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-    let searchURL = "https://itunes.apple.com/search?term=\(query)&entity=allArtist&limit=1"
+	private func fetchTrackLinkLastFm(artist: String, track: String) async -> URL? {
+		do {
+			return try await lastFm.fetchTrackInfo(artist: artist, track: track)?.url
+		} catch {
+			print("Error fetching Last.fm track: \(error)")
+			return nil
+		}
+	}
 
-    guard let url = URL(string: searchURL) else { return nil }
+	// MARK: - Apple Music Links
 
-    do {
-      let (data, _) = try await URLSession.shared.data(from: url)
-      let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+	private func fetchArtistLinkMusic(artist: String) async -> URL? {
+		let query = artist.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+		let searchURL = "https://itunes.apple.com/search?term=\(query)&entity=allArtist&limit=1"
 
-      guard let results = json?["results"] as? [[String: Any]],
-        let firstResult = results.first,
-        let artistID = firstResult["artistId"] as? Int
-      else {
-        return nil
-      }
+		guard let url = URL(string: searchURL) else { return nil }
 
-      return URL(string: "music://music.apple.com/artist/\(artistID)")
-    } catch {
-      print("Error fetching Apple Music artist: \(error)")
-      return nil
-    }
-  }
+		do {
+			let (data, _) = try await URLSession.shared.data(from: url)
+			let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
 
-  private func fetchTrackLinkMusic(artist: String, track: String, album: String? = nil) async
-    -> URL?
-  {
-    var searchTerm = "\(artist) \(track)"
-    if let album = album, !album.isEmpty {
-      searchTerm += " \(album)"
-    }
+			guard let results = json?["results"] as? [[String: Any]],
+				let firstResult = results.first,
+				let artistID = firstResult["artistId"] as? Int
+			else {
+				return nil
+			}
 
-    let query = searchTerm.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-    let searchURL = "https://itunes.apple.com/search?term=\(query)&entity=song&limit=1"
+			return URL(string: "music://music.apple.com/artist/\(artistID)")
+		} catch {
+			print("Error fetching Apple Music artist: \(error)")
+			return nil
+		}
+	}
 
-    guard let url = URL(string: searchURL) else { return nil }
+	private func fetchTrackLinkMusic(artist: String, track: String, album: String? = nil) async
+		-> URL?
+	{
+		var searchTerm = "\(artist) \(track)"
+		if let album = album, !album.isEmpty {
+			searchTerm += " \(album)"
+		}
 
-    do {
-      let (data, _) = try await URLSession.shared.data(from: url)
-      let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+		let query = searchTerm.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+		let searchURL = "https://itunes.apple.com/search?term=\(query)&entity=song&limit=1"
 
-      guard let results = json?["results"] as? [[String: Any]],
-        let firstResult = results.first,
-        let trackID = firstResult["trackId"] as? Int
-      else {
-        return nil
-      }
+		guard let url = URL(string: searchURL) else { return nil }
 
-      return URL(string: "music://music.apple.com/song/\(trackID)")
-    } catch {
-      print("Error fetching Apple Music track: \(error)")
-      return nil
-    }
-  }
+		do {
+			let (data, _) = try await URLSession.shared.data(from: url)
+			let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
 
-  // MARK: - Spotify Links
+			guard let results = json?["results"] as? [[String: Any]],
+				let firstResult = results.first,
+				let trackID = firstResult["trackId"] as? Int
+			else {
+				return nil
+			}
 
-  private func fetchArtistLinkSpotify(artist: String) async -> URL? {
-    let query = artist.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-    return URL(string: "spotify:search:\(query)")
-  }
+			return URL(string: "music://music.apple.com/song/\(trackID)")
+		} catch {
+			print("Error fetching Apple Music track: \(error)")
+			return nil
+		}
+	}
 
-  private func fetchTrackLinkSpotify(artist: String, title: String, album: String? = nil) async
-    -> URL?
-  {
-    var query = "\(artist) \(title)"
-    if let album = album {
-      query += " \(album)"
-    }
-    let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-    return URL(string: "spotify:search:\(encoded)")
-  }
+	// MARK: - Spotify Links
+
+	private func fetchArtistLinkSpotify(artist: String) async -> URL? {
+		let query = artist.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+		return URL(string: "spotify:search:\(query)")
+	}
+
+	private func fetchTrackLinkSpotify(artist: String, title: String, album: String? = nil) async
+		-> URL?
+	{
+		var query = "\(artist) \(title)"
+		if let album = album {
+			query += " \(album)"
+		}
+		let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+		return URL(string: "spotify:search:\(encoded)")
+	}
 }
