@@ -212,22 +212,15 @@ jobs:
           git checkout main
           git pull origin main
 
-          # Create properly formatted item
-          cat >> /tmp/new_item.txt << 'EOF'
-          <item>
-            <title>Version ${{ env.VERSION }}</title>
-            <pubDate>$(date -R)</pubDate>
-            <enclosure
-              url="https://github.com/${{ github.repository }}/releases/download/${{ env.TAG_NAME }}/${{ env.APP_NAME }}.zip"
-              sparkle:version="${{ env.VERSION }}"
-              sparkle:edSignature="${{ env.SIGNATURE }}"
-              length="${{ env.ZIP_SIZE }}"
-              type="application/octet-stream"/>
-          </item>
-          EOF
+          PUB_DATE=$(date -R)
 
-          # Insert before </channel>
-          sed -i '' '/<\/channel>/r /tmp/new_item.txt' appcast.xml
+          # Insert new item before </channel>
+          sed -i '' "s|</channel>|  <item>\\
+            <title>Version ${{ env.VERSION }}</title>\\
+            <pubDate>${PUB_DATE}</pubDate>\\
+            <enclosure url=\"https://github.com/${{ github.repository }}/releases/download/${{ env.TAG_NAME }}/${APP_NAME}.zip\" sparkle:version=\"${{ env.VERSION }}\" sparkle:edSignature=\"${{ env.SIGNATURE }}\" length=\"${{ env.ZIP_SIZE }}\" type=\"application/octet-stream\"/>\\
+          </item>\\
+          </channel>|" appcast.xml
 
           git config user.name "github-actions"
           git config user.email "actions@github.com"

@@ -6,14 +6,13 @@
   <br>
 </h1>
 
-**scrobble.up** is a lightweight Free and Open Source scrobbler for Apple Music and Spotify that lives in your menu bar.
+Finally an open source macOS music tracker for ListenBrainz and Last.fm
 
 ### Features
 - Scrobble to last.fm & ListenBrainz
-- Recently played and scrobbled logs
-- Similar artists and track suggestions from last.fm
-- Like syncing between Apple Music, ListenBrainz, and last.fm
-- Display track artwork in the dock icon
+- Similar artists and track suggestions from Last.fm
+- Like syncing between Apple Music, ListenBrainz, and Last.fm
+- Display track artwork in dock
 
 ## Installation
 **System Requirements:**  
