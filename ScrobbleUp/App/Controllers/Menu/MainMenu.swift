@@ -106,6 +106,9 @@ final class MainMenu {
 
 		self.recentlyPlayedMenu.recentTrackItems = (0..<5).map { _ in
 			let item = NSMenuItem(title: "—", action: nil, keyEquivalent: "")
+			let view = RecentlyPlayedMenuItemView(width: 260)
+			view.configure(title: "—", subtitle: nil, image: nil)
+			item.view = view
 			mainMenu.addItem(item)
 			return item
 		}

@@ -7,6 +7,7 @@
 
 import AppKit
 import LastFM
+import Foundation
 
 final class RecentlyPlayedMenu {
 	// Injected Dependencies
@@ -46,20 +47,39 @@ final class RecentlyPlayedMenu {
 			}
 			for (i, entry) in entries.prefix(5).enumerated() {
 				let item = self.recentTrackItems[i]
-				item.title = entry.title
-				item.subtitle = entry.artist
-				item.image = self.artworkManager.placeholder().styled(
-					size: NSSize(width: 32, height: 32),
-					cornerRadius: 4
-				)
-				item.truncateTitle(maxWidth: 200)
+
+				item.target = nil
+				item.action = nil
+
+				if let view = item.view as? RecentlyPlayedMenuItemView {
+					view.configure(
+						title: entry.title,
+						subtitle: entry.artist,
+						image: self.artworkManager.placeholder().styled(
+							size: NSSize(width: 32, height: 32),
+							cornerRadius: 4
+						)
+					)
+				} else {
+					let view = RecentlyPlayedMenuItemView(width: 260)
+					view.configure(
+						title: entry.title,
+						subtitle: entry.artist,
+						image: self.artworkManager.placeholder().styled(
+							size: NSSize(width: 32, height: 32),
+							cornerRadius: 4
+						)
+					)
+					item.view = view
+				}
 
 				Task {
 					if let artwork = await self.artworkManager.fetchFromiTunes(
 						artist: entry.artist, track: entry.title)
 					{
 						await MainActor.run {
-							item.image = artwork.styled(
+							let view = item.view as? RecentlyPlayedMenuItemView
+							view?.image = artwork.styled(
 								size: NSSize(width: 32, height: 32),
 								cornerRadius: 4
 							)
@@ -72,9 +92,9 @@ final class RecentlyPlayedMenu {
 			}
 			for i in entries.count..<5 {
 				let item = self.recentTrackItems[i]
-				item.title = "—"
-				item.subtitle = nil
-				item.image = nil
+				if let view = item.view as? RecentlyPlayedMenuItemView {
+					view.configure(title: "—", subtitle: nil, image: nil)
+				}
 				item.representedObject = nil
 				item.isHidden = true
 				item.isEnabled = false
@@ -116,10 +136,12 @@ final class RecentlyPlayedMenu {
 			})
 		else { return }
 
-		item.image = artworkManager.placeholder().styled(
-			size: NSSize(width: 32, height: 32),
-			cornerRadius: 4
-		)
+		if let view = item.view as? RecentlyPlayedMenuItemView {
+			view.image = artworkManager.placeholder().styled(
+				size: NSSize(width: 32, height: 32),
+				cornerRadius: 4
+			)
+		}
 
 		Task { [weak self] in
 			guard let self else { return }
@@ -127,10 +149,12 @@ final class RecentlyPlayedMenu {
 				artist: entry.artist, track: entry.title)
 			{
 				await MainActor.run {
-					item.image = artwork.styled(
-						size: NSSize(width: 32, height: 32),
-						cornerRadius: 4
-					)
+					if let view = item.view as? RecentlyPlayedMenuItemView {
+						view.image = artwork.styled(
+							size: NSSize(width: 32, height: 32),
+							cornerRadius: 4
+						)
+					}
 				}
 			}
 		}
@@ -263,13 +287,16 @@ final class RecentlyPlayedMenu {
 								keyEquivalent: ""
                             )
 							menuItem.target = self
-							menuItem.subtitle = track.artist.name
 							menuItem.representedObject = [
 								"artist": track.artist.name,
 								"title": track.name,
 							]
 							menuItem.isEnabled = true
-                            menuItem.truncateTitle(maxWidth: 200)
+
+							let view = RecentlyPlayedMenuItemView(width: 260)
+							view.configure(title: track.name, subtitle: track.artist.name, image: nil)
+							menuItem.view = view
+
 							submenu.insertItem(menuItem, at: insertIndex)
 							insertIndex += 1
 						}
