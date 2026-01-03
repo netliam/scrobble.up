@@ -6,13 +6,19 @@
   <br>
 </h1>
 
-Finally an open source macOS music tracker for ListenBrainz and Last.fm
+A lightweight universal music tracker for macOS that lives in your menu bar.
 
 ### Features
 - Scrobble to last.fm & ListenBrainz
 - Similar artists and track suggestions from Last.fm
+- Track listens from a wide range of music players
 - Like syncing between Apple Music, ListenBrainz, and Last.fm
 - Display track artwork in dock
+
+### Screenshots
+
+<img src="Assets/Menu_Screenshot.png" width="300" alt="Menu Screenshot" >
+<img src="Assets/Scrobble_Log_Screenshot.png" width="300" alt="Menu Screenshot" >
 
 ## Installation
 **System Requirements:**  

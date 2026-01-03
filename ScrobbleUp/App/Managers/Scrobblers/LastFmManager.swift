@@ -50,48 +50,6 @@ final class LastFmManager: ObservableObject {
 		}
 	}
 
-	func getToken() async throws -> String {
-		do {
-			let token = try await lastFM.Auth.getToken()
-
-			return token
-		} catch LastFMError.LastFMServiceError(let errorType, let message) {
-			print("LastFM Error: \(errorType.rawValue) - \(message)")
-			return ""
-		} catch {
-			print("Unexpected Error: \(error)")
-			return ""
-		}
-	}
-
-	func authURL(token: String) -> URL {
-		var c = URLComponents()
-		c.scheme = "https"
-		c.host = "www.last.fm"
-		c.path = "/api/auth"
-		c.queryItems = [
-			.init(name: "api_key", value: apiKey),
-			.init(name: "token", value: token),
-		]
-		return c.url ?? URL(
-			string: "https://www.last.fm/api/auth?api_key=\(apiKey)&token=\(token)")!
-	}
-
-	func getSession(with token: String) async throws {
-		do {
-			let session = try await lastFM.Auth.getSession(token: token)
-
-			self.sessionKey = session.key
-			self.username = session.name
-			KeychainHelper.shared.set(session.key, for: "lastfm_sessionKey")
-			KeychainHelper.shared.set(session.name, for: "lastfm_username")
-		} catch LastFMError.NoData {
-			print("No data was returned.")
-		} catch {
-			print("Unexpected Error: \(error)")
-		}
-	}
-
 	func signOut() {
 		sessionKey = nil
 		username = nil

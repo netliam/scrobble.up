@@ -136,7 +136,7 @@ final class RecentlyPlayedMenu {
 		}
 
 		let subMenu = NSMenu()
-
+        
 		let copyArtistTrack = NSMenuItem(
 			title: "Copy Artist & Title",
 			action: #selector(copyArtistTrack),
@@ -223,6 +223,7 @@ final class RecentlyPlayedMenu {
 							menuItem.target = self
 							menuItem.representedObject = ["artist": artist.name]
 							menuItem.isEnabled = true
+                            menuItem.truncateTitle(maxWidth: 200)
 							submenu.insertItem(menuItem, at: insertIndex)
 							insertIndex += 1
 						}
@@ -260,7 +261,7 @@ final class RecentlyPlayedMenu {
 								title: track.name,
 								action: #selector(self.openTrack),
 								keyEquivalent: ""
-							)
+                            )
 							menuItem.target = self
 							menuItem.subtitle = track.artist.name
 							menuItem.representedObject = [
@@ -268,6 +269,7 @@ final class RecentlyPlayedMenu {
 								"title": track.name,
 							]
 							menuItem.isEnabled = true
+                            menuItem.truncateTitle(maxWidth: 200)
 							submenu.insertItem(menuItem, at: insertIndex)
 							insertIndex += 1
 						}

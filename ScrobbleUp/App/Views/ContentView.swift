@@ -77,27 +77,4 @@ struct ContentView: View {
 		}
 		.frame(maxWidth: .infinity, alignment: .leading)
 	}
-
-	private func startAuth() async {
-		do {
-			let token = try await lastFm.getToken()
-			self.pendingToken = token
-			let url = lastFm.authURL(token: token)
-			NSWorkspace.shared.open(url)
-		} catch {
-			authError = error.localizedDescription
-			showingError = true
-		}
-	}
-
-	private func completeAuth() async {
-		guard let token = pendingToken else { return }
-		do {
-			try await lastFm.getSession(with: token)
-			pendingToken = nil
-		} catch {
-			authError = error.localizedDescription
-			showingError = true
-		}
-	}
 }
