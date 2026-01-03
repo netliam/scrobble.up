@@ -41,7 +41,7 @@ class AppState: ObservableObject {
 		}
 	}
 
-	private var settingsWindowController: SettingsWindowController?
+	var settingsWindowController: SettingsWindowController?
 
 	@MainActor
 	func openPreferences() {  // swiftlint:disable:this function_body_length
@@ -103,12 +103,12 @@ class AppState: ObservableObject {
 		settingsWindowController?.show()
 		settingsWindowController?.window?.orderFrontRegardless()
 	}
-    
-    @MainActor
-    func openPreferences(pane: Settings.PaneIdentifier) {
-        openPreferences()
-        settingsWindowController?.show(pane: pane)
-    }
+
+	@MainActor
+	func openPreferences(pane: Settings.PaneIdentifier) {
+		openPreferences()
+		settingsWindowController?.show(pane: pane)
+	}
 
 	func toggleLikeCurrentTrack() {
 		playerManager.toggleLoveCurrentTrack()

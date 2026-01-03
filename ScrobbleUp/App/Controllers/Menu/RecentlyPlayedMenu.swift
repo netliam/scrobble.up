@@ -52,6 +52,7 @@ final class RecentlyPlayedMenu {
 					size: NSSize(width: 32, height: 32),
 					cornerRadius: 4
 				)
+				item.truncateTitle(maxWidth: 200)
 
 				Task {
 					if let artwork = await self.artworkManager.fetchFromiTunes(

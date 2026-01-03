@@ -4,8 +4,6 @@
 <dict>
 	<key>com.apple.application-identifier</key>
 	<string>$(AppIdentifierPrefix)$(CFBundleIdentifier)</string>
-	<key>com.apple.security.network.server</key>
-	<false/>
 	<key>com.apple.security.personal-information.addressbook</key>
 	<false/>
 	<key>com.apple.security.temporary-exception.apple-events</key>

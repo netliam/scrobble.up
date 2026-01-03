@@ -10,6 +10,18 @@ import Foundation
 
 final class ListenBrainzManager: ObservableObject {
 
+	private static let userAgent = "scrobble.up/1.0 (liams@tuskmo.com)"
+
+	private lazy var session: URLSession = {
+		let config = URLSessionConfiguration.default
+		// Set a consistent User-Agent and JSON defaults for all requests
+		var headers = config.httpAdditionalHeaders ?? [:]
+		headers["User-Agent"] = Self.userAgent
+		headers["Accept"] = "application/json"
+		config.httpAdditionalHeaders = headers
+		return URLSession(configuration: config)
+	}()
+
 	static let shared = ListenBrainzManager()
 	static let defaultBaseURL = "https://api.listenbrainz.org"
 
@@ -36,7 +48,7 @@ final class ListenBrainzManager: ObservableObject {
 		var request = URLRequest(url: requestURL)
 		request.setValue("Token \(token)", forHTTPHeaderField: "Authorization")
 
-		let (data, response) = try await URLSession.shared.data(for: request)
+		let (data, response) = try await session.data(for: request)
 
 		guard let httpResponse = response as? HTTPURLResponse,
 			httpResponse.statusCode == 200
@@ -63,7 +75,7 @@ final class ListenBrainzManager: ObservableObject {
 
 		if let baseURL = baseURL {
 			self.baseURL = baseURL.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-			UserDefaults.standard.set(self.baseURL, forKey: "listenBrainzBaseURL")
+			UserDefaults.standard.set(self.baseURL, for: \.listenBrainzBaseURL)
 		}
 
 		KeychainHelper.shared.set(token, for: "listenbrainz_token")
@@ -184,7 +196,7 @@ final class ListenBrainzManager: ObservableObject {
 		request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 		request.httpBody = try JSONSerialization.data(withJSONObject: payload)
 
-		let (data, response) = try await URLSession.shared.data(for: request)
+		let (data, response) = try await session.data(for: request)
 
 		guard let httpResponse = response as? HTTPURLResponse else {
 			throw ListenBrainzError.invalidResponse
@@ -216,8 +228,7 @@ final class ListenBrainzManager: ObservableObject {
 		}
 
 		var request = URLRequest(url: url)
-        request.setValue("scrobble.up/1.0 (liams@tuskmo.com)", forHTTPHeaderField: "User-Agent")
-		let (data, response) = try await URLSession.shared.data(for: request)
+		let (data, response) = try await session.data(for: request)
 
 		guard let httpResponse = response as? HTTPURLResponse,
 			httpResponse.statusCode == 200
@@ -248,7 +259,7 @@ final class ListenBrainzManager: ObservableObject {
 		var request = URLRequest(url: url)
 		request.setValue("application/json", forHTTPHeaderField: "Accept")
 
-		let (data, response) = try await URLSession.shared.data(for: request)
+		let (data, response) = try await session.data(for: request)
 
 		guard let httpResponse = response as? HTTPURLResponse,
 			httpResponse.statusCode == 200
@@ -289,7 +300,7 @@ final class ListenBrainzManager: ObservableObject {
 		request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 		request.httpBody = try JSONSerialization.data(withJSONObject: payload)
 
-		let (data, response) = try await URLSession.shared.data(for: request)
+		let (data, response) = try await session.data(for: request)
 
 		guard let httpResponse = response as? HTTPURLResponse else {
 			throw ListenBrainzError.invalidResponse
