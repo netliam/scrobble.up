@@ -23,13 +23,6 @@ Finally an open source macOS music tracker for ListenBrainz and Last.fm
 ### Manual Installation (Currently the only option)
 <a href="https://github.com/netliam/scrobble.up/releases/latest/download/scrobble.up.dmg" target="_self"><img width="200" src="Assets/Download_for_MacOS.png" alt="Download for macOS" /></a>
 
-### Using scrobble.up
-- Launch the app
-- Click "Connect to Last.fm"
-- Authorize scrobble.up on the Last.fm page
-- Click "I've authorized scrobble.up — Complete login"
-- And you're done and ready to start scrobbling
-
 ---
 
 ## Building the app

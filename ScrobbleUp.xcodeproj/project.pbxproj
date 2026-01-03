@@ -375,14 +375,14 @@
 				INFOPLIST_KEY_CFBundleDisplayName = scrobble.up;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
 				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSAppleEventsUsageDescription = "This application needs access to Apple Music information to display the currently playing song.";
+				INFOPLIST_KEY_NSAppleEventsUsageDescription = "scrobble.up needs the permission to get info about currently playing music.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.6;
-				MARKETING_VERSION = 1.0.3;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.netliam.ScrobbleUp;
 				PRODUCT_DEFINITION_PLIST = ScrobbleUp/Info.plist;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -439,14 +439,14 @@
 				INFOPLIST_KEY_CFBundleDisplayName = scrobble.up;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
 				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSAppleEventsUsageDescription = "This application needs access to Apple Music information to display the currently playing song.";
+				INFOPLIST_KEY_NSAppleEventsUsageDescription = "scrobble.up needs the permission to get info about currently playing music.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.6;
-				MARKETING_VERSION = 1.0.3;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.netliam.ScrobbleUp;
 				PRODUCT_DEFINITION_PLIST = ScrobbleUp/Info.plist;
 				PRODUCT_NAME = "$(TARGET_NAME)";

@@ -103,6 +103,12 @@ class AppState: ObservableObject {
 		settingsWindowController?.show()
 		settingsWindowController?.window?.orderFrontRegardless()
 	}
+    
+    @MainActor
+    func openPreferences(pane: Settings.PaneIdentifier) {
+        openPreferences()
+        settingsWindowController?.show(pane: pane)
+    }
 
 	func toggleLikeCurrentTrack() {
 		playerManager.toggleLoveCurrentTrack()

@@ -8,6 +8,8 @@
 import Foundation
 
 enum Keys {
+    static let hasCompletedOnboarding = UserDefaultsKey("hasCompletedOnboarding", defaultValue: false)
+    
 	static let playerSwitching = UserDefaultsKey(
 		"playerSwitching", defaultValue: PlayerSwitching.automatic)
 	static let playerOverride = UserDefaultsKey("playerOverride", defaultValue: PlayerOverride.none)
@@ -16,7 +18,7 @@ enum Keys {
 
 	static let showIconInDock = UserDefaultsKey("showIconInDock", defaultValue: false)
 	static let showArtworkInDock = UserDefaultsKey("showArtworkInDock", defaultValue: false)
-
+    
 	static let ratingAndLoveStatus = UserDefaultsKey("ratingAndLoveStatus", defaultValue: true)
 	static let infoCopiedToClipboard = UserDefaultsKey("infoCopiedToClipboard", defaultValue: true)
 	static let currentPlayerChanged = UserDefaultsKey("currentPlayerChanged", defaultValue: true)

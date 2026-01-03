@@ -45,6 +45,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 	private let dockIconManager: DockIconManager = .shared
 
 	var menuController = MenuController()
+    
+    private var onboardingWindowController: NSWindowController?
 
 	var scrobbleManager: UnifiedScrobbleManager!
 
@@ -90,7 +92,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 			name: NSWorkspace.didTerminateApplicationNotification,
 			object: nil
 		)
-	}
+        
+        showOnboardingIfNeeded()
+    }
 
 	private func updateDockIconWithCurrentTrack() {
 		let currentTrack = appState.currentTrack
@@ -111,6 +115,46 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 			menuController.menu.refresh()
 		}
 	}
+    
+    private func showOnboardingIfNeeded() {
+        let hasCompleted = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
+        let isLoggedIntoLastFm = LastFmManager.shared.username != nil
+        let isLoggedIntoListenBrainz = ListenBrainzManager.shared.username != nil
+        
+        guard !hasCompleted && !isLoggedIntoLastFm && !isLoggedIntoListenBrainz else { return }
+        
+        let onboardingView = OnboardingView(
+            onConnectLastFm: { [weak self] in
+                self?.appState.openPreferences(pane: .lastfm)
+            },
+            onConnectListenBrainz: { [weak self] in
+                self?.appState.openPreferences(pane: .listenbrainz)
+            },
+            onSkip: { [weak self] in
+                UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
+                self?.onboardingWindowController?.close()
+                self?.onboardingWindowController = nil
+            }
+        )
+        
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 450, height: 420),
+            styleMask: [.titled, .closable],
+            backing: .buffered,
+            defer: false
+        )
+        window.center()
+        window.title = "Welcome"
+        window.contentView = NSHostingView(rootView: onboardingView)
+        window.isReleasedWhenClosed = false
+        
+        let controller = NSWindowController(window: window)
+        onboardingWindowController = controller
+        
+        controller.showWindow(nil)
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
 
 	// MARK: - Window Mangement
 

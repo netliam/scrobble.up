@@ -67,22 +67,6 @@ struct ContentView: View {
 			}
 			.padding([.horizontal, .top])
 
-			if pendingToken != nil && lastFm.username == nil {
-				HStack {
-					Button {
-						Task { await completeAuth() }
-					} label: {
-						Label(
-							"I've authorized it — Complete login", systemImage: "checkmark.circle")
-					}
-					.buttonStyle(.borderedProminent)
-					.keyboardShortcut(.defaultAction)
-					Spacer()
-					Button("Cancel") { pendingToken = nil }
-				}
-				.padding(.horizontal)
-			}
-
 			Divider()
 
 			TabView {
@@ -90,42 +74,8 @@ struct ContentView: View {
 					.tabItem { Label("Scrobble Log", systemImage: "list.bullet.rectangle") }
 			}
 			.padding([.horizontal, .bottom])
-
-			HStack {
-				if let username = lastFm.username {
-					Label("Connected to Last.fm - \(username)", systemImage: "checkmark.seal")
-						.foregroundStyle(.green)
-				} else {
-					Label("Not Connected", systemImage: "exclamationmark.triangle").foregroundStyle(
-						.secondary)
-				}
-				Spacer()
-				if lastFm.username != nil {
-					Button(role: .destructive) {
-						lastFm.signOut()
-					} label: {
-						Label("Disconnect", systemImage: "rectangle.portrait.and.arrow.right")
-					}
-				} else {
-					Button {
-						Task { await startAuth() }
-					} label: {
-						Label("Login to Last.fm", systemImage: "link")
-					}
-					.buttonStyle(.borderedProminent)
-				}
-			}
-			.padding([.horizontal, .bottom])
 		}
 		.frame(maxWidth: .infinity, alignment: .leading)
-		.alert(
-			"Authentication failed", isPresented: $showingError,
-			actions: {
-				Button("Ok", role: .cancel) {}
-			},
-			message: {
-				Text(authError ?? "Unknown Error")
-			})
 	}
 
 	private func startAuth() async {

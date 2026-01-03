@@ -216,8 +216,7 @@ final class ListenBrainzManager: ObservableObject {
 		}
 
 		var request = URLRequest(url: url)
-		request.setValue("scrobble.up/1.0 (your@email.com)", forHTTPHeaderField: "User-Agent")
-
+        request.setValue("scrobble.up/1.0 (liams@tuskmo.com)", forHTTPHeaderField: "User-Agent")
 		let (data, response) = try await URLSession.shared.data(for: request)
 
 		guard let httpResponse = response as? HTTPURLResponse,

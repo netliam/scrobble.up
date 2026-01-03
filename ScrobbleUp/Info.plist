@@ -8,17 +8,28 @@
 	<string>$(LASTFM_API_KEY)</string>
 	<key>LastFmApiSecret</key>
 	<string>$(LASTFM_API_SECRET)</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>musicbrainz.org</key>
+			<dict>
+				<key>NSExceptionMinimumTLSVersion</key>
+				<string>TLSv1.2</string>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
 	<key>SMAuthorizedClients</key>
 	<array>
 		<string>identifier &quot;$(PRODUCT_BUNDLE_IDENTIFIER)&quot; and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = &quot;$(AppIdentifierPrefix)&quot;</string>
 	</array>
-	<key>NSAppleEventsUsageDescription</key>
-	<string>scrobble.up needs the permission to get info about currently playing music.</string>
+	<key>SUEnableInstallerLauncherService</key>
+	<true/>
 	<key>SUFeedURL</key>
 	<string>https://raw.githubusercontent.com/netliam/scrobble.up/refs/heads/main/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>m8uUvgDKoeV0Rgz/EtnVOKDsUsPcoUOLLeLjWpTD8o0=</string>
-	<key>SUEnableInstallerLauncherService</key>
-	<true/>
 </dict>
 </plist>

@@ -45,10 +45,8 @@ final class UpdaterViewModel: ObservableObject {
 			userDriverDelegate: nil
 		)
 
-		// Sync initial values
 		automaticallyChecksForUpdates = updaterController.updater.automaticallyChecksForUpdates
 
-		// Observe changes
 		updaterController.updater.publisher(for: \.canCheckForUpdates)
 			.receive(on: DispatchQueue.main)
 			.assign(to: &$canCheckForUpdates)
