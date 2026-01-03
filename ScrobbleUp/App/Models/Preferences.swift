@@ -8,38 +8,38 @@
 // MARK: - PlayerSwitching
 
 enum PlayerSwitching: String, CaseIterable, Codable {
-    case automatic = "automatic"
-    case preferAppleMusic = "preferAppleMusic"
-    case preferSpotify = "preferSpotify"
+	case automatic = "automatic"
+	case preferAppleMusic = "preferAppleMusic"
+	case preferSpotify = "preferSpotify"
 }
 
 // MARK: - PlayerOverride
 
 enum PlayerOverride: String, CaseIterable, Codable {
-    case none = "none"
-    case appleMusic = "appleMusic"
-    case spotify = "spotify"
+	case none = "none"
+	case appleMusic = "appleMusic"
+	case spotify = "spotify"
 }
 
 // MARK: - TrackFetchingMethod
 
 enum TrackFetchingMethod: String, CaseIterable, Codable {
-    case perApp = "perApp"
-    case mediaRemote = "mediaRemote"
+	case perApp = "perApp"
+	case mediaRemote = "mediaRemote"
 }
 
 // MARK: - OpenLinksWith
 
 enum OpenLinksWith: String, CaseIterable, Codable {
-    case alwaysInLastFm = "alwaysInLastFm"
-    case alwaysInAppleMusic = "alwaysInAppleMusic"
-    case alwaysInSpotify = "alwaysInSpotify"
+	case alwaysInLastFm = "alwaysInLastFm"
+	case alwaysInAppleMusic = "alwaysInAppleMusic"
+	case alwaysInSpotify = "alwaysInSpotify"
 }
 
 // MARK: - CopiedLink
 
 enum CopiedLink: String, CaseIterable, Codable {
-    case artistTitle = "artistTitle"
-    case appleMusic = "appleMusic"
-    case spotify = "spotify"
+	case artistTitle = "artistTitle"
+	case appleMusic = "appleMusic"
+	case spotify = "spotify"
 }

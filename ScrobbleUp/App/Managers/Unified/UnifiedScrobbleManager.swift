@@ -63,37 +63,37 @@ final class UnifiedScrobbleManager: ObservableObject {
 				appState.currentTrack.artist = artist
 				appState.currentTrack.album = album
 
-                Task {
-                    var artworkImage = nowPlaying.artwork
-                    
-                    if artworkImage == nil {
-                        artworkImage = await artworkManager.fetchFromiTunes(
-                            artist: entry.artist, track: entry.title, album: entry.album)
-                    }
-                    
-                    if artworkImage == nil {
-                        artworkImage = await MediaRemoteManager.shared.fetchCurrentArtwork()
-                    }
-                    
-                    if let image = artworkImage {
-                        appState.currentTrack.image = image
-                    }
+				Task {
+					var artworkImage = nowPlaying.artwork
 
-                    await sendNowPlaying(
-                        artist: artist,
-                        track: title,
-                        album: album,
-                        duration: duration
-                    )
+					if artworkImage == nil {
+						artworkImage = await artworkManager.fetchFromiTunes(
+							artist: entry.artist, track: entry.title, album: entry.album)
+					}
 
-                    await playerManager.fetchLoveStateForCurrentTrack()
+					if artworkImage == nil {
+						artworkImage = await MediaRemoteManager.shared.fetchCurrentArtwork()
+					}
 
-                    if UserDefaults.standard.get(\.showArtworkInDock) {
-                        DockIconManager.shared.updateDockIcon(
-                            with: appState.currentTrack.image
-                        )
-                    }
-                }
+					if let image = artworkImage {
+						appState.currentTrack.image = image
+					}
+
+					await sendNowPlaying(
+						artist: artist,
+						track: title,
+						album: album,
+						duration: duration
+					)
+
+					await playerManager.fetchLoveStateForCurrentTrack()
+
+					if UserDefaults.standard.get(\.showArtworkInDock) {
+						DockIconManager.shared.updateDockIcon(
+							with: appState.currentTrack.image
+						)
+					}
+				}
 				scheduleScrobbleIfNeeded(duration: duration)
 			}
 
