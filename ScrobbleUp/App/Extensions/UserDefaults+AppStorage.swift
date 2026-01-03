@@ -126,6 +126,21 @@ extension UserDefaults {
 			.removeDuplicates(by: { $0.rawValue == $1.rawValue })
 			.sink { onChange($0) }
 	}
+    
+    func observe<T: RawRepresentable & Equatable>(
+        _ keyPath: KeyPath<Keys.Type, UserDefaultsKey<T>>, onChange: @escaping (T) -> Void
+    ) -> AnyCancellable where T.RawValue: Equatable {
+        let initialValue: T = get(keyPath)
+        onChange(initialValue)
+
+        return NotificationCenter.default
+            .publisher(for: UserDefaults.didChangeNotification)
+            .compactMap { [weak self] _ -> T? in
+                self?.get(keyPath)
+            }
+            .removeDuplicates()
+            .sink { onChange($0) }
+    }
 }
 
 extension AppStorage {

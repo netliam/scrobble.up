@@ -6,128 +6,169 @@
 //
 
 import AppKit
+import Foundation
+import Combine
 import ScriptingBridge
 
 final class UnifiedMusicManager {
-	static let shared = UnifiedMusicManager()
+    static let shared = UnifiedMusicManager()
 
-	private let appState: AppState = .shared
+    private let appState: AppState = .shared
 
-	private init() {}
-	private var lastAcceptedSource: MusicSource?
+    private init() {
+        setupObservers()
+    }
 
-	func start(handler: @escaping (MusicInfo) -> Void) {
-		stop()
+    private var lastAcceptedSource: MusicSource?
+    private var currentFetchingMethod: TrackFetchingMethod?
+    private var currentHandler: ((MusicInfo) -> Void)?
+    private var cancellables = Set<AnyCancellable>()
 
-		let filteringHandler: (MusicInfo) -> Void = { [weak self] info in
-			guard let self = self else { return }
-			guard let source = info.source else { return }
+    // MARK: - Observers
 
-			if self.shouldAcceptTrack(from: source) {
-				handler(info)
-				if let source = info.source {
-					Task { @MainActor in
-						switch source {
-						case .appleMusic:
-							self.appState.currentActivePlayer = .appleMusic
-						case .spotify:
-							self.appState.currentActivePlayer = .spotify
-						}
-					}
-				}
-				self.lastAcceptedSource = info.source
-			} else {
-				print("0 Ignoring track from \(source.rawValue) due to player preference")
-			}
-		}
+    private func setupObservers() {
+        UserDefaults.standard.observe(\.trackFetchingMethod) { [weak self] newValue in
+            self?.restart()
+        }
+        .store(in: &cancellables)
+    }
 
-		AppleMusicManager.shared.start(handler: filteringHandler)
-		SpotifyManager.shared.start(handler: filteringHandler)
-	}
+    // MARK: - Public API
 
-	func stop() {
-		AppleMusicManager.shared.stop()
-		SpotifyManager.shared.stop()
-		Task { @MainActor in
-			self.appState.currentActivePlayer = nil
-		}
-	}
+    func start(handler: @escaping (MusicInfo) -> Void) {
+        stop()
 
-	// MARK: - Player Selection Logic
+        currentHandler = handler
+        let fetchingMethod = UserDefaults.standard.get(\.trackFetchingMethod)
+        currentFetchingMethod = fetchingMethod
 
-	private func shouldAcceptTrack(from source: MusicSource) -> Bool {
-		let override = UserDefaults.standard.get(\.playerOverride)
+        let filteringHandler: (MusicInfo) -> Void = { [weak self] info in
+            guard let self = self else { return }
 
-		switch override {
-		case .appleMusic:
-			return source == .appleMusic
+            if self.shouldAcceptTrack(info) {
+                handler(info)
+                if let source = info.source {
+                    Task { @MainActor in
+                        self.appState.currentActivePlayer = source
+                    }
+                }
+                self.lastAcceptedSource = info.source
+            } else {
+                print("Ignoring track due to player preference")
+            }
+        }
 
-		case .spotify:
-			return source == .spotify
+        switch fetchingMethod {
+        case .perApp:
+            AppleMusicManager.shared.start(handler: filteringHandler)
+            SpotifyManager.shared.start(handler: filteringHandler)
 
-		case .none:
-			return shouldAcceptBasedOnPreference(from: source)
-		}
-	}
+        case .mediaRemote:
+            MediaRemoteManager.shared.start(handler: filteringHandler)
+        }
+    }
 
-	private func shouldAcceptBasedOnPreference(from source: MusicSource) -> Bool {
-		let preference = UserDefaults.standard.get(\.playerSwitching)
+    func stop() {
+        AppleMusicManager.shared.stop()
+        SpotifyManager.shared.stop()
+        MediaRemoteManager.shared.stop()
 
-		switch preference {
-		case .automatic:
-			return true
+        currentFetchingMethod = nil
+        Task { @MainActor in
+            self.appState.currentActivePlayer = nil
+        }
+    }
 
-		case .preferAppleMusic:
-			if source == .appleMusic {
-				return true
-			}
-			return !isAppleMusicActive()
+    func restart() {
+        guard let handler = currentHandler else { return }
+        start(handler: handler)
+    }
 
-		case .preferSpotify:
-			if source == .spotify {
-				return true
-			}
-			return !isSpotifyActive()
-		}
-	}
+    // MARK: - Player Selection Logic
 
-	// MARK: - Helpers
+    private func shouldAcceptTrack(_ info: MusicInfo) -> Bool {
+        guard let source = info.source else {
+            return info.title != nil && info.artist != nil
+        }
 
-	private func isAppleMusicActive() -> Bool {
-		guard
-			!NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.Music")
-				.isEmpty
-		else {
-			return false
-		}
+        let override = UserDefaults.standard.get(\.playerOverride)
 
-		let script = """
-			tell application "Music"
-			    if it is running then
-			        return player state is playing
-			    else
-			        return false
-			    end if
-			end tell
-			"""
+        switch override {
+        case .appleMusic:
+            return source == .appleMusic
 
-		if let result = NSAppleScript(source: script)?.executeAndReturnError(nil) {
-			return result.booleanValue
-		}
-		return false
-	}
+        case .spotify:
+            return source == .spotify
 
-	private func isSpotifyActive() -> Bool {
-		guard SpotifyManager.shared.isRunning else {
-			return false
-		}
+        case .none:
+            return shouldAcceptBasedOnPreference(from: source)
+        }
+    }
 
-		if let spotify = SBApplication(bundleIdentifier: "com.spotify.client")
-			as? SpotifyApplication,
-			let state = spotify.playerState
-		{
-			return state == "playing"
-		}
-		return false
-	}
+    private func shouldAcceptBasedOnPreference(from source: MusicSource) -> Bool {
+        let preference = UserDefaults.standard.get(\.playerSwitching)
+
+        switch preference {
+        case .automatic:
+            return true
+
+        case .preferAppleMusic:
+            if source == .appleMusic {
+                return true
+            }
+            if source == .other {
+                return !isAppleMusicActive()
+            }
+            return !isAppleMusicActive()
+
+        case .preferSpotify:
+            if source == .spotify {
+                return true
+            }
+            if source == .other {
+                return !isSpotifyActive()
+            }
+            return !isSpotifyActive()
+        }
+    }
+
+    // MARK: - Helpers
+
+    private func isAppleMusicActive() -> Bool {
+        guard
+            !NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.Music")
+                .isEmpty
+        else {
+            return false
+        }
+
+        let script = """
+            tell application "Music"
+                if it is running then
+                    return player state is playing
+                else
+                    return false
+                end if
+            end tell
+            """
+
+        if let result = NSAppleScript(source: script)?.executeAndReturnError(nil) {
+            return result.booleanValue
+        }
+        return false
+    }
+
+    private func isSpotifyActive() -> Bool {
+        guard SpotifyManager.shared.isRunning else {
+            return false
+        }
+
+        if let spotify = SBApplication(bundleIdentifier: "com.spotify.client")
+            as? SpotifyApplication,
+            let state = spotify.playerState
+        {
+            return state == "playing"
+        }
+        return false
+    }
 }

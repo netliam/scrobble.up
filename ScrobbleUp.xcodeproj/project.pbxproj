@@ -11,6 +11,8 @@
 		2D050FDA2EFDD70800DFE18C /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 2D050FD92EFDD70800DFE18C /* LaunchAtLogin */; };
 		2D07ACB72F04458600CDCF93 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 2D07ACB62F04458600CDCF93 /* README.md */; };
 		2D469F632F0865FD002F379B /* swift-format.json in Resources */ = {isa = PBXBuildFile; fileRef = 2D469F622F0865F7002F379B /* swift-format.json */; };
+		2D46A35B2F09A3A1002F379B /* MediaRemoteAdapter in Frameworks */ = {isa = PBXBuildFile; productRef = 2D46A35A2F09A3A1002F379B /* MediaRemoteAdapter */; };
+		2D46A35E2F09A457002F379B /* MediaRemoteAdapter in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 2D46A35A2F09A3A1002F379B /* MediaRemoteAdapter */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		2D5CDFEB2F061DA00056B4CF /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 2D5CDFEA2F061DA00056B4CF /* Sparkle */; };
 		2DB6C9B22F076BF100B52B00 /* ExportOptions.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2DB6C9B12F076BEA00B52B00 /* ExportOptions.plist */; };
 		2DF0282F2EFDE34B00AE9026 /* LastFM in Frameworks */ = {isa = PBXBuildFile; productRef = 2DF0282E2EFDE34B00AE9026 /* LastFM */; };
@@ -18,6 +20,20 @@
 		9F4C57C72EA31C66000ED6A2 /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F4C57C62EA31C66000ED6A2 /* ServiceManagement.framework */; };
 		9F4C57C92EA31C6F000ED6A2 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F4C57C82EA31C6F000ED6A2 /* CoreServices.framework */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		2D46A35F2F09A457002F379B /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				2D46A35E2F09A457002F379B /* MediaRemoteAdapter in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		2D07AC2D2F0310D100CDCF93 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
@@ -78,6 +94,7 @@
 				2D050FDA2EFDD70800DFE18C /* LaunchAtLogin in Frameworks */,
 				9F4C57C92EA31C6F000ED6A2 /* CoreServices.framework in Frameworks */,
 				2DF028452EFE25EF00AE9026 /* KeyboardShortcuts in Frameworks */,
+				2D46A35B2F09A3A1002F379B /* MediaRemoteAdapter in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,6 +142,7 @@
 				9F36429E2E7E538B00D4E680 /* Sources */,
 				9F36429F2E7E538B00D4E680 /* Frameworks */,
 				9F3642A02E7E538B00D4E680 /* Resources */,
+				2D46A35F2F09A457002F379B /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -141,6 +159,7 @@
 				2DF0282E2EFDE34B00AE9026 /* LastFM */,
 				2DF028442EFE25EF00AE9026 /* KeyboardShortcuts */,
 				2D5CDFEA2F061DA00056B4CF /* Sparkle */,
+				2D46A35A2F09A3A1002F379B /* MediaRemoteAdapter */,
 			);
 			productName = NowPlaying;
 			productReference = 9F3642A22E7E538B00D4E680 /* scrobble.up.app */;
@@ -158,6 +177,7 @@
 				TargetAttributes = {
 					9F3642A12E7E538B00D4E680 = {
 						CreatedOnToolsVersion = 26.0;
+						LastSwiftMigration = 2620;
 					};
 				};
 			};
@@ -176,6 +196,7 @@
 				2DF0282D2EFDE34B00AE9026 /* XCRemoteSwiftPackageReference "LastFM" */,
 				2DF028432EFE25EF00AE9026 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
 				2D5CDFE92F061DA00056B4CF /* XCRemoteSwiftPackageReference "Sparkle" */,
+				2D46A3592F09A3A1002F379B /* XCRemoteSwiftPackageReference "mediaremote-adapter" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9F3642A32E7E538B00D4E680 /* Products */;
@@ -348,6 +369,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				AUTOMATION_APPLE_EVENTS = YES;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_USE_OPTIMIZATION_PROFILE = YES;
 				CODE_SIGN_ENTITLEMENTS = ScrobbleUp/ScrobbleUp.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -398,6 +420,8 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -412,6 +436,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				AUTOMATION_APPLE_EVENTS = YES;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_USE_OPTIMIZATION_PROFILE = YES;
 				CODE_SIGN_ENTITLEMENTS = ScrobbleUp/ScrobbleUp.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -462,6 +487,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -507,6 +533,14 @@
 				kind = branch;
 			};
 		};
+		2D46A3592F09A3A1002F379B /* XCRemoteSwiftPackageReference "mediaremote-adapter" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ejbills/mediaremote-adapter.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		2D5CDFE92F061DA00056B4CF /* XCRemoteSwiftPackageReference "Sparkle" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sparkle-project/Sparkle";
@@ -543,6 +577,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 2D050FD82EFDD70800DFE18C /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */;
 			productName = LaunchAtLogin;
+		};
+		2D46A35A2F09A3A1002F379B /* MediaRemoteAdapter */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2D46A3592F09A3A1002F379B /* XCRemoteSwiftPackageReference "mediaremote-adapter" */;
+			productName = MediaRemoteAdapter;
 		};
 		2D5CDFEA2F061DA00056B4CF /* Sparkle */ = {
 			isa = XCSwiftPackageProductDependency;
