@@ -5,7 +5,7 @@
         <item>
             <title>1.0.4</title>
             <pubDate>Sat, 03 Jan 2026 01:30:46 +0000</pubDate>
-            <sparkle:version>1</sparkle:version>
+            <sparkle:version>1.0.4</sparkle:version>
             <sparkle:shortVersionString>1.0.4</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.6</sparkle:minimumSystemVersion>
             <enclosure url="https://github.com/netliam/scrobble.up/releases/download/v1.0.4/scrobble.up.zip" length="4446418" type="application/octet-stream" sparkle:edSignature="uZE4xvK0zqPHrZnW6/mv2lJVIioPiZWl5j2wwgQnBYxzsx+29/kbH80bJY+jH9DGbsKZDC1jXURqs7ofjoQTDg=="/>
