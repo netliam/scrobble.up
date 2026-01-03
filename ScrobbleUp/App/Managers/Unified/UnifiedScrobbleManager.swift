@@ -64,10 +64,7 @@ final class UnifiedScrobbleManager: ObservableObject {
 				appState.currentTrack.album = album
 
 				Task {
-					if let image = await artworkManager.fetchFromiTunes(
-						artist: artist,
-						track: title
-					) {
+					if let image = await artworkManager.fetchFromiTunes(artist: entry.artist, track: entry.title, album: entry.album) {
 						appState.currentTrack.image = image
 					}
 

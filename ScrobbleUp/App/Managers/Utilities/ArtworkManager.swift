@@ -5,7 +5,10 @@ struct iTunesResponse: Codable {
 }
 
 struct iTunesResult: Codable {
-	let artworkUrl100: String
+    let artworkUrl100: String
+    let artistName: String
+    let trackName: String
+    let collectionName: String?
 }
 
 final class ArtworkManager {
@@ -39,38 +42,104 @@ final class ArtworkManager {
 		return image
 	}
 
-	func fetchFromiTunes(artist: String, track: String) async -> NSImage? {
-		let cacheKey = "\(artist)|\(track)" as NSString
+    func fetchFromiTunes(artist: String, track: String, album: String? = nil) async -> NSImage? {
+        let cacheKey = "\(artist)|\(track)" as NSString
 
-		if let cached = imageCache.object(forKey: cacheKey) {
-			return cached
-		}
+        if let cached = imageCache.object(forKey: cacheKey) {
+            return cached
+        }
 
-		let query =
-			"\(artist) \(track)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
-			?? ""
-		let urlString =
-			"https://itunes.apple.com/search?term=\(query)&media=music&entity=song&limit=1"
+        var searchTerms = [artist, track]
+        if let album = album, !album.isEmpty {
+            searchTerms.append(album)
+        }
+        
+        let query = searchTerms.joined(separator: " ")
+            .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        
+        let urlString =
+            "https://itunes.apple.com/search?term=\(query)&media=music&entity=song&limit=10"
 
-		guard let url = URL(string: urlString) else { return nil }
+        guard let url = URL(string: urlString) else { return nil }
 
-		do {
-			let (data, _) = try await URLSession.shared.data(from: url)
-			let response = try JSONDecoder().decode(iTunesResponse.self, from: data)
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let response = try JSONDecoder().decode(iTunesResponse.self, from: data)
 
-			if let artworkURL = response.results.first?.artworkUrl100 {
-				let highResURL = artworkURL.replacingOccurrences(of: "100x100", with: "600x600")
-				if let image = await loadNSImage(from: URL(string: highResURL)!) {
-					imageCache.setObject(image, forKey: cacheKey, cost: 1_400_000)
-					return image
-				}
-			}
-		} catch {
-			print("iTunes API error: \(error)")
-		}
+            let artworkURL = findBestMatch(
+                results: response.results,
+                artist: artist,
+                track: track,
+                album: album
+            )
+            
+            if let artworkURL = artworkURL {
+                let highResURL = artworkURL.replacingOccurrences(of: "100x100", with: "600x600")
+                if let image = await loadNSImage(from: URL(string: highResURL)!) {
+                    imageCache.setObject(image, forKey: cacheKey, cost: 1_400_000)
+                    return image
+                }
+            }
+        } catch {
+            print("iTunes API error: \(error)")
+        }
 
-		return nil
-	}
+        return nil
+    }
+
+    private func findBestMatch(
+        results: [iTunesResult],
+        artist: String,
+        track: String,
+        album: String?
+    ) -> String? {
+        let normalizedArtist = artist.lowercased()
+        let normalizedTrack = track.lowercased()
+        let normalizedAlbum = album?.lowercased()
+        
+        var bestScore = 0
+        var bestArtwork: String? = nil
+        
+        for result in results {
+            var score = 0
+            
+            if result.artistName.lowercased().contains(normalizedArtist) ||
+               normalizedArtist.contains(result.artistName.lowercased()) {
+                score += 10
+            }
+            
+            if result.trackName.lowercased().contains(normalizedTrack) ||
+               normalizedTrack.contains(result.trackName.lowercased()) {
+                score += 10
+            }
+            
+            if let normalizedAlbum = normalizedAlbum,
+               let resultAlbum = result.collectionName?.lowercased() {
+                if resultAlbum.contains(normalizedAlbum) ||
+                   normalizedAlbum.contains(resultAlbum) {
+                    score += 15
+                }
+                
+                if resultAlbum.contains("greatest hits") ||
+                   resultAlbum.contains("best of") ||
+                   resultAlbum.contains("compilation") ||
+                   resultAlbum.contains("collection") {
+                    score -= 5
+                }
+            }
+            
+            if result.artistName.lowercased().contains("various") {
+                score -= 10
+            }
+            
+            if score > bestScore {
+                bestScore = score
+                bestArtwork = result.artworkUrl100
+            }
+        }
+        
+        return bestArtwork ?? results.first?.artworkUrl100
+    }
 
 	func loadNSImage(from url: URL) async -> NSImage? {
 		do {
