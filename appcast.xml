@@ -3,12 +3,12 @@
     <channel>
         <title>scrobble.up</title>
         <item>
-            <title>1.0.3</title>
-            <pubDate>Fri, 02 Jan 2026 22:05:51 +0000</pubDate>
-            <sparkle:version>1</sparkle:version>
-            <sparkle:shortVersionString>1.0.3</sparkle:shortVersionString>
+            <title>1.0.4</title>
+            <pubDate>Sat, 03 Jan 2026 01:30:46 +0000</pubDate>
+            <sparkle:version>1.0.4</sparkle:version>
+            <sparkle:shortVersionString>1.0.4</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.6</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/netliam/scrobble.up/releases/download/v1.0.3/scrobble.up.zip" length="4440988" type="application/octet-stream" sparkle:edSignature="IljPChS9SbitW/6DHuuvfbgH3tEiSXbHAoewbWJH46+x2snyMaHV52sif3FmA9tM4USVOSbfObwDaRnm4ggKDw=="/>
+            <enclosure url="https://github.com/netliam/scrobble.up/releases/download/v1.0.4/scrobble.up.zip" length="4446418" type="application/octet-stream" sparkle:edSignature="uZE4xvK0zqPHrZnW6/mv2lJVIioPiZWl5j2wwgQnBYxzsx+29/kbH80bJY+jH9DGbsKZDC1jXURqs7ofjoQTDg=="/>
         </item>
     </channel>
 </rss>
