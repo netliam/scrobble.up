@@ -1,9 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
-  <channel>
-    <title>scrobble.up</title>
-    <link>https://github.com/netliam/scrobble.up</link>
-    <description>Most recent changes with links to updates.</description>
-    <language>en</language>
-  </channel>
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>scrobble.up</title>
+        <item>
+            <title>1.0.3</title>
+            <pubDate>Fri, 02 Jan 2026 22:05:51 +0000</pubDate>
+            <sparkle:version>1</sparkle:version>
+            <sparkle:shortVersionString>1.0.3</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.6</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/netliam/scrobble.up/releases/download/v1.0.3/scrobble.up.zip" length="4440988" type="application/octet-stream" sparkle:edSignature="IljPChS9SbitW/6DHuuvfbgH3tEiSXbHAoewbWJH46+x2snyMaHV52sif3FmA9tM4USVOSbfObwDaRnm4ggKDw=="/>
+        </item>
+    </channel>
 </rss>
