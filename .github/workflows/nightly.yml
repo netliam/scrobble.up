@@ -229,14 +229,14 @@ jobs:
           curl -L -o /tmp/Sparkle.tar.xz https://github.com/sparkle-project/Sparkle/releases/download/2.6.4/Sparkle-2.6.4.tar.xz
           tar -xf /tmp/Sparkle.tar.xz -C /tmp
 
-          # Create nightly releases directory structure
+          # Create nightly releases directory structure with correctly named ZIP
           mkdir -p "$RUNNER_TEMP/nightly-releases"
-          ditto -c -k --keepParent "$RUNNER_TEMP/export/$APP_NAME.app" "$RUNNER_TEMP/nightly-releases/$APP_NAME.zip"
+          ditto -c -k --keepParent "$RUNNER_TEMP/export/$APP_NAME.app" "$RUNNER_TEMP/nightly-releases/$APP_NAME-nightly.zip"
 
           # Set up Sparkle private key
           printf '%s' "$SPARKLE_KEY" > "$RUNNER_TEMP/sparkle_key"
 
-          # Generate nightly appcast
+          # Generate nightly appcast (it will use the filename from the directory)
           /tmp/bin/generate_appcast \
             --ed-key-file "$RUNNER_TEMP/sparkle_key" \
             --download-url-prefix "https://github.com/${{ github.repository }}/releases/download/nightly-$(date +%Y%m%d)/" \
@@ -246,7 +246,7 @@ jobs:
           rm "$RUNNER_TEMP/sparkle_key"
 
           # Copy zip to expected location for release upload
-          cp "$RUNNER_TEMP/nightly-releases/$APP_NAME.zip" "$RUNNER_TEMP/$APP_NAME-nightly.zip"
+          cp "$RUNNER_TEMP/nightly-releases/$APP_NAME-nightly.zip" "$RUNNER_TEMP/$APP_NAME-nightly.zip"
 
       - name: Delete old nightly releases
         env:
