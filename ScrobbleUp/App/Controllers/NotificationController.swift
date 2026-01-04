@@ -95,7 +95,7 @@ class NotificationController: NSObject, UNUserNotificationCenterDelegate {
 
 		let hudView = HUDView(symbol: symbol, text: text, subtitle: subtitle, artwork: artwork)
 		let hostingView = NSHostingView(rootView: hudView)
-		hostingView.layer?.backgroundColor = .clear
+		hostingView.layer?.backgroundColor = CGColor.clear
 		window.contentView = hostingView
 
 		let side: CGFloat = 200
@@ -247,8 +247,6 @@ private struct HUDView: View {
 					lineWidth: 1
 				)
 		)
-		.shadow(color: .black.opacity(0.25), radius: 16, x: 0, y: 8)
-		.frame(maxWidth: .infinity, maxHeight: .infinity)
 	}
 }
 
