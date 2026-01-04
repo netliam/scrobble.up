@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch: # Allow manual triggering
+
 jobs:
   build:
     runs-on: macos-26
