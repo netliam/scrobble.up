@@ -166,6 +166,19 @@ jobs:
             -exportOptionsPlist ExportOptions.plist \
             -allowProvisioningUpdates
 
+      - name: Inspect archive contents
+        run: |
+          echo "=== Archive root ==="
+          ls "$RUNNER_TEMP/ScrobbleUp.xcarchive"
+        
+          echo ""
+          echo "=== Products/Applications ==="
+          ls "$RUNNER_TEMP/ScrobbleUp.xcarchive/Products/Applications" || echo "No Applications directory"
+        
+          echo ""
+          echo "=== All Info.plist files ==="
+          find "$RUNNER_TEMP/ScrobbleUp.xcarchive" -name Info.plist
+
       - name: Get version and create nightly version
         run: |
           ARCHIVE_PATH="$RUNNER_TEMP/$APP_NAME.xcarchive"
