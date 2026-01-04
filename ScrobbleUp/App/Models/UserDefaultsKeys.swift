@@ -15,7 +15,7 @@ enum Keys {
 		"playerSwitching", defaultValue: PlayerSwitching.automatic)
 	static let playerOverride = UserDefaultsKey("playerOverride", defaultValue: PlayerOverride.none)
 	static let trackFetchingMethod = UserDefaultsKey(
-		"trackFetchingMethod", defaultValue: TrackFetchingMethod.perApp)
+		"trackFetchingMethod", defaultValue: TrackFetchingMethod.mediaRemote)
 	static let openLinksWith = UserDefaultsKey(
 		"openLinksWith", defaultValue: OpenLinksWith.alwaysInAppleMusic)
 
