@@ -26,6 +26,7 @@
 <img src="Assets/Menu_Screenshot.png" width="300" alt="Menu Screenshot" >
 <img src="Assets/Scrobble_Log_Screenshot.png" width="300" alt="Scrobble Log Screenshot" >
 <h1 />
+  
 ## Installation
 **System Requirements:**  
 - macOS **14 Sonoma** or later  
