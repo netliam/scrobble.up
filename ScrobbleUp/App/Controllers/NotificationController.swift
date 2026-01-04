@@ -158,7 +158,7 @@ private struct HUDView: View {
 	var artwork: NSImage?
 
 	var body: some View {
-		VStack(spacing: 16) {
+		VStack(spacing: 9) {
 			if let nsImage = artwork {
 				ZStack {
 					Image(nsImage: nsImage)
@@ -179,25 +179,79 @@ private struct HUDView: View {
 					.foregroundStyle(.primary)
 			}
 
-			Text(text)
-				.font(.title)
-				.bold()
-				.multilineTextAlignment(.center)
-				.lineLimit(2)
-				.minimumScaleFactor(0.8)
-
-			if let subtitle {
-				Text(subtitle)
-					.font(.subheadline)
-					.foregroundStyle(.secondary)
+			VStack(spacing: 5) {
+				Text(text)
+					.font(.largeTitle)
+					.bold()
 					.multilineTextAlignment(.center)
 					.lineLimit(2)
-					.minimumScaleFactor(0.7)
+					.minimumScaleFactor(0.5)
+
+				if let subtitle {
+					Text(subtitle)
+						.font(.title2)
+						.foregroundStyle(.secondary)
+						.multilineTextAlignment(.center)
+						.lineLimit(2)
+						.minimumScaleFactor(0.2)
+				}
 			}
 		}
 		.padding(20)
 		.frame(width: 180, height: 180)
-		.background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+		.background {
+			ZStack {
+				RoundedRectangle(cornerRadius: 20, style: .continuous)
+					.fill(.ultraThinMaterial)
+
+				RoundedRectangle(cornerRadius: 20, style: .continuous)
+					.fill(
+						LinearGradient(
+							colors: [
+								Color.white.opacity(0.10),
+								Color.white.opacity(0.02),
+							],
+							startPoint: .topLeading,
+							endPoint: .bottomTrailing
+						)
+					)
+					.blendMode(.plusLighter)
+
+				RoundedRectangle(cornerRadius: 20, style: .continuous)
+					.fill(
+						AngularGradient(
+							gradient: Gradient(colors: [
+								Color.white.opacity(0.18),
+								Color.white.opacity(0.00),
+								Color.white.opacity(0.12),
+								Color.white.opacity(0.00),
+							]),
+							center: .center
+						)
+					)
+					.blur(radius: 14)
+					.opacity(0.6)
+			}
+		}
+		.overlay(
+			RoundedRectangle(cornerRadius: 20, style: .continuous)
+				.strokeBorder(
+					LinearGradient(
+						colors: [
+							Color.white.opacity(0.35),
+							Color.white.opacity(0.10),
+						],
+						startPoint: .topLeading,
+						endPoint: .bottomTrailing
+					),
+					lineWidth: 1
+				)
+		)
+		.shadow(color: .black.opacity(0.25), radius: 16, x: 0, y: 8)
 		.frame(maxWidth: .infinity, maxHeight: .infinity)
 	}
+}
+
+#Preview {
+	HUDView(symbol: "star", text: "test", subtitle: "test")
 }

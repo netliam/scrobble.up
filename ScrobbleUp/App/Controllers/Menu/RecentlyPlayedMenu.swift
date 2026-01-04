@@ -6,8 +6,8 @@
 //
 
 import AppKit
-import LastFM
 import Foundation
+import LastFM
 
 final class RecentlyPlayedMenu {
 	// Injected Dependencies
@@ -160,7 +160,7 @@ final class RecentlyPlayedMenu {
 		}
 
 		let subMenu = NSMenu()
-        
+
 		let copyArtistTrack = NSMenuItem(
 			title: "Copy Artist & Title",
 			action: #selector(copyArtistTrack),
@@ -247,7 +247,7 @@ final class RecentlyPlayedMenu {
 							menuItem.target = self
 							menuItem.representedObject = ["artist": artist.name]
 							menuItem.isEnabled = true
-                            menuItem.truncateTitle(maxWidth: 200)
+							menuItem.truncateTitle(maxWidth: 200)
 							submenu.insertItem(menuItem, at: insertIndex)
 							insertIndex += 1
 						}
@@ -285,7 +285,7 @@ final class RecentlyPlayedMenu {
 								title: track.name,
 								action: #selector(self.openTrack),
 								keyEquivalent: ""
-                            )
+							)
 							menuItem.target = self
 							menuItem.representedObject = [
 								"artist": track.artist.name,
@@ -294,7 +294,8 @@ final class RecentlyPlayedMenu {
 							menuItem.isEnabled = true
 
 							let view = RecentlyPlayedMenuItemView(width: 260)
-							view.configure(title: track.name, subtitle: track.artist.name, image: nil)
+							view.configure(
+								title: track.name, subtitle: track.artist.name, image: nil)
 							menuItem.view = view
 
 							submenu.insertItem(menuItem, at: insertIndex)

@@ -1,11 +1,40 @@
-name: Build & Release
+name: Nightly Build & Release
 
 on:
-  push:
-    tags:
-      - "v*"
+  schedule:
+    # Run at 2 AM UTC every day
+    - cron: "0 2 * * *"
+  workflow_dispatch: # Allow manual triggering
+
 jobs:
+  check-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      should_build: ${{ steps.check.outputs.should_build }}
+      commit_sha: ${{ steps.check.outputs.commit_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check for changes since last nightly
+        id: check
+        run: |
+          # Check if there were any commits in the last 24 hours
+          COMMITS=$(git log --since="24 hours ago" --oneline | wc -l)
+
+          if [ "$COMMITS" -gt 0 ]; then
+            echo "should_build=true" >> $GITHUB_OUTPUT
+            echo "commit_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+            echo "Found $COMMITS commits in the last 24 hours"
+          else
+            echo "should_build=false" >> $GITHUB_OUTPUT
+            echo "No commits in the last 24 hours, skipping build"
+          fi
+
   build:
+    needs: check-changes
+    if: needs.check-changes.outputs.should_build == 'true'
     runs-on: macos-26
     env:
       APP_NAME: scrobble.up
@@ -61,11 +90,9 @@ jobs:
 
           security set-key-partition-list -S apple-tool:,apple: -s -k "temp123" "$KEYCHAIN_PATH"
 
-          # Set as default and add to search list
           security default-keychain -s "$KEYCHAIN_PATH"
           security list-keychain -d user -s "$KEYCHAIN_PATH" login.keychain-db
 
-          # Verify
           security find-identity -v -p codesigning
 
       - name: Create Secrets.xcconfig
@@ -74,6 +101,23 @@ jobs:
           LASTFM_API_KEY = ${{ secrets.LASTFM_API_KEY }}
           LASTFM_API_SECRET = ${{ secrets.LASTFM_API_SECRET }}
           EOF
+
+      - name: Update version for nightly
+        run: |
+          # Get current version from Info.plist
+          PLIST_PATH="ScrobbleUp/Info.plist"  # Adjust path as needed
+          CURRENT_VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "$PLIST_PATH")
+
+          # Create nightly version: 1.2.3-nightly-20240104-abc1234
+          DATE=$(date +%Y%m%d)
+          COMMIT=${{ needs.check-changes.outputs.commit_sha }}
+          NIGHTLY_VERSION="${CURRENT_VERSION}-nightly-${DATE}-${COMMIT}"
+
+          echo "NIGHTLY_VERSION=$NIGHTLY_VERSION" >> $GITHUB_ENV
+          echo "Building nightly version: $NIGHTLY_VERSION"
+
+          # Update CFBundleVersion with timestamp for uniqueness
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $(date +%Y%m%d%H%M%S)" "$PLIST_PATH"
 
       - name: Build dependencies
         run: |
@@ -149,7 +193,6 @@ jobs:
             --wait \
             --output-format json | tee notarization.json
 
-          # Check result
           STATUS=$(cat notarization.json | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
           ID=$(cat notarization.json | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4)
 
@@ -170,7 +213,7 @@ jobs:
           brew install create-dmg
 
           create-dmg \
-            --volname "$APP_NAME" \
+            --volname "$APP_NAME Nightly" \
             --volicon "Assets/AppIcon.icns" \
             --window-pos 200 120 \
             --window-size 600 400 \
@@ -178,10 +221,10 @@ jobs:
             --icon "$APP_NAME.app" 150 190 \
             --app-drop-link 450 190 \
             --hide-extension "$APP_NAME.app" \
-            "$RUNNER_TEMP/$APP_NAME.dmg" \
+            "$RUNNER_TEMP/$APP_NAME-nightly.dmg" \
             "$RUNNER_TEMP/export/$APP_NAME.app"
 
-      - name: Create Sparkle ZIP & generate appcast
+      - name: Create Sparkle ZIP & generate nightly appcast
         env:
           SPARKLE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
         run: |
@@ -189,41 +232,61 @@ jobs:
           curl -L -o /tmp/Sparkle.tar.xz https://github.com/sparkle-project/Sparkle/releases/download/2.6.4/Sparkle-2.6.4.tar.xz
           tar -xf /tmp/Sparkle.tar.xz -C /tmp
 
-          # Create release directory structure
-          mkdir -p "$RUNNER_TEMP/releases"
-          ditto -c -k --keepParent "$RUNNER_TEMP/export/$APP_NAME.app" "$RUNNER_TEMP/releases/$APP_NAME.zip"
+          # Create nightly releases directory structure
+          mkdir -p "$RUNNER_TEMP/nightly-releases"
+          ditto -c -k --keepParent "$RUNNER_TEMP/export/$APP_NAME.app" "$RUNNER_TEMP/nightly-releases/$APP_NAME.zip"
 
-          # Set up Sparkle private key (use printf to avoid trailing newline)
+          # Set up Sparkle private key
           printf '%s' "$SPARKLE_KEY" > "$RUNNER_TEMP/sparkle_key"
 
-          # Generate appcast using Sparkle's tool
+          # Generate nightly appcast
           /tmp/bin/generate_appcast \
             --ed-key-file "$RUNNER_TEMP/sparkle_key" \
-            --download-url-prefix "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/" \
-            -o "$RUNNER_TEMP/appcast.xml" \
-            "$RUNNER_TEMP/releases"
+            --download-url-prefix "https://github.com/${{ github.repository }}/releases/download/nightly-$(date +%Y%m%d)/" \
+            -o "$RUNNER_TEMP/appcast-nightly.xml" \
+            "$RUNNER_TEMP/nightly-releases"
 
           rm "$RUNNER_TEMP/sparkle_key"
 
           # Copy zip to expected location for release upload
-          cp "$RUNNER_TEMP/releases/$APP_NAME.zip" "$RUNNER_TEMP/$APP_NAME.zip"
+          cp "$RUNNER_TEMP/nightly-releases/$APP_NAME.zip" "$RUNNER_TEMP/$APP_NAME-nightly.zip"
 
-      - name: Get version
+      - name: Delete old nightly releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "$RUNNER_TEMP/export/$APP_NAME.app/Contents/Info.plist")
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "TAG_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
+          # Keep only the last 7 nightly releases
+          gh release list --limit 100 | grep "nightly-" | tail -n +8 | while read -r line; do
+            TAG=$(echo "$line" | awk '{print $3}')
+            echo "Deleting old nightly release: $TAG"
+            gh release delete "$TAG" --yes --cleanup-tag || true
+          done
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ env.TAG_NAME }}
-          make_latest: true
-          files: |
-            ${{ runner.temp }}/${{ env.APP_NAME }}.dmg
-            ${{ runner.temp }}/${{ env.APP_NAME }}.zip
+      - name: Create or update nightly release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="nightly-$(date +%Y%m%d)"
+          RELEASE_NAME="Nightly Build $(date +%Y-%m-%d)"
 
-      - name: Update GitHub Pages with stable appcast
+          # Delete existing nightly release for today if it exists
+          gh release delete "$TAG_NAME" --yes --cleanup-tag 2>/dev/null || true
+
+          # Create new release
+          gh release create "$TAG_NAME" \
+            --title "$RELEASE_NAME" \
+            --notes "Automated nightly build from commit ${{ needs.check-changes.outputs.commit_sha }}
+
+          **Warning:** This is a nightly build and may be unstable. Use at your own risk.
+
+          **Changes:** [View commits](https://github.com/${{ github.repository }}/compare/nightly-$(date -d yesterday +%Y%m%d 2>/dev/null || date -v-1d +%Y%m%d)...${{ needs.check-changes.outputs.commit_sha }})
+
+          Built from: \`${{ github.sha }}\`" \
+            --prerelease \
+            "$RUNNER_TEMP/$APP_NAME-nightly.dmg" \
+            "$RUNNER_TEMP/$APP_NAME-nightly.zip"
+
+      - name: Update GitHub Pages with nightly appcast
         run: |
           # Clone gh-pages branch
           git clone --branch gh-pages https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git gh-pages || \
@@ -234,73 +297,19 @@ jobs:
           # Create gh-pages branch if it doesn't exist
           git checkout gh-pages 2>/dev/null || git checkout --orphan gh-pages
 
-          # Copy stable appcast
-          cp "$RUNNER_TEMP/appcast.xml" appcast.xml
-
-          # Create index.html if it doesn't exist
-          if [ ! -f index.html ]; then
-            cat > index.html << 'HTMLEOF'
-              <!DOCTYPE html>
-              <html lang="en">
-              <head>
-                  <meta charset="UTF-8">
-                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                  <title>ScrobbleUp Updates</title>
-                  <style>
-                      body {
-                          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-                          max-width: 800px;
-                          margin: 50px auto;
-                          padding: 20px;
-                          line-height: 1.6;
-                      }
-                      h1 { color: #333; }
-                      .channel {
-                          margin: 30px 0;
-                          padding: 20px;
-                          background: #f5f5f5;
-                          border-radius: 8px;
-                      }
-                      .channel h2 { margin-top: 0; }
-                      code {
-                          background: #e0e0e0;
-                          padding: 2px 6px;
-                          border-radius: 3px;
-                          font-size: 0.9em;
-                      }
-                      a { color: #007aff; }
-                  </style>
-              </head>
-              <body>
-                  <h1>ScrobbleUp Update Feeds</h1>
-
-                  <div class="channel">
-                      <h2>Stable Release Channel</h2>
-                      <p>Recommended for most users. Contains tested, stable releases.</p>
-                      <p><strong>Appcast URL:</strong><br>
-                      <code>https://USERNAME.github.io/REPOSITORY/appcast.xml</code></p>
-                  </div>
-
-                  <div class="channel">
-                      <h2>Nightly Build Channel</h2>
-                      <p>For testers and early adopters. Updated daily with the latest changes. May be unstable.</p>
-                      <p><strong>Appcast URL:</strong><br>
-                      <code>https://USERNAME.github.io/REPOSITORY/appcast-nightly.xml</code></p>
-                  </div>
-
-                  <hr style="margin: 40px 0;">
-
-                  <p><small>Configure your update channel in your app's Info.plist using the SUFeedURL key.</small></p>
-              </body>
-              </html>
-              HTMLEOF
-          fi
+          # Copy nightly appcast
+          cp "$RUNNER_TEMP/appcast-nightly.xml" appcast-nightly.xml
 
           # Configure git
           git config user.name "github-actions"
           git config user.email "actions@github.com"
 
           # Commit and push
-          git add appcast.xml index.html
-          git commit -m "Update stable appcast for ${{ env.TAG_NAME }}" || echo "No changes to commit"
+          git add appcast-nightly.xml
+          git commit -m "Update nightly appcast for $(date +%Y-%m-%d)" || echo "No changes to commit"
           git push origin gh-pages
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Nightly build failed. Check the logs for details."
