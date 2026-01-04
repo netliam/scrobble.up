@@ -11,20 +11,10 @@ import SwiftUI
 struct ScrobblerSettingsPane: View {
 	@AppStorage(\.syncLikes) private var syncLikes
 	@AppStorage(\.scrobbleTrackAt) private var scrobbleTrackAt
-	@AppStorage(\.trackFetchingMethod) private var trackFetchingMethod
+    @AppStorage(\.playerSwitching) private var playerSwitching
 
 	var body: some View {
 		Form {
-			Section("Track Detection") {
-				Picker("Fetching method", selection: $trackFetchingMethod) {
-					Text("Per-App (AppleScript)").tag(TrackFetchingMethod.perApp)
-					Text("MediaRemote (System-wide)").tag(TrackFetchingMethod.mediaRemote)
-				}
-				.pickerStyle(.radioGroup)
-				Text(trackFetchingMethodDescription)
-					.font(.caption)
-					.foregroundColor(.secondary)
-			}
 			Section("Integration") {
 				Toggle(
 					"Sync likes between Apple Music and scrobbler",
@@ -59,14 +49,5 @@ struct ScrobblerSettingsPane: View {
 		.frame(width: 450)
 	}
 
-	private var trackFetchingMethodDescription: String {
-		switch trackFetchingMethod {
-		case .perApp:
-			return
-				"Uses AppleScript to detect tracks from Apple Music and Spotify. More reliable for these specific apps."
-		case .mediaRemote:
-			return
-				"Uses system-wide MediaRemote to detect tracks from any music player including Tidal, Deezer, and more."
-		}
-	}
+
 }
