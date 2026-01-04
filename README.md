@@ -2,24 +2,30 @@
   <br>
     <img src="Assets/AppIcon.png" width="150" alt="scrobble.up Logo" />
   <br>
-  scrobble.up
+    scrobble.up
   <br>
+  <h3> 
+    For the music 
+  <h3 />
 </h1>
 
-A lightweight universal music tracker for macOS that lives in your menu bar.
+**scrobble.up** is a lightweight free and open source scrobbler for macOS. 
 
 ### Features
-- Scrobble to last.fm & ListenBrainz
+- Scrobble to Last.fm & ListenBrainz
+- Track plays from a wide range of music players
 - Similar artists and track suggestions from Last.fm
-- Track listens from a wide range of music players
 - Like syncing between Apple Music, ListenBrainz, and Last.fm
 - Display track artwork in dock
+- Global shortcut for liking current track
+- Free forever
 
 ### Screenshots
 
+<h1 align="center">
 <img src="Assets/Menu_Screenshot.png" width="300" alt="Menu Screenshot" >
-<img src="Assets/Scrobble_Log_Screenshot.png" width="300" alt="Menu Screenshot" >
-
+<img src="Assets/Scrobble_Log_Screenshot.png" width="300" alt="Scrobble Log Screenshot" >
+<h1 />
 ## Installation
 **System Requirements:**  
 - macOS **14 Sonoma** or later  
