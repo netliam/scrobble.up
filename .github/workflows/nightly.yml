@@ -168,15 +168,16 @@ jobs:
 
       - name: Get version and create nightly version
         run: |
+          INFO_PLIST="$RUNNER_TEMP/export/$APP_NAME.app/Contents/Info.plist"
           # Get version from the exported app
-          VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "$RUNNER_TEMP/export/$APP_NAME.app/Contents/Info.plist")
+          VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" INFO_PLIST)
 
           # Create nightly version: 1.2.3-nightly-20240104-abc1234
           DATE=$(date +%Y%m%d)
           COMMIT=${{ needs.check-changes.outputs.commit_sha }}
           NIGHTLY_VERSION="${VERSION}-nightly-${DATE}-${COMMIT}"
 
-          INFO_PLIST="build/ScrobbleUp.app/Contents/Info.plist"
+
 
           /usr/libexec/PlistBuddy \
             -c "Set SUFeedURL https://netliam.github.io/scrobble.up/appcast-nightly.xml" \
