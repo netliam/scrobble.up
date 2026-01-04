@@ -272,10 +272,10 @@ jobs:
           # Create new release
           gh release create "$TAG_NAME" \
             --title "$RELEASE_NAME" \
-            --notes "🌙 Automated nightly build from commit ${{ needs.check-changes.outputs.commit_sha }}
+            --notes "Automated nightly build from commit ${{ needs.check-changes.outputs.commit_sha }}
 
           **Version:** ${{ env.NIGHTLY_VERSION }}
-          **⚠️ Warning:** This is a nightly build and may be unstable. Use at your own risk.
+          **Warning:** This is a nightly build and may be unstable. Use at your own risk.
           
           **Changes:** [View commits](https://github.com/${{ github.repository }}/compare/nightly-$(date -d yesterday +%Y%m%d 2>/dev/null || date -v-1d +%Y%m%d)...${{ needs.check-changes.outputs.commit_sha }})
           
