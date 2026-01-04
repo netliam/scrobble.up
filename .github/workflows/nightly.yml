@@ -3,7 +3,7 @@ name: Nightly Build & Release
 on:
   schedule:
     # Run at 2 AM UTC every day
-    - cron: '0 2 * * *'
+    - cron: "0 2 * * *"
   workflow_dispatch: # Allow manual triggering
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
         run: |
           # Check if there were any commits in the last 24 hours
           COMMITS=$(git log --since="24 hours ago" --oneline | wc -l)
-          
+
           if [ "$COMMITS" -gt 0 ]; then
             echo "should_build=true" >> $GITHUB_OUTPUT
             echo "commit_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
@@ -165,12 +165,12 @@ jobs:
         run: |
           # Get version from the exported app
           VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "$RUNNER_TEMP/export/$APP_NAME.app/Contents/Info.plist")
-          
+
           # Create nightly version: 1.2.3-nightly-20240104-abc1234
           DATE=$(date +%Y%m%d)
           COMMIT=${{ needs.check-changes.outputs.commit_sha }}
           NIGHTLY_VERSION="${VERSION}-nightly-${DATE}-${COMMIT}"
-          
+
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "NIGHTLY_VERSION=$NIGHTLY_VERSION" >> $GITHUB_ENV
           echo "Building nightly version: $NIGHTLY_VERSION"
@@ -265,10 +265,10 @@ jobs:
         run: |
           TAG_NAME="nightly-$(date +%Y%m%d)"
           RELEASE_NAME="Nightly Build $(date +%Y-%m-%d)"
-          
+
           # Delete existing nightly release for today if it exists
           gh release delete "$TAG_NAME" --yes --cleanup-tag 2>/dev/null || true
-          
+
           # Create new release
           gh release create "$TAG_NAME" \
             --title "$RELEASE_NAME" \
@@ -276,36 +276,26 @@ jobs:
 
           **Version:** ${{ env.NIGHTLY_VERSION }}
           **Warning:** This is a nightly build and may be unstable. Use at your own risk.
-          
+
           **Changes:** [View commits](https://github.com/${{ github.repository }}/compare/nightly-$(date -d yesterday +%Y%m%d 2>/dev/null || date -v-1d +%Y%m%d)...${{ needs.check-changes.outputs.commit_sha }})
-          
+
           Built from: \`${{ github.sha }}\`" \
             --prerelease \
             "$RUNNER_TEMP/$APP_NAME-nightly.dmg" \
             "$RUNNER_TEMP/$APP_NAME-nightly.zip"
 
-      - name: Update GitHub Pages with nightly appcast
+      - name: Prepare Pages content
         run: |
-          # Clone gh-pages branch
-          git clone --branch gh-pages https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git gh-pages || \
-            git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git gh-pages
-          
-          cd gh-pages
-          
-          # Create gh-pages branch if it doesn't exist
-          git checkout gh-pages 2>/dev/null || git checkout --orphan gh-pages
-          
-          # Copy nightly appcast
-          cp "$RUNNER_TEMP/appcast-nightly.xml" appcast-nightly.xml
-          
-          # Configure git
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          
-          # Commit and push
-          git add appcast-nightly.xml
-          git commit -m "Update nightly appcast for $(date +%Y-%m-%d)" || echo "No changes to commit"
-          git push origin gh-pages
+          mkdir -p pages
+          cp "$RUNNER_TEMP/appcast-nightly.xml" pages/appcast-nightly.xml
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: pages
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
 
       - name: Notify on failure
         if: failure()
