@@ -3,12 +3,12 @@
     <img src="Assets/AppIcon.png" width="150" alt="scrobble.up Logo" />
   <br>
     scrobble.up
+    <h3 align="center"> 
+      For the music 
+    <h3 />
   <br>
-  <h3> 
-    For the music 
-  <h3 />
 </h1>
-
+      
 **scrobble.up** is a lightweight free and open source scrobbler for macOS. 
 
 ### Features
