@@ -168,8 +168,8 @@ jobs:
 
       - name: Get version and create nightly version
         run: |
-          ARCHIVE_PATH="$RUNNER_TEMP/ScrobbleUp.xcarchive"
-          INFO_PLIST="$ARCHIVE_PATH/Products/Applications/ScrobbleUp.app/Contents/Info.plist"
+          ARCHIVE_PATH="$RUNNER_TEMP/$APP_NAME.xcarchive"
+          INFO_PLIST="$ARCHIVE_PATH/Products/Applications/$APP_NAME.app/Contents/Info.plist"
 
           # Get version from the exported app
           VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" INFO_PLIST)
