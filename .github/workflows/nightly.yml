@@ -168,7 +168,9 @@ jobs:
 
       - name: Get version and create nightly version
         run: |
-          INFO_PLIST="$RUNNER_TEMP/export/$APP_NAME.app/Contents/Info.plist"
+          ARCHIVE_PATH="$RUNNER_TEMP/ScrobbleUp.xcarchive"
+          INFO_PLIST="$ARCHIVE_PATH/Products/Applications/ScrobbleUp.app/Contents/Info.plist"
+
           # Get version from the exported app
           VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" INFO_PLIST)
 
@@ -176,16 +178,14 @@ jobs:
           DATE=$(date +%Y%m%d)
           COMMIT=${{ needs.check-changes.outputs.commit_sha }}
           NIGHTLY_VERSION="${VERSION}-nightly-${DATE}-${COMMIT}"
-
-
-
+          
           /usr/libexec/PlistBuddy \
             -c "Set SUFeedURL https://netliam.github.io/scrobble.up/appcast-nightly.xml" \
-            "$INFO_PLIST"
+            "$ARCHIVE_PATH"
 
           BASE_BUILD=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" "$INFO_PLIST")
           NIGHTLY_BUILD="${BASE_BUILD}-nightly.$(date +%Y%m%d%H%M)"
-          /usr/libexec/PlistBuddy -c "Set CFBundleVersion $NIGHTLY_BUILD" "$INFO_PLIST"
+          /usr/libexec/PlistBuddy -c "Set CFBundleVersion $NIGHTLY_BUILD" "$ARCHIVE_PATH"
 
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "NIGHTLY_VERSION=$NIGHTLY_VERSION" >> $GITHUB_ENV
