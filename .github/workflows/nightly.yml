@@ -136,6 +136,35 @@ jobs:
             CODE_SIGN_IDENTITY="Developer ID Application" \
             DEVELOPMENT_TEAM="${{ secrets.TEAM_ID }}" \
             OTHER_CODE_SIGN_FLAGS="--timestamp --options=runtime"
+            
+      - name: Configure nightly Info.plist (archive)
+        run: |
+          ARCHIVE="$RUNNER_TEMP/$APP_NAME.xcarchive"
+          INFO_PLIST="$ARCHIVE/Products/Applications/$APP_NAME.app/Contents/Info.plist"
+      
+          echo "Using Info.plist at:"
+          echo "$INFO_PLIST"
+      
+          test -f "$INFO_PLIST" || { echo "Info.plist not found"; exit 1; }
+      
+          # Sparkle nightly feed
+          /usr/libexec/PlistBuddy -c "Delete :SUFeedURL" "$INFO_PLIST" || true
+          /usr/libexec/PlistBuddy \
+            -c "Add :SUFeedURL string https://netliam.github.io/scrobble.up/appcast-nightly.xml" \
+            "$INFO_PLIST"
+      
+          # Nightly build number
+          BASE_BUILD=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$INFO_PLIST")
+          NIGHTLY_BUILD="${BASE_BUILD}-nightly.$(date +%Y%m%d%H%M)"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $NIGHTLY_BUILD" "$INFO_PLIST"
+      
+          # Export readable vars
+          VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$INFO_PLIST")
+          COMMIT=${{ needs.check-changes.outputs.commit_sha }}
+          NIGHTLY_VERSION="${VERSION}-nightly-$(date +%Y%m%d)-${COMMIT}"
+      
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "NIGHTLY_VERSION=$NIGHTLY_VERSION" >> $GITHUB_ENV
 
       - name: Save cache
         uses: actions/cache/save@v4
@@ -166,39 +195,15 @@ jobs:
             -exportOptionsPlist ExportOptions.plist \
             -allowProvisioningUpdates
 
-      - name: Inspect archive contents
-        run: |
-          echo "=== Archive root ==="
-          ls "$RUNNER_TEMP/ScrobbleUp.xcarchive"
-        
-          echo ""
-          echo "=== Products/Applications ==="
-          ls "$RUNNER_TEMP/ScrobbleUp.xcarchive/Products/Applications" || echo "No Applications directory"
-        
-          echo ""
-          echo "=== All Info.plist files ==="
-          find "$RUNNER_TEMP/ScrobbleUp.xcarchive" -name Info.plist
-
       - name: Get version and create nightly version
         run: |
-          ARCHIVE_PATH="$RUNNER_TEMP/$APP_NAME.xcarchive"
-          INFO_PLIST="$ARCHIVE_PATH/Products/Applications/$APP_NAME.app/Contents/Info.plist"
-
           # Get version from the exported app
-          VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" INFO_PLIST)
+          VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "$RUNNER_TEMP/export/$APP_NAME.app/Contents/Info.plist")
 
           # Create nightly version: 1.2.3-nightly-20240104-abc1234
           DATE=$(date +%Y%m%d)
           COMMIT=${{ needs.check-changes.outputs.commit_sha }}
           NIGHTLY_VERSION="${VERSION}-nightly-${DATE}-${COMMIT}"
-          
-          /usr/libexec/PlistBuddy \
-            -c "Set SUFeedURL https://netliam.github.io/scrobble.up/appcast-nightly.xml" \
-            "$ARCHIVE_PATH"
-
-          BASE_BUILD=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" "$INFO_PLIST")
-          NIGHTLY_BUILD="${BASE_BUILD}-nightly.$(date +%Y%m%d%H%M)"
-          /usr/libexec/PlistBuddy -c "Set CFBundleVersion $NIGHTLY_BUILD" "$ARCHIVE_PATH"
 
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "NIGHTLY_VERSION=$NIGHTLY_VERSION" >> $GITHUB_ENV
