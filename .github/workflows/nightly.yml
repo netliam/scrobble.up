@@ -179,7 +179,7 @@ jobs:
           INFO_PLIST="build/ScrobbleUp.app/Contents/Info.plist"
 
           /usr/libexec/PlistBuddy \
-            -c "Set :SUFeedURL https://netliam.github.io/scrobble.up/appcast-nightly.xml" \
+            -c "Set SUFeedURL https://netliam.github.io/scrobble.up/appcast-nightly.xml" \
             "$INFO_PLIST"
 
           BASE_BUILD=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" "$INFO_PLIST")
