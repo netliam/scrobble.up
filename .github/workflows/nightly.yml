@@ -182,9 +182,9 @@ jobs:
             -c "Set :SUFeedURL https://netliam.github.io/scrobble.up/appcast-nightly.xml" \
             "$INFO_PLIST"
 
-          BASE_BUILD=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$INFO_PLIST")
+          BASE_BUILD=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" "$INFO_PLIST")
           NIGHTLY_BUILD="${BASE_BUILD}-nightly.$(date +%Y%m%d%H%M)"
-          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $NIGHTLY_BUILD" "$INFO_PLIST"
+          /usr/libexec/PlistBuddy -c "Set CFBundleVersion $NIGHTLY_BUILD" "$INFO_PLIST"
 
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "NIGHTLY_VERSION=$NIGHTLY_VERSION" >> $GITHUB_ENV
