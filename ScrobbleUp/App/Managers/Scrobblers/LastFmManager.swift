@@ -170,7 +170,6 @@ final class LastFmManager: ObservableObject {
 	func isTrackLoved(artist: String, track: String) async -> Bool {
 		guard let username = username else { return false }
 
-		// Use raw API call since the library doesn't expose userloved
 		var components = URLComponents(string: api)!
 		components.queryItems = [
 			URLQueryItem(name: "method", value: "track.getInfo"),

@@ -256,9 +256,22 @@ class RecentlyPlayedMenuItemView: NSView {
     override func mouseDown(with event: NSEvent) {
         super.mouseDown(with: event)
         guard let item = self.enclosingMenuItem else { return }
-        if let action = item.action {
-            NSApp.sendAction(action, to: item.target, from: item)
+
+        if item.hasSubmenu {
+            return
         }
+
+        guard let menu = item.menu else {
+            NSApp.sendAction(#selector(NSMenu.cancelTracking), to: nil, from: nil)
+            return
+        }
+
+        let index = menu.index(of: item)
+        if index != -1 {
+
+            menu.performActionForItem(at: index)
+        }
+
         NSApp.sendAction(#selector(NSMenu.cancelTracking), to: nil, from: nil)
     }
 }
