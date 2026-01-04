@@ -10,31 +10,9 @@ import SwiftUI
 
 struct UpdateSettingsView: View {
 	@ObservedObject var updaterViewModel: UpdaterViewModel
-	@AppStorage(\.updateChannel) private var updateChannel
 
 	var body: some View {
 		VStack(alignment: .leading, spacing: 12) {
-			Picker(
-				"Release channel",
-				selection: Binding(
-					get: { updateChannel },
-					set: { newChannel in
-						updateChannel = newChannel
-						updaterViewModel.channelDidChange(to: newChannel)
-					}
-				)
-			) {
-				ForEach(UpdateChannel.allCases, id: \.self) { channel in
-					Text(channel.displayName).tag(channel)
-				}
-			}
-
-			Text(updateChannel.description)
-				.font(.caption)
-				.foregroundColor(.secondary)
-				.fixedSize(horizontal: false, vertical: true)
-
-			Divider()
 
 			Toggle(
 				"Automatically check for updates",
@@ -52,15 +30,6 @@ struct UpdateSettingsView: View {
 			}
 			.disabled(!updaterViewModel.canCheckForUpdates)
 		}
-	}
-}
-
-// MARK: - Updater Delegate
-
-final class UpdaterDelegate: NSObject, SPUUpdaterDelegate {
-	func feedURLString(for updater: SPUUpdater) -> String? {
-		let channel = UserDefaults.standard.get(\.updateChannel)
-		return channel.feedURL.absoluteString
 	}
 }
 
@@ -108,15 +77,6 @@ final class UpdaterViewModel: ObservableObject {
 
 	func checkForUpdates() {
 		updaterController.checkForUpdates(nil)
-	}
-
-	func channelDidChange(to channel: UpdateChannel) {
-		// The delegate will automatically provide the new feed URL on next check
-		// Optionally check for updates immediately after switching channels
-		// Uncomment if desired:
-		DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-			self?.checkForUpdates()
-		}
 	}
 
 }

@@ -19,8 +19,6 @@ enum Keys {
 	static let openLinksWith = UserDefaultsKey(
 		"openLinksWith", defaultValue: OpenLinksWith.alwaysInAppleMusic)
 
-	static let updateChannel = UserDefaultsKey("updateChannel", defaultValue: UpdateChannel.stable)
-
 	static let showIconInDock = UserDefaultsKey("showIconInDock", defaultValue: false)
 	static let showArtworkInDock = UserDefaultsKey("showArtworkInDock", defaultValue: false)
 
