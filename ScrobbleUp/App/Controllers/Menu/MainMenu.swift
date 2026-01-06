@@ -125,14 +125,14 @@ final class MainMenu {
 		logItem.image = scroll
 		mainMenu.addItem(logItem)
 
-		let preferencesItem = NSMenuItem(
-			title: "Preferences...",
-			action: #selector(openPreferences),
+		let settingsItem = NSMenuItem(
+			title: "Settings...",
+			action: #selector(openSettings),
 			keyEquivalent: ","
 		)
-		preferencesItem.target = self
-		preferencesItem.image = gear
-		mainMenu.addItem(preferencesItem)
+        settingsItem.target = self
+        settingsItem.image = gear
+		mainMenu.addItem(settingsItem)
 
 		mainMenu.addItem(NSMenuItem.separator())
 
@@ -207,8 +207,8 @@ final class MainMenu {
 		NSApp.terminate(nil)
 	}
 
-	@objc func openPreferences() {
-		appState.openPreferences()
+	@objc func openSettings() {
+		appState.openSettings()
 	}
 
 	@objc func openMainWindow() {

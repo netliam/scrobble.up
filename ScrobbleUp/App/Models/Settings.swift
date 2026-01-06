@@ -1,5 +1,5 @@
 //
-//  Preferences.swift
+//  Settings.swift
 //  ScrobbleUp
 //
 //  Created by Liam Smith-Gales on 12/25/25.

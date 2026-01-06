@@ -44,7 +44,7 @@ class AppState: ObservableObject {
 	var settingsWindowController: SettingsWindowController?
 
 	@MainActor
-	func openPreferences() {  // swiftlint:disable:this function_body_length
+	func openSettings() {  // swiftlint:disable:this function_body_length
 
 		if settingsWindowController == nil {
 			settingsWindowController = SettingsWindowController(
@@ -105,8 +105,8 @@ class AppState: ObservableObject {
 	}
 
 	@MainActor
-	func openPreferences(pane: Settings.PaneIdentifier) {
-		openPreferences()
+	func openSettings(pane: Settings.PaneIdentifier) {
+		openSettings()
 		settingsWindowController?.show(pane: pane)
 	}
 

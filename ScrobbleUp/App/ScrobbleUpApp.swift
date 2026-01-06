@@ -22,9 +22,9 @@ struct ScrobbleUpApp: App {
 
 			CommandGroup(replacing: CommandGroupPlacement.appSettings) {
 				Button {
-					appState.openPreferences()
+					appState.openSettings()
 				} label: {
-					Label("Preferences...", systemImage: "gear")
+					Label("Settings...", systemImage: "gear")
 				}
 				.keyboardShortcut(",", modifiers: .command)
 			}
