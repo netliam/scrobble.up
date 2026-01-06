@@ -10,7 +10,7 @@ import Settings
 extension Settings.PaneIdentifier {
 	static let general = Self("general")
 	static let notifications = Self("notifications")
-	static let hotkeys = Self("hotkeys")
+	static let shortcuts = Self("shortcuts")
 	static let lastfm = Self("lastfm")
 	static let listenbrainz = Self("listenbrainz")
 	static let scrobbler = Self("scrobbler")

@@ -8,9 +8,19 @@
 import AppKit
 
 enum MusicSource: String, Codable {
-	case appleMusic = "Apple Music"
-	case spotify = "Spotify"
-	case other = "Other"
+    case appleMusic = "com.apple.Music"
+    case spotify = "com.spotify.client"
+    case tidal = "com.tidal.desktop"
+    case amazonMusic = "com.amazon.music"
+    case deezer = "com.deezer.deezer-desktop"
+    case pandora = "com.pandora.desktop"
+    case soundCloud = "com.soundcloud.desktop"
+    case plex = "tv.plex.plexamp"
+    case roon = "com.roon.Roon"
+    case audirvana = "com.audirvana.Audirvana-Plus"
+    case vox = "com.vox.vox"
+    case hiFidelity = "vr.HiFidelity"
+    case other = "Other"
 }
 
 enum MusicState: String, Codable, Equatable {

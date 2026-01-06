@@ -49,6 +49,7 @@ final class UnifiedMusicManager {
 				handler(info)
 				if let source = info.source {
 					Task { @MainActor in
+                        print(source)
 						self.appState.currentActivePlayer = source
 					}
 				}

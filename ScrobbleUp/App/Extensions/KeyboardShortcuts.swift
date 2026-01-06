@@ -9,4 +9,5 @@ import KeyboardShortcuts
 
 extension KeyboardShortcuts.Name {
 	static let loveTrack = Self("loveTrack")
+    static let bringPlayerToFront = Self("bringPlayerToFront")
 }

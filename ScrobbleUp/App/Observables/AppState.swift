@@ -39,6 +39,9 @@ class AppState: ObservableObject {
 		KeyboardShortcuts.onKeyUp(for: .loveTrack) { [self] in
 			playerManager.toggleLoveCurrentTrack()
 		}
+        KeyboardShortcuts.onKeyUp(for: .bringPlayerToFront) { [self] in
+            playerManager.bringPlayerToFront()
+        }
 	}
 
 	var settingsWindowController: SettingsWindowController?
@@ -68,12 +71,12 @@ class AppState: ObservableObject {
 						NotificationsSettingsPane()
 					},
 					Settings.Pane(
-						identifier: Settings.PaneIdentifier.hotkeys,
-						title: "Hotkeys",
+						identifier: Settings.PaneIdentifier.shortcuts,
+						title: "Shortcuts",
 						toolbarIcon: NSImage(
-							systemSymbolName: "keyboard", accessibilityDescription: "Hotkeys")!
+							systemSymbolName: "keyboard", accessibilityDescription: "Shortcuts")!
 					) {
-						HotkeysSettingsPane()
+						ShortcutSettingsPane()
 					},
 					Settings.Pane(
 						identifier: Settings.PaneIdentifier.lastfm,
@@ -108,9 +111,5 @@ class AppState: ObservableObject {
 	func openSettings(pane: Settings.PaneIdentifier) {
 		openSettings()
 		settingsWindowController?.show(pane: pane)
-	}
-
-	func toggleLikeCurrentTrack() {
-		playerManager.toggleLoveCurrentTrack()
 	}
 }
