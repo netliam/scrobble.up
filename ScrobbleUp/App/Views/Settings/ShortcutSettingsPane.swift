@@ -16,14 +16,15 @@ struct ShortcutSettingsPane: View {
 
 		Form {
 			Section("Scrobbler") {
-                KeyboardShortcuts.Recorder("Love/Unlove Track", name: .loveTrack)
+				KeyboardShortcuts.Recorder("Love/Unlove Track", name: .loveTrack)
 			}
-            Section("Player") {
-                KeyboardShortcuts.Recorder("Bring active player to front", name: .bringPlayerToFront)
-            }
-            Text("Shortcuts work system-wide while the app is running.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+			Section("Player") {
+				KeyboardShortcuts.Recorder(
+					"Bring active player to front", name: .bringPlayerToFront)
+			}
+			Text("Shortcuts work system-wide while the app is running.")
+				.font(.caption)
+				.foregroundStyle(.secondary)
 		}
 		.formStyle(.grouped)
 	}

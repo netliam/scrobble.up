@@ -11,7 +11,7 @@ import MediaRemoteAdapter
 
 final class MediaRemoteManager: ObservableObject {
 	static let shared = MediaRemoteManager()
-    
+
 	let mediaController = MediaController()
 
 	private static let scrobblableBundleIDs: Set<String> = [
@@ -26,7 +26,7 @@ final class MediaRemoteManager: ObservableObject {
 		"com.roon.Roon",
 		"com.audirvana.Audirvana-Plus",
 		"com.vox.vox",
-        "vr.HiFidelity"
+		"vr.HiFidelity",
 	]
 
 	private init() {}
@@ -78,7 +78,7 @@ final class MediaRemoteManager: ObservableObject {
 		}
 
 		let payload = trackInfo.payload
-        let source = MusicSource(rawValue: bundleID)
+		let source = MusicSource(rawValue: bundleID)
 
 		let state: MusicState? = {
 			if let isPlaying = payload.isPlaying {

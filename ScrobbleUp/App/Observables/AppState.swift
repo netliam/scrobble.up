@@ -39,9 +39,9 @@ class AppState: ObservableObject {
 		KeyboardShortcuts.onKeyUp(for: .loveTrack) { [self] in
 			playerManager.toggleLoveCurrentTrack()
 		}
-        KeyboardShortcuts.onKeyUp(for: .bringPlayerToFront) { [self] in
-            playerManager.bringPlayerToFront()
-        }
+		KeyboardShortcuts.onKeyUp(for: .bringPlayerToFront) { [self] in
+			playerManager.bringPlayerToFront()
+		}
 	}
 
 	var settingsWindowController: SettingsWindowController?

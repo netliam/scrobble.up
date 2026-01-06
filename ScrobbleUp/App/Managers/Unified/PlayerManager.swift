@@ -147,21 +147,21 @@ final class PlayerManager: ObservableObject {
 		currentTrackKey = nil
 		resetLoveState()
 	}
-    
-    func bringPlayerToFront() {
-        guard let bundleID = appState.currentActivePlayer?.rawValue else { return }
-        
-        let script = """
-        tell application id "\(bundleID)"
-            activate
-            reopen
-        end tell
-        """
-        
-        Task {
-            try await AppleScriptHelper.executeVoid(script)
-        }
-    }
+
+	func bringPlayerToFront() {
+		guard let bundleID = appState.currentActivePlayer?.rawValue else { return }
+
+		let script = """
+			tell application id "\(bundleID)"
+			    activate
+			    reopen
+			end tell
+			"""
+
+		Task {
+			try await AppleScriptHelper.executeVoid(script)
+		}
+	}
 
 	// MARK: - Private Helpers
 

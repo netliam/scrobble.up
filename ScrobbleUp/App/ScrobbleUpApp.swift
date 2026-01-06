@@ -111,7 +111,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
 		if app.bundleIdentifier == "com.spotify.client" || app.bundleIdentifier == "com.apple.Music"
 		{
-			menuController.menu.refresh()
+			menuController.refresh()
 		}
 	}
 
