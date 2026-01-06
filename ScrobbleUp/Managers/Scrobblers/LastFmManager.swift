@@ -98,26 +98,7 @@ final class LastFmManager: ObservableObject {
 		}
 
 	}
-
-	func fetchRecentTracks(limit: Int = 30) async throws -> [RecentTrack?] {
-		let recentTrackParams = RecentTracksParams(user: username ?? "", limit: UInt(limit))
-
-		do {
-			let recentTracks = try await lastFM.User.getRecentTracks(params: recentTrackParams)
-
-			return Array(recentTracks.items)
-		} catch LastFMError.LastFMServiceError(let errorType, let message) {
-			print(errorType, message)
-			return []
-		} catch LastFMError.NoData {
-			print("No data was returned.")
-			return []
-		} catch {
-			print("An error ocurred: \(error)")
-			return []
-		}
-	}
-
+    
 	func fetchTrackInfo(artist: String, track: String) async throws -> TrackInfo? {
 		let trackInfoParams = TrackInfoParams(artist: artist, track: track)
 
@@ -301,6 +282,46 @@ final class LastFmManager: ObservableObject {
 			return nil
 		}
 	}
+    
+    func fetchRecentTracks(limit: Int = 30) async throws -> [RecentTrack?] {
+        let recentTrackParams = RecentTracksParams(user: username ?? "", limit: UInt(limit))
+
+        do {
+            let recentTracks = try await lastFM.User.getRecentTracks(params: recentTrackParams)
+
+            return Array(recentTracks.items)
+        } catch LastFMError.LastFMServiceError(let errorType, let message) {
+            print(errorType, message)
+            return []
+        } catch LastFMError.NoData {
+            print("No data was returned.")
+            return []
+        } catch {
+            print("An error ocurred: \(error)")
+            return []
+        }
+    }
+
+    func fetchTopTracks(period: TopAlbumPeriod, limit: Int = 9) async -> [UserTopTrack]? {
+        guard let username = username else { return nil }
+        
+        let topTrackParams = UserTopItemsParams(user: username, period: UserTopItemsParams.Period(rawValue: period.rawValue) ?? .overall, limit: UInt(limit))
+        
+        do {
+            let topTracks = try await lastFM.User.getTopTracks(params: topTrackParams)
+
+            return Array(topTracks.items)
+        } catch LastFMError.LastFMServiceError(let errorType, let message) {
+            print(errorType, message)
+            return []
+        } catch LastFMError.NoData {
+            print("No data was returned.")
+            return []
+        } catch {
+            print("An error ocurred: \(error)")
+            return []
+        }
+    }
 
 	// MARK: - Misc Functions
 

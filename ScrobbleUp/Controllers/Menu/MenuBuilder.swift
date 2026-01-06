@@ -98,6 +98,10 @@ final class MenuBuilder {
 
 		return items
 	}
+    
+    // MARK: - Last.fm Section
+    
+    
 
 	// MARK: - Generic Menu Items
 

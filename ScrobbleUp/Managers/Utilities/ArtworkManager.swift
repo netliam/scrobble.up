@@ -68,10 +68,6 @@ final class ArtworkManager {
 		imageCache.countLimit = 100
 	}
 
-	@objc private func handleMemoryWarning() {
-		clearCache()
-	}
-
 	func clearCache() {
 		imageCache.removeAllObjects()
 	}
@@ -101,14 +97,6 @@ final class ArtworkManager {
 
 	func fetchFromiTunes(artist: String, track: String, album: String? = nil) async -> NSImage? {
 		return await fetchFromiTunes(artist: artist, track: track, album: album, size: .small)
-	}
-
-	func fetchThumbnail(artist: String, track: String, album: String? = nil) async -> NSImage? {
-		return await fetchFromiTunes(artist: artist, track: track, album: album, size: .thumbnail)
-	}
-
-	func fetchLarge(artist: String, track: String, album: String? = nil) async -> NSImage? {
-		return await fetchFromiTunes(artist: artist, track: track, album: album, size: .large)
 	}
 
 	private func fetchFromiTunes(

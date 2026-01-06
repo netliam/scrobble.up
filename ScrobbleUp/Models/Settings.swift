@@ -54,3 +54,14 @@ enum WidgetWindowBehavior: String, CaseIterable, Codable {
 	case stuck = "stuck"
 	case standardWindow = "standardWindow"
 }
+
+// MARK: - TopAlbumPeriod
+
+enum TopAlbumPeriod: String, CaseIterable, Codable {
+    case week = "last7Days"
+    case month = "last30days"
+    case quarter = "last90days"
+    case halfYear = "last180days"
+    case year = "lastYear"
+    case overall = "overall"
+}

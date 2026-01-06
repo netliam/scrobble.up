@@ -71,7 +71,6 @@ private struct LogEntryRow: View {
 				.clipShape(RoundedRectangle(cornerRadius: 12))
 				.shadow(radius: 6)
 				.task {
-					// Use the small size optimized for list view
 					if artwork == nil {
 						artwork = await artworkManager.fetchFromiTunes(
 							artist: entry.artist,
@@ -81,7 +80,6 @@ private struct LogEntryRow: View {
 					}
 				}
 				.onDisappear {
-					// Clear artwork when row disappears to save memory
 					artwork = nil
 				}
 

@@ -66,18 +66,16 @@ final class UnifiedScrobbleManager: ObservableObject {
 				Task {
 					var artworkImage = nowPlaying.artwork
 
+                    if artworkImage == nil {
+                        artworkImage = await MediaRemoteManager.shared.fetchCurrentArtwork()
+                    }
+                    
 					if artworkImage == nil {
 						artworkImage = await artworkManager.fetchFromiTunes(
 							artist: entry.artist, track: entry.title, album: entry.album)
 					}
 
-					if artworkImage == nil {
-						artworkImage = await MediaRemoteManager.shared.fetchCurrentArtwork()
-					}
-
-					if let image = artworkImage {
-						appState.currentTrack.image = image
-					}
+                    appState.currentTrack.image = artworkImage
 
 					await sendNowPlaying(
 						artist: artist,

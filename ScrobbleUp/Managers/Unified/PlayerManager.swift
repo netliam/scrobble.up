@@ -65,7 +65,7 @@ final class PlayerManager: ObservableObject {
 
 		if UserDefaults.standard.get(\.syncLikes) {
 			_ = await appleMusic.requestAutomationPermissionIfNeeded()
-			await appleMusic.setFavorite(loved)
+			_ = await appleMusic.setFavorite(loved)
 			results.appleMusicSuccess = true
 		}
 

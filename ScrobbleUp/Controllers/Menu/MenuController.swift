@@ -13,7 +13,7 @@ final class MenuController: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
 	private var statusItem: NSStatusItem?
 
-	// Menu components (flat ownership)
+	// Menu components
 	private let menu = NSMenu()
 	private let menuBuilder: MenuBuilder
 	private let recentTracksUpdater: RecentTracksUpdater

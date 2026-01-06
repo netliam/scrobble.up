@@ -17,6 +17,9 @@ enum Keys {
 	static let showDesktopWidget = UserDefaultsKey("showDesktopWidget", defaultValue: false)
 	static let widgetWindowBehavior = UserDefaultsKey(
 		"widgetWindowBehavior", defaultValue: WidgetWindowBehavior.desktop)
+    
+    static let showCurrentTrackInStatusBar = UserDefaultsKey("showCurrentTrackInStatusBar", defaultValue: false)
+    static let showAlbumNameInStatusBar = UserDefaultsKey("showAlbumNameInStatusBar", defaultValue: false)
 
 	static let ratingAndLoveStatus = UserDefaultsKey("ratingAndLoveStatus", defaultValue: true)
 	static let infoCopiedToClipboard = UserDefaultsKey("infoCopiedToClipboard", defaultValue: true)
@@ -38,4 +41,5 @@ enum Keys {
 		"listenBrainzBaseURL", defaultValue: "https://api.listenbrainz.org")
 
 	static let lastFmEnabled = UserDefaultsKey("lastFmEnabled", defaultValue: true)
+    static let lastFmTopAlbumPeriod = UserDefaultsKey("lastFmTopAlbumPeriod", defaultValue: TopAlbumPeriod.overall)
 }
