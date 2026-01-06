@@ -58,10 +58,30 @@ enum WidgetWindowBehavior: String, CaseIterable, Codable {
 // MARK: - TopAlbumPeriod
 
 enum TopAlbumPeriod: String, CaseIterable, Codable {
-    case week = "last7Days"
-    case month = "last30days"
-    case quarter = "last90days"
-    case halfYear = "last180days"
-    case year = "lastYear"
-    case overall = "overall"
+    case overall = "Overall"
+    case week = "Week"
+    case month = "Month"
+    case quarter = "Quarter"
+    case halfYear = "Half Year"
+    case year = "Year"
+}
+
+// MARK: - ScrobblerService
+
+enum ScrobblerService: String, CaseIterable {
+    case lastFm = "Last.fm"
+    case listenBrainz = "ListenBrainz"
+    
+    var displayName: String {
+        rawValue
+    }
+    
+    var periodKey: KeyPath<Keys.Type, UserDefaultsKey<TopAlbumPeriod>> {
+        switch self {
+        case .lastFm:
+            return \.lastFmTopAlbumPeriod
+        case .listenBrainz:
+            return \.listenBrainzTopAlbumPeriod
+        }
+    }
 }

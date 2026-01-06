@@ -99,9 +99,71 @@ final class MenuBuilder {
 		return items
 	}
     
-    // MARK: - Last.fm Section
+    // MARK: - Scrobbler Section (Unified)
     
-    
+    func createScrobblerSection(for service: ScrobblerService, target: AnyObject, profileAction: Selector) -> NSMenuItem {
+        let item = NSMenuItem(title: service.displayName, action: nil, keyEquivalent: "")
+        let subMenu = NSMenu()
+        subMenu.autoenablesItems = false
+
+        let width: CGFloat = 260
+
+        // Profile button
+        let profileItem = NSMenuItem(title: "Open profile...", action: profileAction, keyEquivalent: "")
+        profileItem.target = target
+        subMenu.addItem(profileItem)
+
+        // Top separator
+        subMenu.addItem(NSMenuItem.separator())
+
+        // Scrobbles row
+        let scrobblesRow = MenuItemStatsRowView(width: width, leftText: "Scrobbles")
+        let scrobblesItem = NSMenuItem()
+        scrobblesItem.view = scrobblesRow
+        subMenu.addItem(scrobblesItem)
+
+        // Artists row
+        let artistsRow = MenuItemStatsRowView(width: width, leftText: "Artists")
+        let artistsItem = NSMenuItem()
+        artistsItem.view = artistsRow
+        subMenu.addItem(artistsItem)
+
+        // Loved tracks row
+        let lovedTracksRow = MenuItemStatsRowView(width: width, leftText: "Loved tracks")
+        let lovedTracksItem = NSMenuItem()
+        lovedTracksItem.view = lovedTracksRow
+        subMenu.addItem(lovedTracksItem)
+
+        // Bottom separator
+        subMenu.addItem(NSMenuItem.separator())
+
+        // Top Albums header - get period from appropriate key
+        let currentPeriod: TopAlbumPeriod
+        switch service {
+        case .lastFm:
+            currentPeriod = UserDefaults.standard.get(\.lastFmTopAlbumPeriod)
+        case .listenBrainz:
+            currentPeriod = UserDefaults.standard.get(\.listenBrainzTopAlbumPeriod)
+        }
+        
+        let topAlbumsHeader = MenuItemHeaderView(
+            width: width,
+            title: "Top Albums",
+            rightText: currentPeriod.rawValue
+        )
+        let headerItem = NSMenuItem()
+        headerItem.view = topAlbumsHeader
+        subMenu.addItem(headerItem)
+
+        // Top albums grid
+        let gridView = TopAlbumsGridView(width: width)
+        let gridItem = NSMenuItem()
+        gridItem.view = gridView
+        subMenu.addItem(gridItem)
+
+        item.submenu = subMenu
+        return item
+    }
 
 	// MARK: - Generic Menu Items
 

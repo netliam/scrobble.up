@@ -44,3 +44,22 @@ enum FeedbackScore: Int {
 	case hate = -1
 	case none = 0
 }
+
+struct ListenBrainzTopAlbum {
+    let releaseName: String
+    let artistName: String
+    let listenCount: Int
+    let releaseGroupMbid: String?
+    let caaId: Int?
+    let caaReleaseMbid: String?
+    
+    /// Returns the Cover Art Archive URL for this album's artwork, if available
+    var artworkURL: URL? {
+        if let caaReleaseMbid = caaReleaseMbid, let caaId = caaId {
+            return URL(string: "https://coverartarchive.org/release/\(caaReleaseMbid)/\(caaId)-250.jpg")
+        } else if let releaseGroupMbid = releaseGroupMbid {
+            return URL(string: "https://coverartarchive.org/release-group/\(releaseGroupMbid)/front-250")
+        }
+        return nil
+    }
+}

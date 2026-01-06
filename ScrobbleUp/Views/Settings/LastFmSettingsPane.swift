@@ -126,6 +126,7 @@ struct LastFmProfileView: View {
 	@State private var profileImageURL: URL?
 
 	@AppStorage(\.lastFmEnabled) private var lastFmEnabled
+    @AppStorage(\.lastFmTopAlbumPeriod) private var topAlbumPeriod
 
 	var body: some View {
 
@@ -192,12 +193,22 @@ struct LastFmProfileView: View {
 					Spacer()
 				}
 			}
-			Section {
+			Section("Settings") {
 				Toggle("Enable Last.fm", isOn: $lastFmEnabled)
+                
+                Picker("Top album period", selection: $topAlbumPeriod) {
+                    Text("Overall").tag(TopAlbumPeriod.overall)
+                    Divider()
+                    Text("Week").tag(TopAlbumPeriod.week)
+                    Text("Month").tag(TopAlbumPeriod.month)
+                    Text("Quarter").tag(TopAlbumPeriod.quarter)
+                    Text("Half year").tag(TopAlbumPeriod.halfYear)
+                    Text("Year").tag(TopAlbumPeriod.year)
+                }
 			}
 		}
 		.formStyle(.grouped)
-		.frame(width: 450, height: 200)
+		.frame(width: 450)
 		.task {
 			guard userInfo == nil else { return }
 			let info = await lastFm.fetchUserInfo()

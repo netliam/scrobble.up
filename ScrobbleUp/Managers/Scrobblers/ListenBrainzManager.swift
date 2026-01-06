@@ -14,7 +14,6 @@ final class ListenBrainzManager: ObservableObject {
 
 	private lazy var session: URLSession = {
 		let config = URLSessionConfiguration.default
-		// Set a consistent User-Agent and JSON defaults for all requests
 		var headers = config.httpAdditionalHeaders ?? [:]
 		headers["User-Agent"] = Self.userAgent
 		headers["Accept"] = "application/json"
@@ -143,7 +142,68 @@ final class ListenBrainzManager: ObservableObject {
 		let feedback = try? await getFeedback(recordingMBID: mbid)
 		return feedback == .love
 	}
+    
+    // MARK: - Tracks
 
+    func fetchTopAlbums(period: TopAlbumPeriod, limit: Int = 9) async -> [ListenBrainzTopAlbum]? {
+        guard let username = username else { return nil }
+
+        let rangeParam = mapPeriodToRange(period)
+
+        guard
+            let url = URL(
+                string: "\(baseURL)/1/stats/user/\(username)/release-groups?range=\(rangeParam)&count=\(limit)"
+            )
+        else {
+            return nil
+        }
+
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+        do {
+            let (data, response) = try await session.data(for: request)
+
+            guard let httpResponse = response as? HTTPURLResponse else {
+                return nil
+            }
+
+            // 204 means no statistics available yet
+            if httpResponse.statusCode == 204 {
+                return []
+            }
+
+            guard httpResponse.statusCode == 200 else {
+                return nil
+            }
+
+            let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            let payload = json?["payload"] as? [String: Any]
+            let releaseGroups = payload?["release_groups"] as? [[String: Any]]
+
+            return releaseGroups?.compactMap { album -> ListenBrainzTopAlbum? in
+                guard let releaseName = album["release_group_name"] as? String,
+                      let artistName = album["artist_name"] as? String,
+                      let listenCount = album["listen_count"] as? Int
+                else {
+                    return nil
+                }
+
+                return ListenBrainzTopAlbum(
+                    releaseName: releaseName,
+                    artistName: artistName,
+                    listenCount: listenCount,
+                    releaseGroupMbid: album["release_group_mbid"] as? String,
+                    caaId: album["caa_id"] as? Int,
+                    caaReleaseMbid: album["caa_release_mbid"] as? String
+                )
+            }
+        } catch {
+            print("Error fetching top albums from ListenBrainz: \(error)")
+            return nil
+        }
+    }
+    
 	// MARK: - Private
 
 	private func submitListen(
@@ -321,4 +381,22 @@ final class ListenBrainzManager: ObservableObject {
 			)
 		}
 	}
+    
+    private func mapPeriodToRange(_ period: TopAlbumPeriod) -> String {
+        switch period {
+        case .overall:
+            return "all_time"
+        case .week:
+            return "week"
+        case .month:
+            return "month"
+        case .quarter:
+            return "quarter"
+        case .halfYear:
+            return "half_yearly"
+        case .year:
+            return "year"
+        }
+    }
+
 }

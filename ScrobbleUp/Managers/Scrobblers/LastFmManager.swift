@@ -168,7 +168,6 @@ final class LastFmManager: ObservableObject {
 			let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
 			let trackData = json?["track"] as? [String: Any]
 
-			// userloved is returned as "0" or "1" string
 			if let userloved = trackData?["userloved"] as? String {
 				return userloved == "1"
 			}
@@ -282,6 +281,36 @@ final class LastFmManager: ObservableObject {
 			return nil
 		}
 	}
+	
+	func fetchLovedTracksCount() async -> UInt {
+		guard let username = username else { return 0 }
+		
+		var components = URLComponents(string: api)!
+		components.queryItems = [
+			URLQueryItem(name: "method", value: "user.getLovedTracks"),
+			URLQueryItem(name: "api_key", value: apiKey),
+			URLQueryItem(name: "user", value: username),
+			URLQueryItem(name: "limit", value: "1"),
+			URLQueryItem(name: "format", value: "json"),
+		]
+		
+		guard let url = components.url else { return 0 }
+		
+		do {
+			let (data, _) = try await URLSession.shared.data(from: url)
+			let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+			let lovedtracks = json?["lovedtracks"] as? [String: Any]
+			let attr = lovedtracks?["@attr"] as? [String: Any]
+			
+			if let totalString = attr?["total"] as? String, let total = UInt(totalString) {
+				return total
+			}
+			return 0
+		} catch {
+			print("Error fetching loved tracks count: \(error)")
+			return 0
+		}
+	}
     
     func fetchRecentTracks(limit: Int = 30) async throws -> [RecentTrack?] {
         let recentTrackParams = RecentTracksParams(user: username ?? "", limit: UInt(limit))
@@ -302,15 +331,32 @@ final class LastFmManager: ObservableObject {
         }
     }
 
-    func fetchTopTracks(period: TopAlbumPeriod, limit: Int = 9) async -> [UserTopTrack]? {
+    func fetchTopAlbums(period: TopAlbumPeriod, limit: Int = 9) async -> [UserTopAlbum]? {
         guard let username = username else { return nil }
         
-        let topTrackParams = UserTopItemsParams(user: username, period: UserTopItemsParams.Period(rawValue: period.rawValue) ?? .overall, limit: UInt(limit))
+        var periodParam: UserTopItemsParams.Period
+        
+        switch period {
+            case .overall:
+                periodParam = .overall
+            case .week:
+                periodParam = .last7Days
+            case .month:
+                periodParam = .last30days
+            case .quarter:
+                periodParam = .last90days
+            case .halfYear:
+                periodParam = .last180days
+            case .year:
+                periodParam = .lastYear
+        }
+        
+        let topAlbumParams = UserTopItemsParams(user: username, period: periodParam, limit: UInt(limit))
         
         do {
-            let topTracks = try await lastFM.User.getTopTracks(params: topTrackParams)
+            let topAlbums = try await lastFM.User.getTopAlbums(params: topAlbumParams)
 
-            return Array(topTracks.items)
+            return Array(topAlbums.items)
         } catch LastFMError.LastFMServiceError(let errorType, let message) {
             print(errorType, message)
             return []

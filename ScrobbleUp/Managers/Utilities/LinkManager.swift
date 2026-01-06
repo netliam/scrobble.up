@@ -47,6 +47,18 @@ final class LinkManager {
 		openURL(url, forPreference: preference)
 	}
 
+	func openAlbum(artist: String, album: String) async {
+		let preference = UserDefaults.standard.get(\.openLinksWith)
+
+		guard let url = await resolveAlbumURL(artist: artist, album: album, preference: preference)
+		else {
+			print("Failed to resolve album URL")
+			return
+		}
+
+		openURL(url, forPreference: preference)
+	}
+
 	// MARK: - URL Resolution
 
 	private func resolveArtistURL(artist: String, preference: OpenLinksWith) async -> URL? {
@@ -77,6 +89,21 @@ final class LinkManager {
 
 		case .alwaysInSpotify:
 			return await fetchTrackLinkSpotify(artist: artist, title: track, album: album)
+		}
+	}
+
+	private func resolveAlbumURL(artist: String, album: String, preference: OpenLinksWith) async
+		-> URL?
+	{
+		switch preference {
+		case .alwaysInLastFm:
+			return await fetchAlbumLinkLastFm(artist: artist, album: album)
+
+		case .alwaysInAppleMusic:
+			return await fetchAlbumLinkMusic(artist: artist, album: album)
+
+		case .alwaysInSpotify:
+			return await fetchAlbumLinkSpotify(artist: artist, album: album)
 		}
 	}
 
@@ -147,6 +174,11 @@ final class LinkManager {
 		}
 	}
 
+	private func fetchAlbumLinkLastFm(artist: String, album: String) async -> URL? {
+		let albumInfo = await lastFm.fetchAlbumInfo(artist: artist, album: album)
+		return albumInfo?.url
+	}
+
 	// MARK: - Apple Music Links
 
 	private func fetchArtistLinkMusic(artist: String) async -> URL? {
@@ -204,6 +236,31 @@ final class LinkManager {
 		}
 	}
 
+	private func fetchAlbumLinkMusic(artist: String, album: String) async -> URL? {
+		let searchTerm = "\(artist) \(album)"
+		let query = searchTerm.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+		let searchURL = "https://itunes.apple.com/search?term=\(query)&entity=album&limit=1"
+
+		guard let url = URL(string: searchURL) else { return nil }
+
+		do {
+			let (data, _) = try await URLSession.shared.data(from: url)
+			let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+
+			guard let results = json?["results"] as? [[String: Any]],
+				let firstResult = results.first,
+				let collectionID = firstResult["collectionId"] as? Int
+			else {
+				return nil
+			}
+
+			return URL(string: "music://music.apple.com/album/\(collectionID)")
+		} catch {
+			print("Error fetching Apple Music album: \(error)")
+			return nil
+		}
+	}
+
 	// MARK: - Spotify Links
 
 	private func fetchArtistLinkSpotify(artist: String) async -> URL? {
@@ -218,6 +275,12 @@ final class LinkManager {
 		if let album = album {
 			query += " \(album)"
 		}
+		let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+		return URL(string: "spotify:search:\(encoded)")
+	}
+
+	private func fetchAlbumLinkSpotify(artist: String, album: String) async -> URL? {
+		let query = "\(artist) \(album)"
 		let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
 		return URL(string: "spotify:search:\(encoded)")
 	}

@@ -39,6 +39,7 @@ enum Keys {
 	static let listenBrainzEnabled = UserDefaultsKey("listenBrainzEnabled", defaultValue: true)
 	static let listenBrainzBaseURL = UserDefaultsKey(
 		"listenBrainzBaseURL", defaultValue: "https://api.listenbrainz.org")
+    static let listenBrainzTopAlbumPeriod = UserDefaultsKey("listenBrainzTopAlbumPeriod", defaultValue: TopAlbumPeriod.overall)
 
 	static let lastFmEnabled = UserDefaultsKey("lastFmEnabled", defaultValue: true)
     static let lastFmTopAlbumPeriod = UserDefaultsKey("lastFmTopAlbumPeriod", defaultValue: TopAlbumPeriod.overall)
