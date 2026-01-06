@@ -1,11 +1,9 @@
 import Cocoa
 
 class RecentlyPlayedMenuItemView: NSView {
-	// MARK: - Properties
 
 	private let fixedWidth: CGFloat
 
-	// Layout
 	private let contentInsets = NSEdgeInsets(top: 6, left: 15, bottom: 6, right: 12)
 	private var titleLeadingWithImage: NSLayoutConstraint?
 	private var titleLeadingWithoutImage: NSLayoutConstraint?
@@ -14,7 +12,6 @@ class RecentlyPlayedMenuItemView: NSView {
 	private var imageLeadingConstraint: NSLayoutConstraint?
 	private var imageCenterYConstraint: NSLayoutConstraint?
 
-	// Hover state
 	private var isHovered: Bool = false {
 		didSet {
 			selectionView.isHidden = !isHovered
@@ -25,7 +22,6 @@ class RecentlyPlayedMenuItemView: NSView {
 
 	private let hoverCornerRadius: CGFloat = 6
 
-	// Selection background view
 	private let selectionView: NSVisualEffectView = {
 		let view = NSVisualEffectView()
 		view.translatesAutoresizingMaskIntoConstraints = false
@@ -115,10 +111,8 @@ class RecentlyPlayedMenuItemView: NSView {
 	// MARK: - Setup
 
 	private func setupSubviews() {
-		// Add selection view first (behind everything)
 		addSubview(selectionView)
 
-		// Then add content on top
 		addSubview(imageView)
 		addSubview(titleLabel)
 		addSubview(subtitleLabel)

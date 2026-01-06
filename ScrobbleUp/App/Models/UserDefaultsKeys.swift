@@ -11,6 +11,17 @@ enum Keys {
 	static let hasCompletedOnboarding = UserDefaultsKey(
 		"hasCompletedOnboarding", defaultValue: false)
 
+	static let showIconInDock = UserDefaultsKey("showIconInDock", defaultValue: false)
+	static let showArtworkInDock = UserDefaultsKey("showArtworkInDock", defaultValue: false)
+
+	static let showDesktopWidget = UserDefaultsKey("showDesktopWidget", defaultValue: false)
+	static let widgetWindowBehavior = UserDefaultsKey(
+		"widgetWindowBehavior", defaultValue: WidgetWindowBehavior.desktop)
+
+	static let ratingAndLoveStatus = UserDefaultsKey("ratingAndLoveStatus", defaultValue: true)
+	static let infoCopiedToClipboard = UserDefaultsKey("infoCopiedToClipboard", defaultValue: true)
+	static let currentPlayerChanged = UserDefaultsKey("currentPlayerChanged", defaultValue: true)
+
 	static let playerSwitching = UserDefaultsKey(
 		"playerSwitching", defaultValue: PlayerSwitching.automatic)
 	static let playerOverride = UserDefaultsKey("playerOverride", defaultValue: PlayerOverride.none)
@@ -18,13 +29,6 @@ enum Keys {
 		"trackFetchingMethod", defaultValue: TrackFetchingMethod.mediaRemote)
 	static let openLinksWith = UserDefaultsKey(
 		"openLinksWith", defaultValue: OpenLinksWith.alwaysInAppleMusic)
-
-	static let showIconInDock = UserDefaultsKey("showIconInDock", defaultValue: false)
-	static let showArtworkInDock = UserDefaultsKey("showArtworkInDock", defaultValue: false)
-
-	static let ratingAndLoveStatus = UserDefaultsKey("ratingAndLoveStatus", defaultValue: true)
-	static let infoCopiedToClipboard = UserDefaultsKey("infoCopiedToClipboard", defaultValue: true)
-	static let currentPlayerChanged = UserDefaultsKey("currentPlayerChanged", defaultValue: true)
 
 	static let syncLikes = UserDefaultsKey("syncLikes", defaultValue: true)
 	static let scrobbleTrackAt = UserDefaultsKey("scrobbleTrackAt", defaultValue: 50)

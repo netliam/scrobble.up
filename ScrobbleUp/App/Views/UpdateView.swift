@@ -18,7 +18,7 @@ struct UpdateSettingsView: View {
 				"Automatically check for updates",
 				isOn: $updaterViewModel.automaticallyChecksForUpdates
 			)
-
+			Divider()
 			Toggle(
 				"Automatically download updates",
 				isOn: $updaterViewModel.automaticallyDownloadsUpdates

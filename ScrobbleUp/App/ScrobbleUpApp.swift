@@ -37,6 +37,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
 	private var statusItem: NSStatusItem?
 	private var mainWindowController: NSWindowController?
+	private var widgetController: DesktopWidgetWindowController?
 	private var cancellables = Set<AnyCancellable>()
 
 	private let core: CoreDataStack = .shared
@@ -59,6 +60,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 		UnifiedMusicManager.shared.start { [weak self] musicInfo in
 			self?.scrobbleManager.handle(musicInfo)
 		}
+
+		widgetController = DesktopWidgetWindowController.shared
 
 		// Observe showIconInDock changes
 		UserDefaults.standard.observe(\.showIconInDock) { [weak self] newValue in

@@ -200,41 +200,8 @@ private struct HUDView: View {
 		.padding(20)
 		.frame(width: 180, height: 180)
 		.background {
-			ZStack {
-				RoundedRectangle(cornerRadius: 20, style: .continuous)
-					.fill(.ultraThinMaterial)
-
-				RoundedRectangle(cornerRadius: 20, style: .continuous)
-					.fill(
-						LinearGradient(
-							colors: [
-								Color.white.opacity(0.10),
-								Color.white.opacity(0.02),
-							],
-							startPoint: .topLeading,
-							endPoint: .bottomTrailing
-						)
-					)
-					.blendMode(.plusLighter)
-
-				RoundedRectangle(cornerRadius: 20, style: .continuous)
-					.fill(
-						AngularGradient(
-							gradient: Gradient(colors: [
-								Color.white.opacity(0.18),
-								Color.white.opacity(0.00),
-								Color.white.opacity(0.12),
-								Color.white.opacity(0.00),
-							]),
-							center: .center
-						)
-					)
-					.blur(radius: 14)
-					.opacity(0.6)
-			}
-		}
-		.overlay(
 			RoundedRectangle(cornerRadius: 20, style: .continuous)
+				.fill(.ultraThinMaterial)
 				.strokeBorder(
 					LinearGradient(
 						colors: [
@@ -246,7 +213,7 @@ private struct HUDView: View {
 					),
 					lineWidth: 1
 				)
-		)
+		}
 	}
 }
 

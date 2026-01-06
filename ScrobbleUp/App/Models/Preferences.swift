@@ -45,3 +45,12 @@ enum CopiedLink: String, CaseIterable, Codable {
 	case appleMusic = "appleMusic"
 	case spotify = "spotify"
 }
+
+// MARK: - WidgetWindowBehavior
+
+enum WidgetWindowBehavior: String, CaseIterable, Codable {
+	case desktop = "desktop"
+	case above = "above"
+	case stuck = "stuck"
+	case standardWindow = "standardWindow"
+}
