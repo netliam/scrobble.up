@@ -13,8 +13,10 @@ final class TopAlbumsUpdater {
     private let lastFmManager: LastFmManager = .shared
     private let listenBrainzManager: ListenBrainzManager = .shared
 
-    func updateTopAlbumsGrid(_ gridView: TopAlbumsGridView, period: TopAlbumPeriod, service: ScrobblerService) {
+    func updateTopAlbumsGrid(_ gridView: TopAlbumsGridView, headerView: MenuItemHeaderView?, period: TopAlbumPeriod, service: ScrobblerService) {
         Task { @MainActor in
+            headerView?.updateRightLabel(period.rawValue)
+            
             let albumDataArray: [AlbumData]
             
             switch service {

@@ -333,12 +333,22 @@ final class MenuController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         case .lastFm:
             guard let gridView = lastFmTopAlbumsGridView else { return }
             let period = UserDefaults.standard.get(\.lastFmTopAlbumPeriod)
-            topAlbumsUpdater.updateTopAlbumsGrid(gridView, period: period, service: .lastFm)
+            topAlbumsUpdater.updateTopAlbumsGrid(
+                gridView,
+                headerView: lastFmTopAlbumsHeaderView,
+                period: period,
+                service: .lastFm
+            )
             
         case .listenBrainz:
             guard let gridView = listenBrainzTopAlbumsGridView else { return }
             let period = UserDefaults.standard.get(\.listenBrainzTopAlbumPeriod)
-            topAlbumsUpdater.updateTopAlbumsGrid(gridView, period: period, service: .listenBrainz)
+            topAlbumsUpdater.updateTopAlbumsGrid(
+                gridView,
+                headerView: listenBrainzTopAlbumsHeaderView,
+                period: period,
+                service: .listenBrainz
+            )
         }
     }
 
