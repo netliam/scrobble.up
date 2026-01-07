@@ -10,138 +10,131 @@ import Foundation
 
 final class ListenBrainzManager: ObservableObject {
 
-	private static let userAgent = "scrobble.up/1.0 (liams@tuskmo.com)"
+    private static let userAgent = "scrobble.up/1.0 (liams@tuskmo.com)"
 
-	private lazy var session: URLSession = {
-		let config = URLSessionConfiguration.default
-		var headers = config.httpAdditionalHeaders ?? [:]
-		headers["User-Agent"] = Self.userAgent
-		headers["Accept"] = "application/json"
-		config.httpAdditionalHeaders = headers
-		return URLSession(configuration: config)
-	}()
+    private lazy var http: HTTPHelper = {
+        HTTPHelper(userAgent: Self.userAgent)
+    }()
 
-	static let shared = ListenBrainzManager()
-	static let defaultBaseURL = "https://api.listenbrainz.org"
+    static let shared = ListenBrainzManager()
+    static let defaultBaseURL = "https://api.listenbrainz.org"
 
-	@Published private(set) var username: String?
-	@Published private(set) var baseURL: String
+    @Published private(set) var username: String?
+    @Published private(set) var baseURL: String
 
-	private var token: String?
+    private var token: String?
 
-	private init() {
-		self.token = KeychainHelper.shared.get("listenbrainz_token")
-		self.username = KeychainHelper.shared.get("listenbrainz_username")
-		self.baseURL = UserDefaults.standard.get(\.listenBrainzBaseURL)
-	}
+    private init() {
+        self.token = KeychainHelper.shared.get("listenbrainz_token")
+        self.username = KeychainHelper.shared.get("listenbrainz_username")
+        self.baseURL = UserDefaults.standard.get(\.listenBrainzBaseURL)
+    }
 
-	// MARK: - Authentication
+    // MARK: - Authentication
 
-	func validateToken(_ token: String, baseURL: String? = nil) async throws -> String {
-		let url = baseURL ?? self.baseURL
+    func validateToken(_ token: String, baseURL: String? = nil) async throws -> String {
+        let url = baseURL ?? self.baseURL
 
-		guard let requestURL = URL(string: "\(url)/1/validate-token") else {
-			throw ListenBrainzError.invalidURL
-		}
+        guard let requestURL = URL(string: "\(url)/1/validate-token") else {
+            throw ListenBrainzError.invalidURL
+        }
 
-		var request = URLRequest(url: requestURL)
-		request.setValue("Token \(token)", forHTTPHeaderField: "Authorization")
+        let headers = ["Authorization": "Token \(token)"]
 
-		let (data, response) = try await session.data(for: request)
+        do {
+            let json = try await http.getJSON(url: requestURL, headers: headers)
 
-		guard let httpResponse = response as? HTTPURLResponse,
-			httpResponse.statusCode == 200
-		else {
-			throw ListenBrainzError.invalidToken
-		}
+            guard let valid = json["valid"] as? Bool, valid,
+                let username = json["user_name"] as? String
+            else {
+                throw ListenBrainzError.invalidToken
+            }
 
-		let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            self.token = token
+            return username
+        } catch HTTPError.unauthorized {
+            throw ListenBrainzError.invalidToken
+        } catch let error as ListenBrainzError {
+            throw error
+        } catch {
+            throw ListenBrainzError.invalidToken
+        }
+    }
 
-		guard let valid = json?["valid"] as? Bool, valid,
-			let username = json?["user_name"] as? String
-		else {
-			throw ListenBrainzError.invalidToken
-		}
+    func configure(token: String, username: String, baseURL: String? = nil) {
+        self.token = token
+        self.username = username
 
-		self.token = token
+        if let baseURL = baseURL {
+            self.baseURL = baseURL.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+            UserDefaults.standard.set(self.baseURL, for: \.listenBrainzBaseURL)
+        }
 
-		return username
-	}
+        KeychainHelper.shared.set(token, for: "listenbrainz_token")
+        KeychainHelper.shared.set(username, for: "listenbrainz_username")
+    }
 
-	func configure(token: String, username: String, baseURL: String? = nil) {
-		self.token = token
-		self.username = username
+    func signOut() {
+        token = nil
+        username = nil
+        baseURL = Self.defaultBaseURL
 
-		if let baseURL = baseURL {
-			self.baseURL = baseURL.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-			UserDefaults.standard.set(self.baseURL, for: \.listenBrainzBaseURL)
-		}
+        KeychainHelper.shared.remove("listenbrainz_token")
+        KeychainHelper.shared.remove("listenbrainz_username")
+        UserDefaults.standard.set(Self.defaultBaseURL, forKey: "listenBrainzBaseURL")
+    }
 
-		KeychainHelper.shared.set(token, for: "listenbrainz_token")
-		KeychainHelper.shared.set(username, for: "listenbrainz_username")
-	}
+    // MARK: - Scrobbling
 
-	func signOut() {
-		token = nil
-		username = nil
-		baseURL = Self.defaultBaseURL
+    func scrobble(artist: String, track: String, timestamp: Int, album: String?, duration: Int?)
+        async throws
+    {
+        try await submitListen(
+            artist: artist,
+            track: track,
+            album: album,
+            duration: duration,
+            listenType: "single",
+            timestamp: timestamp
+        )
+    }
 
-		KeychainHelper.shared.remove("listenbrainz_token")
-		KeychainHelper.shared.remove("listenbrainz_username")
-		UserDefaults.standard.set(Self.defaultBaseURL, forKey: "listenBrainzBaseURL")
-	}
+    func updateNowPlaying(artist: String, track: String, album: String?, duration: Int?)
+        async throws
+    {
+        try await submitListen(
+            artist: artist,
+            track: track,
+            album: album,
+            duration: duration,
+            listenType: "playing_now",
+            timestamp: nil
+        )
+    }
 
-	// MARK: - Scrobbling
+    // MARK: - Feedback
 
-	func scrobble(artist: String, track: String, timestamp: Int, album: String?, duration: Int?)
-		async throws
-	{
-		try await submitListen(
-			artist: artist,
-			track: track,
-			album: album,
-			duration: duration,
-			listenType: "single",
-			timestamp: timestamp
-		)
-	}
+    func loveTrack(artist: String, track: String) async throws {
+        guard let mbid = try await lookupRecordingMBID(artist: artist, track: track) else {
+            throw ListenBrainzError.recordingNotFound
+        }
+        try await submitFeedback(recordingMBID: mbid, score: .love)
+    }
 
-	func updateNowPlaying(artist: String, track: String, album: String?, duration: Int?)
-		async throws
-	{
-		try await submitListen(
-			artist: artist,
-			track: track,
-			album: album,
-			duration: duration,
-			listenType: "playing_now",
-			timestamp: nil
-		)
-	}
+    func unloveTrack(artist: String, track: String) async throws {
+        guard let mbid = try await lookupRecordingMBID(artist: artist, track: track) else {
+            throw ListenBrainzError.recordingNotFound
+        }
+        try await submitFeedback(recordingMBID: mbid, score: .none)
+    }
 
-	// MARK: - Feedback
-
-	func loveTrack(artist: String, track: String) async throws {
-		guard let mbid = try await lookupRecordingMBID(artist: artist, track: track) else {
-			throw ListenBrainzError.recordingNotFound
-		}
-		try await submitFeedback(recordingMBID: mbid, score: .love)
-	}
-
-	func unloveTrack(artist: String, track: String) async throws {
-		guard let mbid = try await lookupRecordingMBID(artist: artist, track: track) else {
-			throw ListenBrainzError.recordingNotFound
-		}
-		try await submitFeedback(recordingMBID: mbid, score: .none)
-	}
-
-	func isTrackLoved(artist: String, track: String) async -> Bool {
-		guard let mbid = try? await lookupRecordingMBID(artist: artist, track: track) else {
-			return false
-		}
-		let feedback = try? await getFeedback(recordingMBID: mbid)
-		return feedback == .love
-	}
+    func isTrackLoved(artist: String, track: String) async -> Bool {
+        guard let mbid = try? await lookupRecordingMBID(artist: artist, track: track) else {
+            return false
+        }
+        let feedback = try? await getFeedback(recordingMBID: mbid)
+        return feedback == .love
+    }
     
     // MARK: - Tracks
 
@@ -158,22 +151,14 @@ final class ListenBrainzManager: ObservableObject {
             return nil
         }
 
-        var request = URLRequest(url: url)
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-
         do {
-            let (data, response) = try await session.data(for: request)
+            let (data, response) = try await http.getRaw(url: url, headers: nil)
 
-            guard let httpResponse = response as? HTTPURLResponse else {
-                return nil
-            }
-
-            // 204 means no statistics available yet
-            if httpResponse.statusCode == 204 {
+            if response.statusCode == 204 {
                 return []
             }
 
-            guard httpResponse.statusCode == 200 else {
+            guard response.statusCode == 200 else {
                 return nil
             }
 
@@ -204,183 +189,147 @@ final class ListenBrainzManager: ObservableObject {
         }
     }
     
-	// MARK: - Private
+    // MARK: - Private
 
-	private func submitListen(
-		artist: String,
-		track: String,
-		album: String?,
-		duration: Int?,
-		listenType: String,
-		timestamp: Int?
-	) async throws {
-		guard let token = token else {
-			throw ListenBrainzError.notAuthenticated
-		}
+    private func submitListen(
+        artist: String,
+        track: String,
+        album: String?,
+        duration: Int?,
+        listenType: String,
+        timestamp: Int?
+    ) async throws {
+        guard let token = token else {
+            throw ListenBrainzError.notAuthenticated
+        }
 
-		guard let url = URL(string: "\(baseURL)/1/submit-listens") else {
-			throw ListenBrainzError.invalidURL
-		}
+        guard let url = URL(string: "\(baseURL)/1/submit-listens") else {
+            throw ListenBrainzError.invalidURL
+        }
 
-		var trackMetadata: [String: Any] = [
-			"artist_name": artist,
-			"track_name": track,
-		]
+        var trackMetadata: [String: Any] = [
+            "artist_name": artist,
+            "track_name": track,
+        ]
 
-		if let album = album, !album.isEmpty {
-			trackMetadata["release_name"] = album
-		}
+        if let album = album, !album.isEmpty {
+            trackMetadata["release_name"] = album
+        }
 
-		if let duration = duration, duration > 0 {
-			trackMetadata["additional_info"] = [
-				"duration_ms": duration * 1000
-			]
-		}
+        if let duration = duration, duration > 0 {
+            trackMetadata["additional_info"] = [
+                "duration_ms": duration * 1000
+            ]
+        }
 
-		var listenData: [String: Any] = [
-			"track_metadata": trackMetadata
-		]
+        var listenData: [String: Any] = [
+            "track_metadata": trackMetadata
+        ]
 
-		if listenType == "single", let timestamp = timestamp {
-			listenData["listened_at"] = timestamp
-		}
+        if listenType == "single", let timestamp = timestamp {
+            listenData["listened_at"] = timestamp
+        }
 
-		let payload: [String: Any] = [
-			"listen_type": listenType,
-			"payload": [listenData],
-		]
+        let payload: [String: Any] = [
+            "listen_type": listenType,
+            "payload": [listenData],
+        ]
 
-		var request = URLRequest(url: url)
-		request.httpMethod = "POST"
-		request.setValue("Token \(token)", forHTTPHeaderField: "Authorization")
-		request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-		request.httpBody = try JSONSerialization.data(withJSONObject: payload)
+        let headers = ["Authorization": "Token \(token)"]
 
-		let (data, response) = try await session.data(for: request)
+        do {
+            _ = try await http.postJSON(url: url, json: payload, headers: headers)
+        } catch HTTPError.unauthorized {
+            throw ListenBrainzError.invalidToken
+        } catch HTTPError.rateLimited {
+            throw ListenBrainzError.rateLimited
+        } catch HTTPError.httpError(let statusCode, let message) {
+            throw ListenBrainzError.apiError(statusCode: statusCode, message: message)
+        } catch {
+            throw ListenBrainzError.invalidResponse
+        }
+    }
 
-		guard let httpResponse = response as? HTTPURLResponse else {
-			throw ListenBrainzError.invalidResponse
-		}
+    private func lookupRecordingMBID(artist: String, track: String) async throws -> String? {
+        let query =
+            "recording:\"\(track)\" AND artist:\"\(artist)\""
+            .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
 
-		switch httpResponse.statusCode {
-		case 200...299:
-			return
-		case 401:
-			throw ListenBrainzError.invalidToken
-		case 429:
-			throw ListenBrainzError.rateLimited
-		default:
-			let message = String(data: data, encoding: .utf8) ?? "Unknown error"
-			throw ListenBrainzError.apiError(statusCode: httpResponse.statusCode, message: message)
-		}
-	}
+        guard
+            let url = URL(
+                string: "https://musicbrainz.org/ws/2/recording?query=\(query)&limit=1&fmt=json")
+        else {
+            return nil
+        }
 
-	private func lookupRecordingMBID(artist: String, track: String) async throws -> String? {
-		let query =
-			"recording:\"\(track)\" AND artist:\"\(artist)\""
-			.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        do {
+            let json = try await http.getJSON(url: url, headers: nil)
+            let recordings = json["recordings"] as? [[String: Any]]
+            return recordings?.first?["id"] as? String
+        } catch {
+            return nil
+        }
+    }
 
-		guard
-			let url = URL(
-				string: "https://musicbrainz.org/ws/2/recording?query=\(query)&limit=1&fmt=json")
-		else {
-			return nil
-		}
+    private func getFeedback(recordingMBID: String) async throws -> FeedbackScore {
+        guard let username = username else {
+            throw ListenBrainzError.notAuthenticated
+        }
 
-		let request = URLRequest(url: url)
-		let (data, response) = try await session.data(for: request)
+        guard
+            let url = URL(
+                string:
+                    "\(baseURL)/1/feedback/user/\(username)/get-feedback-for-recording?recording_mbid=\(recordingMBID)"
+            )
+        else {
+            throw ListenBrainzError.invalidURL
+        }
 
-		guard let httpResponse = response as? HTTPURLResponse,
-			httpResponse.statusCode == 200
-		else {
-			return nil
-		}
+        do {
+            let json = try await http.getJSON(url: url, headers: nil)
+            let feedback = json["feedback"] as? [[String: Any]]
 
-		let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
-		let recordings = json?["recordings"] as? [[String: Any]]
+            if let first = feedback?.first, let score = first["score"] as? Int {
+                return FeedbackScore(rawValue: score) ?? .none
+            }
 
-		return recordings?.first?["id"] as? String
-	}
+            return .none
+        } catch {
+            throw ListenBrainzError.invalidResponse
+        }
+    }
 
-	private func getFeedback(recordingMBID: String) async throws -> FeedbackScore {
-		guard let username = username else {
-			throw ListenBrainzError.notAuthenticated
-		}
+    private func submitFeedback(
+        recordingMBID: String,
+        score: FeedbackScore
+    ) async throws {
+        guard let token = token else {
+            throw ListenBrainzError.notAuthenticated
+        }
 
-		guard
-			let url = URL(
-				string:
-					"\(baseURL)/1/feedback/user/\(username)/get-feedback-for-recording?recording_mbid=\(recordingMBID)"
-			)
-		else {
-			throw ListenBrainzError.invalidURL
-		}
+        guard let url = URL(string: "\(baseURL)/1/feedback/recording-feedback") else {
+            throw ListenBrainzError.invalidURL
+        }
 
-		var request = URLRequest(url: url)
-		request.setValue("application/json", forHTTPHeaderField: "Accept")
+        let payload: [String: Any] = [
+            "recording_mbid": recordingMBID,
+            "score": score.rawValue,
+        ]
 
-		let (data, response) = try await session.data(for: request)
+        let headers = ["Authorization": "Token \(token)"]
 
-		guard let httpResponse = response as? HTTPURLResponse,
-			httpResponse.statusCode == 200
-		else {
-			throw ListenBrainzError.invalidResponse
-		}
-
-		let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
-		let feedback = json?["feedback"] as? [[String: Any]]
-
-		if let first = feedback?.first, let score = first["score"] as? Int {
-			return FeedbackScore(rawValue: score) ?? .none
-		}
-
-		return .none
-	}
-
-	private func submitFeedback(
-		recordingMBID: String,
-		score: FeedbackScore
-	) async throws {
-		guard let token = token else {
-			throw ListenBrainzError.notAuthenticated
-		}
-
-		guard let url = URL(string: "\(baseURL)/1/feedback/recording-feedback") else {
-			throw ListenBrainzError.invalidURL
-		}
-
-		let payload: [String: Any] = [
-			"recording_mbid": recordingMBID,
-			"score": score.rawValue,
-		]
-
-		var request = URLRequest(url: url)
-		request.httpMethod = "POST"
-		request.setValue("Token \(token)", forHTTPHeaderField: "Authorization")
-		request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-		request.httpBody = try JSONSerialization.data(withJSONObject: payload)
-
-		let (data, response) = try await session.data(for: request)
-
-		guard let httpResponse = response as? HTTPURLResponse else {
-			throw ListenBrainzError.invalidResponse
-		}
-
-		switch httpResponse.statusCode {
-		case 200...299:
-			return
-		case 401:
-			throw ListenBrainzError.invalidToken
-		case 429:
-			throw ListenBrainzError.rateLimited
-		default:
-			let message = String(data: data, encoding: .utf8) ?? "Unknown error"
-			throw ListenBrainzError.apiError(
-				statusCode: httpResponse.statusCode,
-				message: message
-			)
-		}
-	}
+        do {
+            _ = try await http.postJSON(url: url, json: payload, headers: headers)
+        } catch HTTPError.unauthorized {
+            throw ListenBrainzError.invalidToken
+        } catch HTTPError.rateLimited {
+            throw ListenBrainzError.rateLimited
+        } catch HTTPError.httpError(let statusCode, let message) {
+            throw ListenBrainzError.apiError(statusCode: statusCode, message: message)
+        } catch {
+            throw ListenBrainzError.invalidResponse
+        }
+    }
     
     private func mapPeriodToRange(_ period: TopAlbumPeriod) -> String {
         switch period {
@@ -398,5 +347,4 @@ final class ListenBrainzManager: ObservableObject {
             return "year"
         }
     }
-
 }
