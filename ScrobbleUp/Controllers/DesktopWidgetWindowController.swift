@@ -9,17 +9,16 @@ import AppKit
 import Combine
 import SwiftUI
 
-final class DesktopWidgetPanel: NSPanel {
-
-	override var canBecomeKey: Bool { false }
-	override var canBecomeMain: Bool { false }
+final class DesktopWidgetWindow: NSWindow {
+    override var canBecomeKey: Bool { true }
+    override var canBecomeMain: Bool { true }
 }
 
 @MainActor
 final class DesktopWidgetWindowController {
 	static let shared = DesktopWidgetWindowController()
 
-	private var window: NSPanel?
+	private var window: NSWindow?
 	private var cancellables = Set<AnyCancellable>()
 
 	private init() {
@@ -58,39 +57,31 @@ final class DesktopWidgetWindowController {
 			return
 		}
 
-		let contentView = DesktopWidgetView(appState: .shared)
+        let contentView = DesktopWidgetView(appState: .shared)
 
-		let hostingView = NSHostingView(rootView: contentView)
-		hostingView.frame = NSRect(x: 0, y: 0, width: 200, height: 200)
+        let hostingView = NSHostingView(rootView: contentView)  // Just regular NSHostingView
+        hostingView.frame = NSRect(x: 0, y: 0, width: 200, height: 200)
 
-		let window = DesktopWidgetPanel(
-			contentRect: NSRect(x: 100, y: 100, width: 200, height: 200),
-			styleMask: [.borderless],
-			backing: .buffered,
-			defer: false
-		)
+        let window = DesktopWidgetWindow(
+            contentRect: NSRect(x: 100, y: 100, width: 200, height: 200),
+            styleMask: [.borderless],
+            backing: .buffered,
+            defer: false
+        )
 
-		window.contentView = hostingView
-		window.isFloatingPanel = false
-		window.hidesOnDeactivate = false
+        window.contentView = hostingView
+        window.isOpaque = false
+        window.backgroundColor = .clear
+        window.hasShadow = true
+        window.isMovableByWindowBackground = true
+        window.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
+        
+        window.ignoresMouseEvents = false
+        window.acceptsMouseMovedEvents = true
 
-		window.isOpaque = false
-		window.backgroundColor = .clear
-		window.hasShadow = true
-
-		window.isMovableByWindowBackground = true
-		window.acceptsMouseMovedEvents = true
-		window.ignoresMouseEvents = false
-
-		window.collectionBehavior = [
-			.canJoinAllSpaces,
-			.stationary,
-			.ignoresCycle,
-		]
-
-		self.window = window
-		updateWindowLevel()
-		window.orderFrontRegardless()
+        self.window = window
+        updateWindowLevel()
+        window.orderFrontRegardless()
 	}
 
 	func hideWindow() {
@@ -114,8 +105,7 @@ final class DesktopWidgetWindowController {
 			)
 
 		case .desktop:
-			window.level = .normal - 1
-
+            window.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.desktopIconWindow)) + 1)
 		case .standardWindow:
 			window.level = .normal
 		}
