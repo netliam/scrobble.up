@@ -63,3 +63,8 @@ struct ListenBrainzTopAlbum {
         return nil
     }
 }
+
+struct ListenBrainzUserStats {
+    let listenCount: UInt
+    let lovedTracksCount: UInt
+}

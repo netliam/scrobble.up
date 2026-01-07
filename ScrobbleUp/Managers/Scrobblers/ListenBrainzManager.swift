@@ -189,6 +189,23 @@ final class ListenBrainzManager: ObservableObject {
         }
     }
     
+    // MARK: - User Stats
+
+    func fetchUserStats() async -> ListenBrainzUserStats? {
+        guard let username = username else { return nil }
+
+        async let listenCountTask = fetchListenCount(username: username)
+        async let lovedTracksCountTask = fetchLovedTracksCount(username: username)
+
+        let listenCount = await listenCountTask
+        let lovedTracksCount = await lovedTracksCountTask
+
+        return ListenBrainzUserStats(
+            listenCount: listenCount ?? 0,
+            lovedTracksCount: lovedTracksCount ?? 0
+        )
+    }
+    
     // MARK: - Private
 
     private func submitListen(
@@ -345,6 +362,41 @@ final class ListenBrainzManager: ObservableObject {
             return "half_yearly"
         case .year:
             return "year"
+        }
+    }
+    
+    private func fetchListenCount(username: String) async -> UInt? {
+        guard let url = URL(string: "\(baseURL)/1/user/\(username)/listen-count") else {
+            return nil
+        }
+
+        do {
+            let json = try await http.getJSON(url: url, headers: nil)
+            let payload = json["payload"] as? [String: Any]
+            if let count = payload?["count"] as? Int {
+                return UInt(count)
+            }
+            return nil
+        } catch {
+            print("Error fetching listen count from ListenBrainz: \(error)")
+            return nil
+        }
+    }
+
+    private func fetchLovedTracksCount(username: String) async -> UInt? {
+        guard let url = URL(string: "\(baseURL)/1/feedback/user/\(username)/get-feedback?score=1&count=0") else {
+            return nil
+        }
+
+        do {
+            let json = try await http.getJSON(url: url, headers: nil)
+            if let totalCount = json["total_count"] as? Int {
+                return UInt(totalCount)
+            }
+            return nil
+        } catch {
+            print("Error fetching loved tracks count from ListenBrainz: \(error)")
+            return nil
         }
     }
 }

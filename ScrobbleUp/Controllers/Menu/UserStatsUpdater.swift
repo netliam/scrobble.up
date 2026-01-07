@@ -17,15 +17,15 @@ final class UserStatsUpdater {
     func updateUserStats(
         profileItem: NSMenuItem,
         scrobblesRow: MenuItemStatsRowView,
-        artistsRow: MenuItemStatsRowView,
+        artistsRow: MenuItemStatsRowView? = nil,
         lovedTracksRow: MenuItemStatsRowView,
         service: ScrobblerService
     ) {
         switch service {
         case .lastFm:
-            updateLastFmStats(profileItem: profileItem, scrobblesRow: scrobblesRow, artistsRow: artistsRow, lovedTracksRow: lovedTracksRow)
+            updateLastFmStats(profileItem: profileItem, scrobblesRow: scrobblesRow, artistsRow: artistsRow!, lovedTracksRow: lovedTracksRow)
         case .listenBrainz:
-            updateListenBrainzStats(profileItem: profileItem, scrobblesRow: scrobblesRow, artistsRow: artistsRow, lovedTracksRow: lovedTracksRow)
+            updateListenBrainzStats(profileItem: profileItem, scrobblesRow: scrobblesRow, lovedTracksRow: lovedTracksRow)
         }
     }
     
@@ -67,7 +67,6 @@ final class UserStatsUpdater {
     private func updateListenBrainzStats(
         profileItem: NSMenuItem,
         scrobblesRow: MenuItemStatsRowView,
-        artistsRow: MenuItemStatsRowView,
         lovedTracksRow: MenuItemStatsRowView
     ) {
         Task {
@@ -75,20 +74,17 @@ final class UserStatsUpdater {
                 await MainActor.run {
                     profileItem.title = "Open profile..."
                     scrobblesRow.updateValue("—")
-                    artistsRow.updateValue("—")
                     lovedTracksRow.updateValue("—")
                 }
                 return
             }
             
-            // ListenBrainz doesn't have a user info endpoint like Last.fm
-            // So we just update the profile title with the username
+            let stats = await listenBrainz.fetchUserStats()
+                        
             await MainActor.run {
                 profileItem.title = "Open \(username)'s profile..."
-                // Stats not available via ListenBrainz API - hide or show dashes
-                scrobblesRow.updateValue("—")
-                artistsRow.updateValue("—")
-                lovedTracksRow.updateValue("—")
+                scrobblesRow.updateValue(formatNumber(stats?.listenCount ?? 0))
+                lovedTracksRow.updateValue(formatNumber(stats?.lovedTracksCount ?? 0))
             }
         }
     }

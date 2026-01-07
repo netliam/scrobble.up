@@ -123,10 +123,12 @@ final class MenuBuilder {
         subMenu.addItem(scrobblesItem)
 
         // Artists row
-        let artistsRow = MenuItemStatsRowView(width: width, leftText: "Artists")
-        let artistsItem = NSMenuItem()
-        artistsItem.view = artistsRow
-        subMenu.addItem(artistsItem)
+        if (service == .lastFm) {
+            let artistsRow = MenuItemStatsRowView(width: width, leftText: "Artists")
+            let artistsItem = NSMenuItem()
+            artistsItem.view = artistsRow
+            subMenu.addItem(artistsItem)
+        }
 
         // Loved tracks row
         let lovedTracksRow = MenuItemStatsRowView(width: width, leftText: "Loved tracks")

@@ -40,7 +40,6 @@ final class MenuController: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var listenBrainzTopAlbumsHeaderView: MenuItemHeaderView?
     private var listenBrainzProfileMenuItem: NSMenuItem?
     private var listenBrainzScrobblesRowView: MenuItemStatsRowView?
-    private var listenBrainzArtistsRowView: MenuItemStatsRowView?
     private var listenBrainzLovedTracksRowView: MenuItemStatsRowView?
     
     private var periodMenuItems: [NSMenuItem] = []
@@ -246,8 +245,6 @@ final class MenuController: NSObject, NSApplicationDelegate, NSWindowDelegate {
                     if statsRowIndex == 0 {
                         listenBrainzScrobblesRowView = statsRow
                     } else if statsRowIndex == 1 {
-                        listenBrainzArtistsRowView = statsRow
-                    } else if statsRowIndex == 2 {
                         listenBrainzLovedTracksRowView = statsRow
                     }
                 }
@@ -319,14 +316,12 @@ final class MenuController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         case .listenBrainz:
             guard let profileItem = listenBrainzProfileMenuItem,
                   let scrobblesRow = listenBrainzScrobblesRowView,
-                  let artistsRow = listenBrainzArtistsRowView,
                   let lovedTracksRow = listenBrainzLovedTracksRowView
             else { return }
-            
+
             userStatsUpdater.updateUserStats(
                 profileItem: profileItem,
                 scrobblesRow: scrobblesRow,
-                artistsRow: artistsRow,
                 lovedTracksRow: lovedTracksRow,
                 service: .listenBrainz
             )
