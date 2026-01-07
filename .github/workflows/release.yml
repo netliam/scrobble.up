@@ -4,7 +4,7 @@ on:
   push:
     tags:
       - "v*"
-      
+
 permissions:
   contents: write
   pages: write
@@ -21,29 +21,18 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Restore cache
         uses: actions/cache/restore@v4
         with:
           path: .deriveddata
           key: ${{ runner.os }}-xcode26-${{ hashFiles('**/*.swift', '**/Package.resolved') }}
-          restore-keys: |
-            ${{ runner.os }}-xcode26-
+          restore-keys: ${{ runner.os }}-xcode26-
 
-      - name: Select latest Xcode
+      - name: Setup Xcode
         run: |
-          ls /Applications | grep Xcode
           LATEST_XCODE=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
-          echo "Using $LATEST_XCODE"
           sudo xcode-select -s "$LATEST_XCODE/Contents/Developer"
-          xcodebuild -version
-
-      - name: Resolve packages
-        run: |
-          xcodebuild -resolvePackageDependencies \
-            -scheme "$SCHEME" \
-            -derivedDataPath .deriveddata
 
       - name: Install certificates
         env:
@@ -51,28 +40,23 @@ jobs:
           P12_PASSWORD: ${{ secrets.CERTIFICATES_PASSWORD }}
         run: |
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-
           echo "$P12_BASE64" | base64 --decode > $RUNNER_TEMP/certificate.p12
-
           security create-keychain -p "temp123" "$KEYCHAIN_PATH"
           security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
           security unlock-keychain -p "temp123" "$KEYCHAIN_PATH"
-
-          security import $RUNNER_TEMP/certificate.p12 \
-            -P "$P12_PASSWORD" \
-            -A \
-            -t cert \
-            -f pkcs12 \
-            -k "$KEYCHAIN_PATH"
-
+          security import $RUNNER_TEMP/certificate.p12 -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
           security set-key-partition-list -S apple-tool:,apple: -s -k "temp123" "$KEYCHAIN_PATH"
-
-          # Set as default and add to search list
           security default-keychain -s "$KEYCHAIN_PATH"
           security list-keychain -d user -s "$KEYCHAIN_PATH" login.keychain-db
 
-          # Verify
-          security find-identity -v -p codesigning
+      - name: Install provisioning profile
+        env:
+          PROFILE_BASE64: ${{ secrets.PROVISIONING_PROFILE }}
+        run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "$PROFILE_BASE64" | base64 --decode > $RUNNER_TEMP/profile.provisionprofile
+          UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< $(security cms -D -i $RUNNER_TEMP/profile.provisionprofile))
+          cp $RUNNER_TEMP/profile.provisionprofile ~/Library/MobileDevice/Provisioning\ Profiles/$UUID.provisionprofile
 
       - name: Create Secrets.xcconfig
         run: |
@@ -81,24 +65,9 @@ jobs:
           LASTFM_API_SECRET = ${{ secrets.LASTFM_API_SECRET }}
           EOF
 
-      - name: Build dependencies
-        run: |
-          xcodebuild build \
-            -scheme "$SCHEME" \
-            -derivedDataPath .deriveddata \
-            -configuration Release \
-            -skipMacroValidation \
-            -skipPackagePluginValidation \
-            CODE_SIGN_IDENTITY="-" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            ONLY_ACTIVE_ARCH=NO
-
       - name: Archive
         run: |
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-          security unlock-keychain -p "temp123" "$KEYCHAIN_PATH"
-
+          security unlock-keychain -p "temp123" $RUNNER_TEMP/app-signing.keychain-db
           xcodebuild archive \
             -scheme "$SCHEME" \
             -archivePath "$RUNNER_TEMP/$APP_NAME.xcarchive" \
@@ -117,23 +86,9 @@ jobs:
           path: .deriveddata
           key: ${{ runner.os }}-xcode26-${{ hashFiles('**/*.swift', '**/Package.resolved') }}
 
-      - name: Install provisioning profile
-        env:
-          PROFILE_BASE64: ${{ secrets.PROVISIONING_PROFILE }}
-        run: |
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          echo "$PROFILE_BASE64" | base64 --decode > $RUNNER_TEMP/profile.provisionprofile
-
-          UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< $(security cms -D -i $RUNNER_TEMP/profile.provisionprofile))
-          cp $RUNNER_TEMP/profile.provisionprofile ~/Library/MobileDevice/Provisioning\ Profiles/$UUID.provisionprofile
-
-          echo "Installed profile with UUID: $UUID"
-
       - name: Export app
         run: |
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-          security unlock-keychain -p "temp123" "$KEYCHAIN_PATH"
-
+          security unlock-keychain -p "temp123" $RUNNER_TEMP/app-signing.keychain-db
           xcodebuild -exportArchive \
             -archivePath "$RUNNER_TEMP/$APP_NAME.xcarchive" \
             -exportPath "$RUNNER_TEMP/export" \
@@ -147,92 +102,61 @@ jobs:
           TEAM_ID: ${{ secrets.TEAM_ID }}
         run: |
           ditto -c -k --keepParent "$RUNNER_TEMP/export/$APP_NAME.app" "$RUNNER_TEMP/$APP_NAME.zip"
-
           xcrun notarytool submit "$RUNNER_TEMP/$APP_NAME.zip" \
-            --apple-id "$APPLE_ID" \
-            --password "$APPLE_PASSWORD" \
-            --team-id "$TEAM_ID" \
-            --wait \
-            --output-format json | tee notarization.json
-
-          # Check result
-          STATUS=$(cat notarization.json | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
-          ID=$(cat notarization.json | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4)
-
-          if [ "$STATUS" != "Accepted" ]; then
-            echo "Notarization failed with status: $STATUS"
-            echo "Fetching log..."
-            xcrun notarytool log "$ID" \
-              --apple-id "$APPLE_ID" \
-              --password "$APPLE_PASSWORD" \
-              --team-id "$TEAM_ID"
-            exit 1
-          fi
-
+            --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$TEAM_ID" \
+            --wait
           xcrun stapler staple "$RUNNER_TEMP/export/$APP_NAME.app"
 
-      - name: Create DMG
+      - name: Create DMG & Sparkle ZIP
+        env:
+          SPARKLE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
         run: |
           brew install create-dmg
-
+          
           create-dmg \
             --volname "$APP_NAME" \
             --volicon "Assets/AppIcon.icns" \
-            --window-pos 200 120 \
-            --window-size 600 400 \
-            --icon-size 100 \
-            --icon "$APP_NAME.app" 150 190 \
+            --window-pos 200 120 --window-size 600 400 \
+            --icon-size 100 --icon "$APP_NAME.app" 150 190 \
             --app-drop-link 450 190 \
             --hide-extension "$APP_NAME.app" \
             "$RUNNER_TEMP/$APP_NAME.dmg" \
             "$RUNNER_TEMP/export/$APP_NAME.app"
-
-      - name: Create Sparkle ZIP & generate appcast
-        env:
-          SPARKLE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
-        run: |
-          # Download Sparkle tools
+          
+          # Sparkle ZIP & appcast
           curl -L -o /tmp/Sparkle.tar.xz https://github.com/sparkle-project/Sparkle/releases/download/2.6.4/Sparkle-2.6.4.tar.xz
           tar -xf /tmp/Sparkle.tar.xz -C /tmp
-
-          # Create release directory structure
+          
           mkdir -p "$RUNNER_TEMP/releases"
           ditto -c -k --keepParent "$RUNNER_TEMP/export/$APP_NAME.app" "$RUNNER_TEMP/releases/$APP_NAME.zip"
-
-          # Set up Sparkle private key (use printf to avoid trailing newline)
+          
           printf '%s' "$SPARKLE_KEY" > "$RUNNER_TEMP/sparkle_key"
-
-          # Generate appcast using Sparkle's tool
           /tmp/bin/generate_appcast \
             --ed-key-file "$RUNNER_TEMP/sparkle_key" \
             --download-url-prefix "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/" \
-            --release-notes-url-prefix "https://github.com/${{ github.repository }}/releases/${{ github.ref_name }}" \
             -o "$RUNNER_TEMP/appcast.xml" \
             "$RUNNER_TEMP/releases"
-
           rm "$RUNNER_TEMP/sparkle_key"
-
-          # Copy zip to expected location for release upload
+          
           cp "$RUNNER_TEMP/releases/$APP_NAME.zip" "$RUNNER_TEMP/$APP_NAME.zip"
-
-      - name: Get version
-        run: |
-          VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "$RUNNER_TEMP/export/$APP_NAME.app/Contents/Info.plist")
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "TAG_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.TAG_NAME }}
+          tag_name: ${{ github.ref_name }}
           make_latest: true
           files: |
             ${{ runner.temp }}/${{ env.APP_NAME }}.dmg
             ${{ runner.temp }}/${{ env.APP_NAME }}.zip
 
-      - name: Prepare Pages content
+      - name: Deploy to GitHub Pages
         run: |
           mkdir -p pages
+          
+          # Fetch existing nightly appcast so we don't overwrite it
+          curl -fsSL https://netliam.github.io/scrobble.up/appcast-nightly.xml -o pages/appcast-nightly.xml || true
+          
+          # Add our release appcast
           cp "$RUNNER_TEMP/appcast.xml" pages/appcast.xml
 
       - name: Upload Pages artifact
@@ -240,5 +164,5 @@ jobs:
         with:
           path: pages
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy Pages
         uses: actions/deploy-pages@v4
