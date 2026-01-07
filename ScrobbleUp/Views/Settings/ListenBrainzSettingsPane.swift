@@ -120,7 +120,6 @@ struct ListenBrainzConnectedView: View {
 	@AppStorage(\.listenBrainzEnabled) private var listenBrainzEnabled
     @AppStorage(\.listenBrainzTopAlbumPeriod) private var topAlbumPeriod
 
-
 	var body: some View {
 		Form {
 			Section {

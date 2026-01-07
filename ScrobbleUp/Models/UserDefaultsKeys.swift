@@ -32,6 +32,7 @@ enum Keys {
 		"trackFetchingMethod", defaultValue: TrackFetchingMethod.mediaRemote)
 	static let openLinksWith = UserDefaultsKey(
 		"openLinksWith", defaultValue: OpenLinksWith.alwaysInAppleMusic)
+    static let artworkSource = UserDefaultsKey("artworkSource", defaultValue: ArtworkSource.lastFm)
 
 	static let syncLikes = UserDefaultsKey("syncLikes", defaultValue: true)
 	static let scrobbleTrackAt = UserDefaultsKey("scrobbleTrackAt", defaultValue: 50)

@@ -90,9 +90,10 @@ final class RecentTracksUpdater {
 
 	private func loadArtwork(for entry: LogEntry, into item: NSMenuItem) {
 		Task {
-			if let artwork = await artworkManager.fetchFromiTunes(
+			if let artwork = await artworkManager.fetchArtwork(
 				artist: entry.artist,
-				track: entry.title
+				track: entry.title,
+				album: entry.album
 			) {
 				await MainActor.run {
 					if let view = item.view as? RecentlyPlayedMenuItemView {

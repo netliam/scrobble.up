@@ -375,17 +375,21 @@ final class LastFmManager: ObservableObject {
 	func fetchArtworkURL(artist: String, track: String, album: String?) async -> URL? {
 		do {
 			let trackInfo = try await fetchTrackInfo(artist: artist, track: track)
-
-			guard let images = trackInfo?.album?.image else { return nil }
-			print(images)
-			if let artwork = bestImageURL(images: images) { return artwork }
-		} catch {}
+			if let images = trackInfo?.album?.image,
+			   let artwork = bestImageURL(images: images) {
+				return artwork
+			}
+		} catch {
+		}
+		
 		if let album = album, !album.isEmpty {
 			let albumInfo = await fetchAlbumInfo(artist: artist, album: album)
-
-			guard let images = albumInfo?.image else { return nil }
-			if let artwork = bestImageURL(images: images) { return artwork }
+			if let images = albumInfo?.image,
+			   let artwork = bestImageURL(images: images) {
+				return artwork
+			}
 		}
+		
 		return nil
 	}
 }

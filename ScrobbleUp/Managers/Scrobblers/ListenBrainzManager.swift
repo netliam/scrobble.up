@@ -8,6 +8,25 @@
 import Combine
 import Foundation
 
+// Rate limiter for MusicBrainz API (1 request per second)
+actor MusicBrainzRateLimiter {
+    static let shared = MusicBrainzRateLimiter()
+    
+    private var lastRequestTime: Date?
+    private let minimumInterval: TimeInterval = 1.0 // MusicBrainz requires 1 req/sec
+    
+    func waitIfNeeded() async {
+        if let lastRequest = lastRequestTime {
+            let elapsed = Date().timeIntervalSince(lastRequest)
+            if elapsed < minimumInterval {
+                let delay = minimumInterval - elapsed
+                try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            }
+        }
+        lastRequestTime = Date()
+    }
+}
+
 final class ListenBrainzManager: ObservableObject {
 
     private static let userAgent = "scrobble.up/1.0 (liams@tuskmo.com)"
@@ -134,6 +153,116 @@ final class ListenBrainzManager: ObservableObject {
         }
         let feedback = try? await getFeedback(recordingMBID: mbid)
         return feedback == .love
+    }
+    
+    // MARK: - Artwork
+
+    func fetchArtworkURL(artist: String, track: String, album: String?) async -> URL? {
+        // Try to get recording MBID first
+        guard let mbid = try? await lookupRecordingMBID(artist: artist, track: track) else {
+            // If no recording found, try album artwork
+            if let album = album, !album.isEmpty {
+                return await fetchAlbumArtworkURL(artist: artist, album: album)
+            }
+            return nil
+        }
+        
+        // Rate limit before making request
+        await MusicBrainzRateLimiter.shared.waitIfNeeded()
+        
+        // Fetch recording info from MusicBrainz to get release info
+        guard let recordingURL = URL(string: "https://musicbrainz.org/ws/2/recording/\(mbid)?inc=releases&fmt=json") else {
+            return nil
+        }
+        
+        do {
+            let json = try await http.getJSON(url: recordingURL, headers: nil)
+            
+            // Get the first release that has cover art
+            if let releases = json["releases"] as? [[String: Any]] {
+                for release in releases {
+                    if let releaseId = release["id"] as? String {
+                        // Check if cover art exists via Cover Art Archive
+                        if let artworkURL = await fetchCoverArtURL(releaseId: releaseId) {
+                            return artworkURL
+                        }
+                    }
+                }
+            }
+        } catch {
+            // Only log non-503 errors (503 is expected when rate limited)
+            if case HTTPError.httpError(let statusCode, _) = error, statusCode != 503 {
+                print("Error fetching recording info from MusicBrainz: \(error)")
+            }
+        }
+        
+        // Fallback to album artwork if available
+        if let album = album, !album.isEmpty {
+            return await fetchAlbumArtworkURL(artist: artist, album: album)
+        }
+        
+        return nil
+    }
+    
+    private func fetchAlbumArtworkURL(artist: String, album: String) async -> URL? {
+        await MusicBrainzRateLimiter.shared.waitIfNeeded()
+        
+        let query =
+            "release:\"\(album)\" AND artist:\"\(artist)\""
+            .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        
+        guard let url = URL(string: "https://musicbrainz.org/ws/2/release?query=\(query)&limit=1&fmt=json") else {
+            return nil
+        }
+        
+        do {
+            let json = try await http.getJSON(url: url, headers: nil)
+            let releases = json["releases"] as? [[String: Any]]
+            
+            if let releaseId = releases?.first?["id"] as? String {
+                return await fetchCoverArtURL(releaseId: releaseId)
+            }
+        } catch {
+            // Only log non-503 errors
+            if case HTTPError.httpError(let statusCode, _) = error, statusCode != 503 {
+                print("Error fetching album from MusicBrainz: \(error)")
+            }
+        }
+        
+        return nil
+    }
+    
+    private func fetchCoverArtURL(releaseId: String) async -> URL? {
+        guard let url = URL(string: "https://coverartarchive.org/release/\(releaseId)") else {
+            return nil
+        }
+        
+        do {
+            let json = try await http.getJSON(url: url, headers: nil)
+            let images = json["images"] as? [[String: Any]]
+            
+            // Prefer front cover
+            if let frontCover = images?.first(where: { image in
+                let types = image["types"] as? [String]
+                return types?.contains("Front") ?? false
+            }), let imageURL = frontCover["image"] as? String {
+                // Force HTTPS for image URLs (CoverArtArchive returns HTTP by default)
+                let secureURL = imageURL.replacingOccurrences(of: "http://", with: "https://")
+                return URL(string: secureURL)
+            }
+            
+            // Fallback to first available image
+            if let firstImage = images?.first, let imageURL = firstImage["image"] as? String {
+                // Force HTTPS for image URLs (CoverArtArchive returns HTTP by default)
+                let secureURL = imageURL.replacingOccurrences(of: "http://", with: "https://")
+                return URL(string: secureURL)
+            }
+        } catch {
+            // Cover art not available for this release
+            return nil
+        }
+        
+        return nil
     }
     
     // MARK: - Tracks
@@ -268,6 +397,8 @@ final class ListenBrainzManager: ObservableObject {
     }
 
     private func lookupRecordingMBID(artist: String, track: String) async throws -> String? {
+        await MusicBrainzRateLimiter.shared.waitIfNeeded()
+        
         let query =
             "recording:\"\(track)\" AND artist:\"\(artist)\""
             .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
@@ -284,6 +415,10 @@ final class ListenBrainzManager: ObservableObject {
             let recordings = json["recordings"] as? [[String: Any]]
             return recordings?.first?["id"] as? String
         } catch {
+            // Don't log 503 errors (rate limiting is expected)
+            if case HTTPError.httpError(let statusCode, _) = error, statusCode == 503 {
+                return nil
+            }
             return nil
         }
     }

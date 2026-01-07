@@ -61,7 +61,6 @@ struct AboutView: View {
                 }
                 .buttonStyle(.plain)
                 
-                // Additional link - Report an Issue
                 Link(destination: URL(string: "https://github.com/yourusername/scrobble.up/issues")!) {
                     HStack(spacing: 8) {
                         Image(systemName: "exclamationmark.bubble")

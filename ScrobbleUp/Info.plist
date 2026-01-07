@@ -12,6 +12,15 @@
 	<dict>
 		<key>NSExceptionDomains</key>
 		<dict>
+			<key>coverartarchive.org</key>
+			<dict>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+				<key>NSTemporaryExceptionMinimumTLSVersion</key>
+				<string>TLSv1.2</string>
+				<key>NSExceptionRequiresForwardSecrecy</key>
+				<true/>
+			</dict>
 			<key>musicbrainz.org</key>
 			<dict>
 				<key>NSIncludesSubdomains</key>

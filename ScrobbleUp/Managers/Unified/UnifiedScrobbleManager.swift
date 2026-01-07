@@ -65,14 +65,32 @@ final class UnifiedScrobbleManager: ObservableObject {
 
 				Task {
 					var artworkImage = nowPlaying.artwork
+					var artworkSource: String?
 
                     if artworkImage == nil {
                         artworkImage = await MediaRemoteManager.shared.fetchCurrentArtwork()
-                    }
+						if artworkImage != nil {
+							artworkSource = "MediaRemote"
+						}
+                    } else {
+						artworkSource = "Player"
+					}
                     
 					if artworkImage == nil {
-						artworkImage = await artworkManager.fetchFromiTunes(
+						artworkImage = await artworkManager.fetchArtwork(
 							artist: entry.artist, track: entry.title, album: entry.album)
+						if artworkImage != nil {
+							artworkSource = UserDefaults.standard.get(\.artworkSource).rawValue
+						}
+					}
+
+					if artworkSource == "MediaRemote", let artwork = artworkImage {
+						artworkManager.cacheArtwork(
+							artwork,
+							artist: entry.artist,
+							track: entry.title,
+							album: entry.album
+						)
 					}
 
                     appState.currentTrack.image = artworkImage

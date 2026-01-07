@@ -85,3 +85,10 @@ enum ScrobblerService: String, CaseIterable {
         }
     }
 }
+
+// MARK: - ArtworkSource
+
+enum ArtworkSource: String, CaseIterable, Codable {
+    case lastFm = "lastFm"
+    case musicBrainz = "musicBrainz"
+}
