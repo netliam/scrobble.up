@@ -48,6 +48,9 @@ final class MenuController: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var contextObserver: NSObjectProtocol?
     private var lastFmPeriodObserver: AnyCancellable?
     private var listenBrainzPeriodObserver: AnyCancellable?
+    private var showCurrentTrackObserver: AnyCancellable?
+    private var showAlbumNameObserver: AnyCancellable?
+    private var currentTrackObserver: AnyCancellable?
 
     private var mainWindow: NSWindow?
 
@@ -66,6 +69,8 @@ final class MenuController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         setupStatusBar()
         startObservingCoreDataChanges()
         startObservingPeriodChanges()
+        startObservingStatusBarSettings()
+        startObservingCurrentTrack()
     }
 
     deinit {
@@ -74,6 +79,9 @@ final class MenuController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
         lastFmPeriodObserver?.cancel()
         listenBrainzPeriodObserver?.cancel()
+        showCurrentTrackObserver?.cancel()
+        showAlbumNameObserver?.cancel()
+        currentTrackObserver?.cancel()
     }
 
     // MARK: - Status Bar
@@ -86,6 +94,37 @@ final class MenuController: NSObject, NSApplicationDelegate, NSWindowDelegate {
             button.image = image?.withSymbolConfiguration(config)
             button.target = self
             button.action = #selector(showMenu)
+        }
+        updateStatusBarTitle()
+    }
+    
+    private func updateStatusBarTitle() {
+        guard let button = statusItem?.button else { return }
+        
+        let showTrack = UserDefaults.standard.get(\.showCurrentTrackInStatusBar)
+        let showAlbum = UserDefaults.standard.get(\.showAlbumNameInStatusBar)
+        
+        if showTrack {
+            let track = appState.currentTrack
+            var components: [String] = []
+            
+            // Add title and artist
+            if !track.title.isEmpty && track.title != "-" {
+                components.append("\(track.title) - \(track.artist)")
+            }
+            
+            // Add album if enabled and available
+            if showAlbum, let album = track.album, !album.isEmpty {
+                components.append("(\(album))")
+            }
+            
+            if !components.isEmpty {
+                button.title = " " + components.joined(separator: " ")
+            } else {
+                button.title = ""
+            }
+        } else {
+            button.title = ""
         }
     }
 
@@ -109,6 +148,23 @@ final class MenuController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         listenBrainzPeriodObserver = UserDefaults.standard.observe(\.listenBrainzTopAlbumPeriod) { [weak self] _ in
             self?.refreshTopAlbums(for: .listenBrainz)
         }
+    }
+    
+    private func startObservingStatusBarSettings() {
+        showCurrentTrackObserver = UserDefaults.standard.observe(\.showCurrentTrackInStatusBar) { [weak self] _ in
+            self?.updateStatusBarTitle()
+        }
+        
+        showAlbumNameObserver = UserDefaults.standard.observe(\.showAlbumNameInStatusBar) { [weak self] _ in
+            self?.updateStatusBarTitle()
+        }
+    }
+    
+    private func startObservingCurrentTrack() {
+        currentTrackObserver = appState.$currentTrack
+            .sink { [weak self] _ in
+                self?.updateStatusBarTitle()
+            }
     }
 
     // MARK: - Menu Lifecycle

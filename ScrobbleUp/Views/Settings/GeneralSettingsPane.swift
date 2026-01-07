@@ -15,6 +15,8 @@ struct GeneralSettingsPane: View {
 	@AppStorage(\.showArtworkInDock) private var showArtworkInDock
 	@AppStorage(\.showDesktopWidget) private var showDesktopWidget
 	@AppStorage(\.widgetWindowBehavior) private var widgetWindowBehavior
+    @AppStorage(\.showCurrentTrackInStatusBar) private var showCurrentTrack
+    @AppStorage(\.showAlbumNameInStatusBar) private var showAlbumName
 
 	var body: some View {
 		Form {
@@ -44,6 +46,14 @@ struct GeneralSettingsPane: View {
 						.foregroundColor(.secondary)
 				}
 			}
+            Section("Status Bar") {
+                Toggle("Show current track in status bar", isOn: $showCurrentTrack)
+                
+                if showCurrentTrack {
+                    Toggle("Show album name", isOn: $showAlbumName)
+                        .padding(.leading, 20)
+                }
+            }
 		}
 		.formStyle(.grouped)
 		.frame(width: 450)
