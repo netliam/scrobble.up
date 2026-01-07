@@ -23,10 +23,10 @@ final class MenuActions: NSObject {
 	@objc func openSettings() {
 		appState.openSettings()
 	}
-
-	@objc func openMainWindow() {
-		AppDelegate.shared?.openMainWindow()
-	}
+    
+    @objc func openAbout() {
+        AppDelegate.shared?.showAboutWindow()
+    }
 
 	// MARK: - Player Selection
 

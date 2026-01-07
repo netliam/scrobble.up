@@ -10,6 +10,8 @@ import SwiftUI
 
 struct UpdateSettingsView: View {
 	@ObservedObject var updaterViewModel: UpdaterViewModel
+    
+    let version = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
 
 	var body: some View {
 		VStack(alignment: .leading, spacing: 12) {
@@ -18,17 +20,14 @@ struct UpdateSettingsView: View {
 				"Automatically check for updates",
 				isOn: $updaterViewModel.automaticallyChecksForUpdates
 			)
-			Divider()
-			Toggle(
-				"Automatically download updates",
-				isOn: $updaterViewModel.automaticallyDownloadsUpdates
-			)
-			.disabled(!updaterViewModel.automaticallyChecksForUpdates)
-
 			Button("Check for Updates…") {
 				updaterViewModel.checkForUpdates()
 			}
 			.disabled(!updaterViewModel.canCheckForUpdates)
+            Divider()
+            Text("Version: \(version ?? "Unknown")")
+                .font(.caption)
+                .foregroundStyle(.secondary)
 		}
 	}
 }
@@ -42,12 +41,7 @@ final class UpdaterViewModel: ObservableObject {
 			updaterController.updater.automaticallyChecksForUpdates = automaticallyChecksForUpdates
 		}
 	}
-	@Published var automaticallyDownloadsUpdates = false {
-		didSet {
-			updaterController.updater.automaticallyDownloadsUpdates = automaticallyDownloadsUpdates
-		}
-	}
-
+    
 	private let updaterController: SPUStandardUpdaterController
 	private var cancellables = Set<AnyCancellable>()
 
@@ -60,7 +54,6 @@ final class UpdaterViewModel: ObservableObject {
 		)
 
 		automaticallyChecksForUpdates = updaterController.updater.automaticallyChecksForUpdates
-		automaticallyDownloadsUpdates = updaterController.updater.automaticallyDownloadsUpdates
 
 		updaterController.updater.publisher(for: \.canCheckForUpdates)
 			.receive(on: DispatchQueue.main)
@@ -69,10 +62,6 @@ final class UpdaterViewModel: ObservableObject {
 		updaterController.updater.publisher(for: \.automaticallyChecksForUpdates)
 			.receive(on: DispatchQueue.main)
 			.assign(to: &$automaticallyChecksForUpdates)
-
-		updaterController.updater.publisher(for: \.automaticallyDownloadsUpdates)
-			.receive(on: DispatchQueue.main)
-			.assign(to: &$automaticallyDownloadsUpdates)
 	}
 
 	func checkForUpdates() {

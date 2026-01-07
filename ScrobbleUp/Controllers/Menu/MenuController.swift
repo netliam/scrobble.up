@@ -52,8 +52,6 @@ final class MenuController: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var showAlbumNameObserver: AnyCancellable?
     private var currentTrackObserver: AnyCancellable?
 
-    private var mainWindow: NSWindow?
-
     let core: CoreDataStack = .shared
     let appState: AppState = .shared
 
@@ -237,15 +235,11 @@ final class MenuController: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         menu.addItem(NSMenuItem.separator())
 
-        // App actions
-        let scrobbleLogItem = menuBuilder.createMenuItem(
-            title: "Scrobble Log",
-            icon: "scroll.fill",
-            target: menuActions,
-            action: #selector(MenuActions.openMainWindow)
-        )
-        menu.addItem(scrobbleLogItem)
-
+        let moreMenu = menuBuilder.createMoreSubmenu(target: menuActions, aboutAction: #selector(MenuActions.openAbout))
+        let moreItem = NSMenuItem(title: "More", action: nil, keyEquivalent: "")
+        moreItem.submenu = moreMenu
+        menu.addItem(moreItem)
+        
         let settingsItem = menuBuilder.createMenuItem(
             title: "Settings...",
             icon: "gear",

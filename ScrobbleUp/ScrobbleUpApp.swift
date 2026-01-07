@@ -19,30 +19,19 @@ struct ScrobbleUpApp: App {
 		}
 		.commands {
 			CommandGroup(replacing: .newItem) {}
-
-			CommandGroup(replacing: CommandGroupPlacement.appSettings) {
-				Button {
-					appState.openSettings()
-				} label: {
-					Label("Settings...", systemImage: "gear")
-				}
-				.keyboardShortcut(",", modifiers: .command)
-			}
-		}
+        }
 	}
 }
 
-final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate {
 	static weak var shared: AppDelegate?
 
-	private var statusItem: NSStatusItem?
-	private var mainWindowController: NSWindowController?
 	private var widgetController: DesktopWidgetWindowController?
+	private var aboutWindowController: NSWindowController?
 	private var cancellables = Set<AnyCancellable>()
 
 	private let core: CoreDataStack = .shared
 	private let appState: AppState = .shared
-	private let lastFm: LastFmManager = .shared
 	private let dockIconManager: DockIconManager = .shared
 
 	var menuController = MenuController()
@@ -94,6 +83,36 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 			object: nil
 		)
 	}
+	
+	func showAboutWindow() {
+		if let windowController = aboutWindowController {
+			windowController.showWindow(nil)
+			windowController.window?.makeKeyAndOrderFront(nil)
+			windowController.window?.orderFrontRegardless()
+			NSApp.activate(ignoringOtherApps: true)
+			return
+		}
+		
+		let window = NSWindow(
+			contentRect: NSRect(x: 0, y: 0, width: 400, height: 500),
+			styleMask: [.titled, .closable],
+			backing: .buffered,
+			defer: false
+		)
+		window.center()
+		window.title = "About ScrobbleUp"
+		window.isReleasedWhenClosed = false
+		
+		let aboutView = AboutView()
+		window.contentView = NSHostingView(rootView: aboutView)
+		
+		let windowController = NSWindowController(window: window)
+		aboutWindowController = windowController
+		
+		windowController.showWindow(nil)
+		window.makeKeyAndOrderFront(nil)
+		NSApp.activate(ignoringOtherApps: true)
+	}
 
 	private func updateDockIconWithCurrentTrack() {
 		let currentTrack = appState.currentTrack
@@ -115,16 +134,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 		}
 	}
 
-	// MARK: - Window Mangement
-
-	func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool)
-		-> Bool
-	{
-		if !flag {
-			openMainWindow()
-		}
-		return true
-	}
+	// MARK: - Activation Policy
 
 	private func updateActivationPolicy() {
 		if UserDefaults.standard.get(\.showIconInDock) {
@@ -132,53 +142,5 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 		} else {
 			NSApp.setActivationPolicy(.accessory)
 		}
-	}
-
-	func windowShouldClose(_ sender: NSWindow) -> Bool {
-		// Hide instead of close
-		sender.orderOut(nil)
-
-		if !UserDefaults.standard.get(\.showIconInDock) {
-			NSApp.setActivationPolicy(.accessory)
-		}
-
-		return false
-	}
-
-	func openMainWindow() {
-		NSApp.setActivationPolicy(.regular)
-
-		if let windowController = mainWindowController {
-			windowController.showWindow(nil)
-			windowController.window?.makeKeyAndOrderFront(nil)
-			windowController.window?.orderFrontRegardless()
-			NSApp.activate(ignoringOtherApps: true)
-			return
-		}
-
-		let window = NSWindow(
-			contentRect: NSRect(x: 0, y: 0, width: 800, height: 600),
-			styleMask: [.titled, .closable, .miniaturizable, .resizable],
-			backing: .buffered,
-			defer: false
-		)
-		window.center()
-		window.title = "ScrobbleUp"
-		window.delegate = self
-		window.setFrameAutosaveName("MainWindow")
-
-		let contentView = ContentView()
-			.environment(\.managedObjectContext, core.container.viewContext)
-			.environmentObject(appState)
-			.environmentObject(lastFm)
-
-		window.contentView = NSHostingView(rootView: contentView)
-
-		let windowController = NSWindowController(window: window)
-		mainWindowController = windowController
-
-		NSApp.activate(ignoringOtherApps: true)
-		window.makeKeyAndOrderFront(nil)
-		window.orderFrontRegardless()
 	}
 }

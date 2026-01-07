@@ -166,6 +166,26 @@ final class MenuBuilder {
         item.submenu = subMenu
         return item
     }
+    
+    // MARK: - Create More Submenu
+    
+    func createMoreSubmenu(target: AnyObject, aboutAction: Selector) -> NSMenu {
+        let subMenu = NSMenu()
+        
+        let version = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
+        let versionHeader = createSectionHeader(title: "Version: \(version ?? "Unknown")")
+        subMenu.addItem(versionHeader)
+        
+        let aboutItem = createMenuItem(
+            title: "About scrobble.up",
+            icon: "info.circle",
+            target: target,
+            action: aboutAction
+        )
+        subMenu.addItem(aboutItem)
+        
+        return subMenu
+    }
 
 	// MARK: - Generic Menu Items
 
@@ -183,7 +203,7 @@ final class MenuBuilder {
 		)
 		item.target = target
 		item.image = NSImage(systemSymbolName: icon, accessibilityDescription: nil)?
-			.configureForMenu(size: 20)
+			.configureForMenu(size: 18)
 		return item
 	}
 }
