@@ -36,6 +36,7 @@ final class LastFmManager: ObservableObject {
 
 	func getMobileSession(username: String, password: String) async throws {
 		do {
+            // This isn't actually deprecated, but the LastFM package marks it as such
 			let session = try await lastFM.Auth.getMobileSession(
 				username: username, password: password)
 

@@ -164,10 +164,12 @@ final class UnifiedMusicManager {
 			return false
 		}
 
-		if let spotify = SBApplication(bundleIdentifier: "com.spotify.client")
-			as? SpotifyApplication,
-			let state = spotify.playerState
-		{
+		guard let app = SBApplication(bundleIdentifier: "com.spotify.client") else {
+			return false
+		}
+		
+		let spotify = app as SpotifyApplication
+		if let state = spotify.playerState {
 			return state == "playing"
 		}
 		return false

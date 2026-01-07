@@ -185,7 +185,9 @@ final class UnifiedScrobbleManager: ObservableObject {
 			withTimeInterval: TimeInterval(threshold),
 			repeats: false
 		) { [weak self] _ in
-			self?.fireScrobble()
+			Task { @MainActor [weak self] in
+                self?.fireScrobble()
+			}
 		}
 	}
 

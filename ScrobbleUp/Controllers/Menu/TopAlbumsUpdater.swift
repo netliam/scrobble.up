@@ -88,7 +88,7 @@ final class TopAlbumsUpdater {
                 if let mbid = mbid {
                     // Open MusicBrainz release group page
                     if let url = URL(string: "https://musicbrainz.org/release-group/\(mbid)") {
-                        await MainActor.run {
+                        _ = await MainActor.run {
                             NSWorkspace.shared.open(url)
                         }
                     }
