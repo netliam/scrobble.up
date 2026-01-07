@@ -20,6 +20,7 @@ struct UpdateSettingsView: View {
 				"Automatically check for updates",
 				isOn: $updaterViewModel.automaticallyChecksForUpdates
 			)
+			
 			Button("Check for Updates…") {
 				updaterViewModel.checkForUpdates()
 			}
@@ -62,6 +63,10 @@ final class UpdaterViewModel: ObservableObject {
 		updaterController.updater.publisher(for: \.automaticallyChecksForUpdates)
 			.receive(on: DispatchQueue.main)
 			.assign(to: &$automaticallyChecksForUpdates)
+		
+		if automaticallyChecksForUpdates {
+			updaterController.updater.checkForUpdatesInBackground()
+		}
 	}
 
 	func checkForUpdates() {

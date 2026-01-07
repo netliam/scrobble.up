@@ -33,6 +33,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 	private let core: CoreDataStack = .shared
 	private let appState: AppState = .shared
 	private let dockIconManager: DockIconManager = .shared
+	
+	let updaterViewModel = UpdaterViewModel()
 
 	var menuController = MenuController()
 
