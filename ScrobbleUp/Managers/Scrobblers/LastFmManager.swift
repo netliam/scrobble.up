@@ -100,7 +100,7 @@ final class LastFmManager: ObservableObject {
 
 	}
     
-	func fetchTrackInfo(artist: String, track: String) async throws -> TrackInfo? {
+	func fetchTrackInfo(artist: String, track: String) async -> TrackInfo? {
 		let trackInfoParams = TrackInfoParams(artist: artist, track: track)
 
 		do {
@@ -203,7 +203,7 @@ final class LastFmManager: ObservableObject {
 
 	// MARK: - Artist Functions
 
-	func fetchArtistInfo(artist: String, autocorrect: Bool = true) async throws -> ArtistInfo? {
+	func fetchArtistInfo(artist: String, autocorrect: Bool = true) async -> ArtistInfo? {
 		let artistInfoParams = ArtistInfoParams(
 			term: artist, criteria: .artist, autocorrect: autocorrect)
 
@@ -373,22 +373,19 @@ final class LastFmManager: ObservableObject {
 	// MARK: - Misc Functions
 
 	func fetchArtworkURL(artist: String, track: String, album: String?) async -> URL? {
-		do {
-			let trackInfo = try await fetchTrackInfo(artist: artist, track: track)
+        if let album = album, !album.isEmpty {
+            let albumInfo = await fetchAlbumInfo(artist: artist, album: album)
+            if let images = albumInfo?.image,
+               let artwork = bestImageURL(images: images) {
+                return artwork
+            }
+        }
+
+			let trackInfo =  await fetchTrackInfo(artist: artist, track: track)
 			if let images = trackInfo?.album?.image,
 			   let artwork = bestImageURL(images: images) {
 				return artwork
 			}
-		} catch {
-		}
-		
-		if let album = album, !album.isEmpty {
-			let albumInfo = await fetchAlbumInfo(artist: artist, album: album)
-			if let images = albumInfo?.image,
-			   let artwork = bestImageURL(images: images) {
-				return artwork
-			}
-		}
 		
 		return nil
 	}

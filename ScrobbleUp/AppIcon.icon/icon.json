@@ -7,8 +7,8 @@
           "blend-mode" : "normal",
           "fill" : {
             "linear-gradient" : [
-              "extended-srgb:1.00000,0.21961,0.23529,1.00000",
-              "display-p3:0.45982,0.13084,0.13658,1.00000"
+              "display-p3:1.00000,0.63083,0.62424,1.00000",
+              "display-p3:1.00000,0.28049,0.32603,1.00000"
             ],
             "orientation" : {
               "start" : {

@@ -158,19 +158,15 @@ final class ListenBrainzManager: ObservableObject {
     // MARK: - Artwork
 
     func fetchArtworkURL(artist: String, track: String, album: String?) async -> URL? {
-        // Try to get recording MBID first
         guard let mbid = try? await lookupRecordingMBID(artist: artist, track: track) else {
-            // If no recording found, try album artwork
             if let album = album, !album.isEmpty {
                 return await fetchAlbumArtworkURL(artist: artist, album: album)
             }
             return nil
         }
         
-        // Rate limit before making request
         await MusicBrainzRateLimiter.shared.waitIfNeeded()
         
-        // Fetch recording info from MusicBrainz to get release info
         guard let recordingURL = URL(string: "https://musicbrainz.org/ws/2/recording/\(mbid)?inc=releases&fmt=json") else {
             return nil
         }
@@ -178,11 +174,9 @@ final class ListenBrainzManager: ObservableObject {
         do {
             let json = try await http.getJSON(url: recordingURL, headers: nil)
             
-            // Get the first release that has cover art
             if let releases = json["releases"] as? [[String: Any]] {
                 for release in releases {
                     if let releaseId = release["id"] as? String {
-                        // Check if cover art exists via Cover Art Archive
                         if let artworkURL = await fetchCoverArtURL(releaseId: releaseId) {
                             return artworkURL
                         }
@@ -190,13 +184,11 @@ final class ListenBrainzManager: ObservableObject {
                 }
             }
         } catch {
-            // Only log non-503 errors (503 is expected when rate limited)
             if case HTTPError.httpError(let statusCode, _) = error, statusCode != 503 {
                 print("Error fetching recording info from MusicBrainz: \(error)")
             }
         }
         
-        // Fallback to album artwork if available
         if let album = album, !album.isEmpty {
             return await fetchAlbumArtworkURL(artist: artist, album: album)
         }
@@ -223,7 +215,6 @@ final class ListenBrainzManager: ObservableObject {
                 return await fetchCoverArtURL(releaseId: releaseId)
             }
         } catch {
-            // Only log non-503 errors
             if case HTTPError.httpError(let statusCode, _) = error, statusCode != 503 {
                 print("Error fetching album from MusicBrainz: \(error)")
             }
@@ -241,24 +232,19 @@ final class ListenBrainzManager: ObservableObject {
             let json = try await http.getJSON(url: url, headers: nil)
             let images = json["images"] as? [[String: Any]]
             
-            // Prefer front cover
             if let frontCover = images?.first(where: { image in
                 let types = image["types"] as? [String]
                 return types?.contains("Front") ?? false
             }), let imageURL = frontCover["image"] as? String {
-                // Force HTTPS for image URLs (CoverArtArchive returns HTTP by default)
                 let secureURL = imageURL.replacingOccurrences(of: "http://", with: "https://")
                 return URL(string: secureURL)
             }
             
-            // Fallback to first available image
             if let firstImage = images?.first, let imageURL = firstImage["image"] as? String {
-                // Force HTTPS for image URLs (CoverArtArchive returns HTTP by default)
                 let secureURL = imageURL.replacingOccurrences(of: "http://", with: "https://")
                 return URL(string: secureURL)
             }
         } catch {
-            // Cover art not available for this release
             return nil
         }
         
@@ -415,7 +401,6 @@ final class ListenBrainzManager: ObservableObject {
             let recordings = json["recordings"] as? [[String: Any]]
             return recordings?.first?["id"] as? String
         } catch {
-            // Don't log 503 errors (rate limiting is expected)
             if case HTTPError.httpError(let statusCode, _) = error, statusCode == 503 {
                 return nil
             }
