@@ -13,10 +13,11 @@
 
 ### Features
 - Scrobble to Last.fm & ListenBrainz
-- Track plays from a wide range of music players
+- Track listens from a wide range of music players
 - Similar artists and track suggestions from Last.fm
 - Like syncing between Apple Music, ListenBrainz, and Last.fm
 - Display track artwork in dock
+- Desktop widget for displaying the current track
 - Global shortcut for liking current track
 - Free forever
 
@@ -24,7 +25,6 @@
 
 <h1 align="center">
 <img src="Assets/Menu_Screenshot.png" width="300" alt="Menu Screenshot" >
-<img src="Assets/Scrobble_Log_Screenshot.png" width="300" alt="Scrobble Log Screenshot" >
 <h1 />
   
 ## Installation

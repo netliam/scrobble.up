@@ -145,8 +145,10 @@ jobs:
         uses: ghalactic/github-release-from-tag@v6
         with:
           assets: |
-            ${{ runner.temp }}/${{ env.APP_NAME }}.dmg
-            ${{ runner.temp }}/${{ env.APP_NAME }}.zip
+            - path: ${{ runner.temp }}/${{ env.APP_NAME }}.dmg
+              name: scrobble.up.dmg
+            - path: ${{ runner.temp }}/${{ env.APP_NAME }}.zip
+              name: scrobble.up.zip
 
       - name: Deploy to GitHub Pages
         run: |
