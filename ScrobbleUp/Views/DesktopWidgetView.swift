@@ -172,7 +172,7 @@ struct DesktopWidgetView: View {
 			showFullInfo = true
 		}
 
-		DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+		DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
 			withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
 				showFullInfo = false
 			}
