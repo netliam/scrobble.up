@@ -112,7 +112,7 @@ jobs:
           SPARKLE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
         run: |
           brew install create-dmg
-          
+
           create-dmg \
             --volname "$APP_NAME" \
             --volicon "Assets/AppIcon.icns" \
@@ -122,14 +122,14 @@ jobs:
             --hide-extension "$APP_NAME.app" \
             "$RUNNER_TEMP/$APP_NAME.dmg" \
             "$RUNNER_TEMP/export/$APP_NAME.app"
-          
+
           # Sparkle ZIP & appcast
           curl -L -o /tmp/Sparkle.tar.xz https://github.com/sparkle-project/Sparkle/releases/download/2.6.4/Sparkle-2.6.4.tar.xz
           tar -xf /tmp/Sparkle.tar.xz -C /tmp
-          
+
           mkdir -p "$RUNNER_TEMP/releases"
           ditto -c -k --keepParent "$RUNNER_TEMP/export/$APP_NAME.app" "$RUNNER_TEMP/releases/$APP_NAME.zip"
-          
+
           printf '%s' "$SPARKLE_KEY" > "$RUNNER_TEMP/sparkle_key"
           /tmp/bin/generate_appcast \
             --ed-key-file "$RUNNER_TEMP/sparkle_key" \
@@ -138,25 +138,23 @@ jobs:
             -o "$RUNNER_TEMP/appcast.xml" \
             "$RUNNER_TEMP/releases"
           rm "$RUNNER_TEMP/sparkle_key"
-          
+
           cp "$RUNNER_TEMP/releases/$APP_NAME.zip" "$RUNNER_TEMP/$APP_NAME.zip"
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
+      - name: GitHub Release from Tag
+        uses: ghalactic/github-release-from-tag@v6
         with:
-          tag_name: ${{ github.ref_name }}
-          make_latest: true
-          files: |
+          assets: |
             ${{ runner.temp }}/${{ env.APP_NAME }}.dmg
             ${{ runner.temp }}/${{ env.APP_NAME }}.zip
 
       - name: Deploy to GitHub Pages
         run: |
           mkdir -p pages
-          
+
           # Fetch existing nightly appcast so we don't overwrite it
           curl -fsSL https://netliam.github.io/scrobble.up/appcast-nightly.xml -o pages/appcast-nightly.xml || true
-          
+
           # Add our release appcast
           cp "$RUNNER_TEMP/appcast.xml" pages/appcast.xml
 
