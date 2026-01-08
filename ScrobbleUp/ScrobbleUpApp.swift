@@ -33,8 +33,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 	private let core: CoreDataStack = .shared
 	private let appState: AppState = .shared
 	private let dockIconManager: DockIconManager = .shared
-	
-	let updaterViewModel = UpdaterViewModel()
 
 	var menuController = MenuController()
 
@@ -138,11 +136,30 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
 	// MARK: - Activation Policy
 
-	private func updateActivationPolicy() {
-		if UserDefaults.standard.get(\.showIconInDock) {
-			NSApp.setActivationPolicy(.regular)
-		} else {
-			NSApp.setActivationPolicy(.accessory)
-		}
-	}
+    private func updateActivationPolicy() {
+        let shouldShow = UserDefaults.standard.get(\.showIconInDock)
+        
+        if shouldShow {
+            NSApp.setActivationPolicy(.regular)
+        } else {
+            let settingsWasVisible = NSApp.windows.contains {
+                $0.isVisible && $0.canBecomeKey && $0.title.contains("General")
+            }
+            let windowFrame = appState.settingsWindowController?.window?.frame
+            
+            NSAnimationContext.beginGrouping()
+            NSAnimationContext.current.duration = 0
+            
+            NSApp.setActivationPolicy(.accessory)
+            
+            if settingsWasVisible {
+                AppState.shared.openSettings()
+                if let frame = windowFrame {
+                    appState.settingsWindowController?.window?.setFrame(frame, display: false, animate: false)
+                }
+            }
+            
+            NSAnimationContext.endGrouping()
+        }
+    }
 }
