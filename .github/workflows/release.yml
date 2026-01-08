@@ -134,6 +134,7 @@ jobs:
           /tmp/bin/generate_appcast \
             --ed-key-file "$RUNNER_TEMP/sparkle_key" \
             --download-url-prefix "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/" \
+            --release-notes-url-prefix "https://github.com/${{ github.repository }}/releases/${{ github.ref_name }}" \
             -o "$RUNNER_TEMP/appcast.xml" \
             "$RUNNER_TEMP/releases"
           rm "$RUNNER_TEMP/sparkle_key"
