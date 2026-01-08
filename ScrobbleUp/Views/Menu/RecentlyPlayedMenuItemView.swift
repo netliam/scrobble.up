@@ -21,22 +21,12 @@ class RecentlyPlayedMenuItemView: NSView {
 	private var trackingAreaRef: NSTrackingArea?
 
 	private let hoverCornerRadius: CGFloat = 6
-    
-    private let highlightView: NSVisualEffectView = {
-        let view = NSVisualEffectView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.material = .selection
-        view.state = .active
-        view.wantsLayer = true
-        view.layer?.cornerRadius = 6
-        view.isHidden = true
-        return view
-    }()
 
 	private let selectionView: NSVisualEffectView = {
 		let view = NSVisualEffectView()
 		view.translatesAutoresizingMaskIntoConstraints = false
 		view.material = .selection
+        view.isEmphasized = true
 		view.state = .active
 		view.wantsLayer = true
 		view.layer?.cornerRadius = 6
