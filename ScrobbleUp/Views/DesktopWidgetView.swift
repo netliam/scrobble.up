@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+@MainActor
 struct DesktopWidgetView: View {
 	@ObservedObject var appState: AppState
 	@ObservedObject var playerManager: PlayerManager = .shared
@@ -18,6 +19,7 @@ struct DesktopWidgetView: View {
 
 	@State private var displayedTitle: String = ""
 	@State private var displayedArtist: String = ""
+	@State private var hideTask: Task<Void, Never>?
 
 	private let animationDuration: Double = 0.5
 	private let widgetSize: CGFloat = 160
@@ -62,6 +64,9 @@ struct DesktopWidgetView: View {
 		.onAppear {
 			displayedTitle = appState.currentTrack.title
 			displayedArtist = appState.currentTrack.artist
+		}
+		.onDisappear {
+			hideTask?.cancel()
 		}
 		.onChange(of: appState.currentTrack.title) { oldTitle, newTitle in
 			guard newTitle != oldTitle else { return }
@@ -165,6 +170,8 @@ struct DesktopWidgetView: View {
 	}
 
 	private func onTrackChanged() {
+		hideTask?.cancel()
+		
 		displayedTitle = appState.currentTrack.title
 		displayedArtist = appState.currentTrack.artist
 
@@ -172,7 +179,10 @@ struct DesktopWidgetView: View {
 			showFullInfo = true
 		}
 
-		DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+		hideTask = Task { @MainActor in
+			try? await Task.sleep(nanoseconds: 5_000_000_000)
+			guard !Task.isCancelled else { return }
+			
 			withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
 				showFullInfo = false
 			}

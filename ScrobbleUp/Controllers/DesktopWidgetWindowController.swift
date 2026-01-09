@@ -52,41 +52,39 @@ final class DesktopWidgetWindowController {
 	}
 
 	func showWindow() {
-		guard window == nil else {
-			window?.orderFrontRegardless()
+		if let existingWindow = window {
+			existingWindow.orderFrontRegardless()
 			return
 		}
 
         let contentView = DesktopWidgetView(appState: .shared)
-
-        let hostingView = NSHostingView(rootView: contentView)  // Just regular NSHostingView
+        let hostingView = NSHostingView(rootView: contentView)
         hostingView.frame = NSRect(x: 0, y: 0, width: 200, height: 200)
 
-        let window = DesktopWidgetWindow(
+        let newWindow = DesktopWidgetWindow(
             contentRect: NSRect(x: 100, y: 100, width: 200, height: 200),
             styleMask: [.borderless],
             backing: .buffered,
             defer: false
         )
 
-        window.contentView = hostingView
-        window.isOpaque = false
-        window.backgroundColor = .clear
-        window.hasShadow = true
-        window.isMovableByWindowBackground = true
-        window.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
+        newWindow.contentView = hostingView
+        newWindow.isOpaque = false
+        newWindow.backgroundColor = .clear
+        newWindow.hasShadow = true
+        newWindow.isMovableByWindowBackground = true
+        newWindow.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
         
-        window.ignoresMouseEvents = false
-        window.acceptsMouseMovedEvents = true
+        newWindow.ignoresMouseEvents = false
+        newWindow.acceptsMouseMovedEvents = true
 
-        self.window = window
+        self.window = newWindow
         updateWindowLevel()
-        window.orderFrontRegardless()
+        newWindow.orderFrontRegardless()
 	}
 
 	func hideWindow() {
-		window?.orderFrontRegardless()
-		window = nil
+		window?.orderOut(nil)
 	}
 
 	private func updateWindowLevel() {
