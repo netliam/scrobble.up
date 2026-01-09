@@ -20,6 +20,7 @@ final class RecentTracksUpdater {
 	// MARK: - Cache
 
 	private var trackInfoCache: [String: TrackInfo] = [:]
+	private var lastDisplayedTracks: [String] = [] // Track cache keys for displayed items
 
 	// MARK: - Public API
 
@@ -38,14 +39,42 @@ final class RecentTracksUpdater {
 
 	func updateRecentTrackItems(_ items: [NSMenuItem], with entries: [LogEntry]) {
 		DispatchQueue.main.async {
+			// Build array of new cache keys
+			let newTrackKeys = entries.prefix(items.count).map { self.createCacheKey(for: $0) }
+			
 			// Update items with entries
 			for (index, entry) in entries.prefix(items.count).enumerated() {
 				let item = items[index]
+				let cacheKey = newTrackKeys[index]
+				let isNewTrack = index >= self.lastDisplayedTracks.count || self.lastDisplayedTracks[index] != cacheKey
+				
+				// Configure the item (this will use cached artwork if available)
 				self.configureTrackItem(item, with: entry)
-				self.loadArtwork(for: entry, into: item)
+				
+				// Check if we're currently showing a placeholder (meaning no cached artwork)
+				let needsArtwork: Bool
+				if let view = item.view as? RecentlyPlayedMenuItemView {
+					// If the image is the placeholder, we need to fetch artwork
+					needsArtwork = self.artworkManager.getCachedArtwork(
+						artist: entry.artist,
+						track: entry.title,
+						album: entry.album
+					) == nil
+				} else {
+					needsArtwork = true
+				}
+				
+				// Load artwork if it's a new track OR if we don't have cached artwork
+				if isNewTrack || needsArtwork {
+					self.loadArtwork(for: entry, into: item)
+				}
+				
 				self.loadTrackDetails(for: entry, into: item)
 			}
 
+			// Update tracking array
+			self.lastDisplayedTracks = newTrackKeys
+			
 			// Hide unused items
 			for index in entries.count..<5 {
 				let item = items[index]
@@ -63,16 +92,29 @@ final class RecentTracksUpdater {
 		item.isHidden = false
 		item.isEnabled = true
 
-		let placeholderImage = artworkManager.placeholder().styled(
-			size: NSSize(width: 32, height: 32),
-			cornerRadius: 4
-		)
+		// Check cache synchronously first for instant display
+		let artwork: NSImage?
+		if let cachedArtwork = artworkManager.getCachedArtwork(
+			artist: entry.artist,
+			track: entry.title,
+			album: entry.album
+		) {
+			artwork = cachedArtwork.styled(
+				size: NSSize(width: 32, height: 32),
+				cornerRadius: 4
+			)
+		} else {
+			artwork = artworkManager.placeholder().styled(
+				size: NSSize(width: 32, height: 32),
+				cornerRadius: 4
+			)
+		}
 
 		if let view = item.view as? RecentlyPlayedMenuItemView {
-			view.configure(title: entry.title, subtitle: entry.artist, image: placeholderImage)
+			view.configure(title: entry.title, subtitle: entry.artist, image: artwork)
 		} else {
 			let view = RecentlyPlayedMenuItemView(width: 260)
-			view.configure(title: entry.title, subtitle: entry.artist, image: placeholderImage)
+			view.configure(title: entry.title, subtitle: entry.artist, image: artwork)
 			item.view = view
 		}
 	}
@@ -89,6 +131,7 @@ final class RecentTracksUpdater {
 	// MARK: - Artwork Loading
 
 	private func loadArtwork(for entry: LogEntry, into item: NSMenuItem) {
+		// Always attempt to fetch - fetchArtwork will return immediately if cached
 		Task {
 			if let artwork = await artworkManager.fetchArtwork(
 				artist: entry.artist,
@@ -96,6 +139,12 @@ final class RecentTracksUpdater {
 				album: entry.album
 			) {
 				await MainActor.run {
+					// Verify this item still represents the same track before updating
+					let currentKey = item.representedObject as? String
+					let entryKey = self.createCacheKey(for: entry)
+					
+					guard currentKey == entryKey else { return }
+					
 					if let view = item.view as? RecentlyPlayedMenuItemView {
 						view.image = artwork.styled(
 							size: NSSize(width: 32, height: 32),
@@ -119,8 +168,7 @@ final class RecentTracksUpdater {
 
 		Task { [weak self] in
 			guard let self else { return }
-			do {
-				if let info = try await lastFm.fetchTrackInfo(
+				if let info = await lastFm.fetchTrackInfo(
 					artist: entry.artist,
 					track: entry.title
 				) {
@@ -129,7 +177,6 @@ final class RecentTracksUpdater {
 						self.buildSubmenu(for: entry, trackInfo: info, item: item)
 					}
 				}
-			} catch {}
 		}
 	}
 

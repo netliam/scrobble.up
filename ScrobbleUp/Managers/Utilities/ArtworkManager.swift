@@ -2,22 +2,36 @@ import AppKit
 import Foundation
 import os.lock
 
-final class ArtworkManager {
+final class ArtworkManager: @unchecked Sendable {
 
 	static let shared = ArtworkManager()
 
 	private let imageCache = NSCache<NSString, NSImage>()
 	private let urlCache = NSCache<NSString, NSURL>()
-	private var notFoundCache = Set<String>() // Cache tracks with no artwork
+	private var notFoundCache = Set<String>()
 	private let notFoundLock = OSAllocatedUnfairLock<Void>(initialState: ())
 
 	private init() {
-		imageCache.totalCostLimit = 30 * 1024 * 1024 // 30 MB
-		imageCache.countLimit = 100
-		urlCache.countLimit = 200
+		imageCache.totalCostLimit = 50 * 1024 * 1024
+		imageCache.countLimit = 200
+		urlCache.countLimit = 300
 	}
 
 	// MARK: - Public Methods
+	
+	func getCachedArtwork(artist: String, track: String, album: String? = nil) -> NSImage? {
+		let cacheKey = makeCacheKey(artist: artist, track: track, album: album)
+		
+		let isNotFound = notFoundLock.withLock {
+			notFoundCache.contains(cacheKey)
+		}
+		
+		if isNotFound {
+			return nil
+		}
+		
+		return imageCache.object(forKey: cacheKey as NSString)
+	}
 
 	func fetchArtwork(artist: String, track: String, album: String? = nil) async -> NSImage? {
 		let cacheKey = makeCacheKey(artist: artist, track: track, album: album)
@@ -43,18 +57,20 @@ final class ArtworkManager {
 		}
 		
 		let artworkSource = UserDefaults.standard.get(\.artworkSource)
-		let artworkURL = await fetchArtworkURL(
-			artist: artist,
-			track: track,
-			album: album,
-			source: artworkSource
-		)
+		
+		let artworkURL = await withTimeout(seconds: 10) {
+            await self.fetchArtworkURL(
+				artist: artist,
+				track: track,
+				album: album,
+				source: artworkSource
+			)
+		}
 		
 		guard let artworkURL = artworkURL else {
-			notFoundLock.withLock {
+			_ = notFoundLock.withLock {
 				notFoundCache.insert(cacheKey)
 			}
-			print("No artwork URL found for: \(artist) - \(track)" + (album.map { " (\($0))" } ?? ""))
 			return nil
 		}
 		
@@ -81,7 +97,7 @@ final class ArtworkManager {
 	
 	func cacheArtwork(_ image: NSImage, artist: String, track: String, album: String?) {
 		let cacheKey = makeCacheKey(artist: artist, track: track, album: album)
-		let cost = Int(image.size.width * image.size.height * 4) // Approximate byte size
+		let cost = Int(image.size.width * image.size.height * 4)
 		imageCache.setObject(image, forKey: cacheKey as NSString, cost: cost)
 	}
 
@@ -116,39 +132,37 @@ final class ArtworkManager {
 		album: String?,
 		source: ArtworkSource
 	) async -> URL? {
-		let primaryURL: URL?
+		async let primaryURL = fetchFromSource(source: source, artist: artist, track: track, album: album)
+		
+		if let album = album, !album.isEmpty {
+			let fallbackSource: ArtworkSource = source == .lastFm ? .musicBrainz : .lastFm
+			async let fallbackURL = fetchFromSource(source: fallbackSource, artist: artist, track: track, album: album)
+			
+			let primary = await primaryURL
+			if let primary = primary {
+				return primary
+			}
+			return await fallbackURL
+		} else {
+			return await primaryURL
+		}
+	}
+	
+	private func fetchFromSource(
+		source: ArtworkSource,
+		artist: String,
+		track: String,
+		album: String?
+	) async -> URL? {
 		switch source {
 		case .lastFm:
-			primaryURL = await LastFmManager.shared.fetchArtworkURL(
-				artist: artist,
-				track: track,
-				album: album
-			)
-		case .musicBrainz:
-			primaryURL = await ListenBrainzManager.shared.fetchArtworkURL(
-				artist: artist,
-				track: track,
-				album: album
-			)
-		}
-		
-		if let primaryURL = primaryURL {
-			return primaryURL
-		}
-		
-		guard album != nil && !album!.isEmpty else {
-			return nil
-		}
-		
-		switch source {
-		case .lastFm:
-			return await ListenBrainzManager.shared.fetchArtworkURL(
-				artist: artist,
-				track: track,
-				album: album
-			)
-		case .musicBrainz:
 			return await LastFmManager.shared.fetchArtworkURL(
+				artist: artist,
+				track: track,
+				album: album
+			)
+		case .musicBrainz:
+			return await ListenBrainzManager.shared.fetchArtworkURL(
 				artist: artist,
 				track: track,
 				album: album
@@ -159,7 +173,11 @@ final class ArtworkManager {
 	private func loadNSImage(from url: URL) async -> NSImage? {
 		do {
 			try Task.checkCancellation()
-			let (data, _) = try await URLSession.shared.data(from: url)
+			
+			var request = URLRequest(url: url)
+			request.timeoutInterval = 5.0
+			
+			let (data, _) = try await URLSession.shared.data(for: request)
 			try Task.checkCancellation()
 			return NSImage(data: data)
 		} catch is CancellationError {
@@ -168,6 +186,25 @@ final class ArtworkManager {
 			let nsError = error as NSError
 			if nsError.domain != NSURLErrorDomain || nsError.code != NSURLErrorCancelled {
 				print("Image load error: \(error)")
+			}
+			return nil
+		}
+	}
+	
+	private func withTimeout<T>(seconds: TimeInterval, operation: @escaping () async -> T?) async -> T? {
+		await withTaskGroup(of: T?.self) { group in
+			group.addTask {
+				await operation()
+			}
+			
+			group.addTask {
+				try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+				return nil
+			}
+			
+			if let result = await group.next() {
+				group.cancelAll()
+				return result
 			}
 			return nil
 		}

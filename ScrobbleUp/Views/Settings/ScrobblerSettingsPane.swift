@@ -110,9 +110,9 @@ struct ScrobblerSettingsPane: View {
 	private var artworkSourceDescription: String {
 		switch artworkSource {
 		case .lastFm:
-			return "Last.fm provides good coverage but may be slower. Falls back to MusicBrainz if unavailable."
+			return "Last.fm provides more accurate results than MusicBrainz, and is generally faster. Falls back to MusicBrainz if unavailable."
 		case .musicBrainz:
-			return "MusicBrainz is rate-limited (1 req/sec) but has comprehensive artwork. Falls back to Last.fm if unavailable."
+			return "MusicBrainz is rate-limited (1 req/sec) and may not always return the most accurate artwork. Falls back to Last.fm if unavailable."
 		}
 	}
 }

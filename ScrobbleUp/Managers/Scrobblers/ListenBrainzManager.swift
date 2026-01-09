@@ -158,10 +158,15 @@ final class ListenBrainzManager: ObservableObject {
     // MARK: - Artwork
 
     func fetchArtworkURL(artist: String, track: String, album: String?) async -> URL? {
-        guard let mbid = try? await lookupRecordingMBID(artist: artist, track: track) else {
-            if let album = album, !album.isEmpty {
-                return await fetchAlbumArtworkURL(artist: artist, album: album)
+        // If we have album info, try album artwork first (faster)
+        if let album = album, !album.isEmpty {
+            if let artworkURL = await fetchAlbumArtworkURL(artist: artist, album: album) {
+                return artworkURL
             }
+        }
+        
+        // Fall back to track lookup
+        guard let mbid = try? await lookupRecordingMBID(artist: artist, track: track) else {
             return nil
         }
         
@@ -175,11 +180,12 @@ final class ListenBrainzManager: ObservableObject {
             let json = try await http.getJSON(url: recordingURL, headers: nil)
             
             if let releases = json["releases"] as? [[String: Any]] {
-                for release in releases {
-                    if let releaseId = release["id"] as? String {
-                        if let artworkURL = await fetchCoverArtURL(releaseId: releaseId) {
-                            return artworkURL
-                        }
+                // Try first 3 releases concurrently for better performance
+                let releaseIds = releases.prefix(3).compactMap { $0["id"] as? String }
+                
+                for releaseId in releaseIds {
+                    if let artworkURL = await fetchCoverArtURL(releaseId: releaseId) {
+                        return artworkURL
                     }
                 }
             }
@@ -187,10 +193,6 @@ final class ListenBrainzManager: ObservableObject {
             if case HTTPError.httpError(let statusCode, _) = error, statusCode != 503 {
                 print("Error fetching recording info from MusicBrainz: \(error)")
             }
-        }
-        
-        if let album = album, !album.isEmpty {
-            return await fetchAlbumArtworkURL(artist: artist, album: album)
         }
         
         return nil
@@ -212,6 +214,7 @@ final class ListenBrainzManager: ObservableObject {
             let releases = json["releases"] as? [[String: Any]]
             
             if let releaseId = releases?.first?["id"] as? String {
+                // CoverArtArchive doesn't have rate limits, so fetch immediately
                 return await fetchCoverArtURL(releaseId: releaseId)
             }
         } catch {
@@ -224,6 +227,7 @@ final class ListenBrainzManager: ObservableObject {
     }
     
     private func fetchCoverArtURL(releaseId: String) async -> URL? {
+        // CoverArtArchive doesn't require rate limiting
         guard let url = URL(string: "https://coverartarchive.org/release/\(releaseId)") else {
             return nil
         }
