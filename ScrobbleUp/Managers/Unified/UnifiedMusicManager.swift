@@ -11,18 +11,23 @@ import Foundation
 import ScriptingBridge
 
 final class UnifiedMusicManager {
+	
+	// MARK: - Singleton
+	
 	static let shared = UnifiedMusicManager()
-
+	
+	// MARK: - Properties
+	
 	private let appState: AppState = .shared
-
-	private init() {
-		setupObservers()
-	}
-
 	private var lastAcceptedSource: MusicSource?
 	private var currentFetchingMethod: TrackFetchingMethod?
 	private var currentHandler: ((MusicInfo) -> Void)?
-	private var cancellables = Set<AnyCancellable>()
+	private var cancellables = Set<AnyCancellable>()	
+	// MARK: - Initialization
+	
+	private init() {
+		setupObservers()
+	}
 
 	// MARK: - Observers
 
@@ -47,13 +52,13 @@ final class UnifiedMusicManager {
 
 			if self.shouldAcceptTrack(info) {
 				handler(info)
+				
 				if let source = info.source {
 					Task { @MainActor in
-						print(source)
 						self.appState.currentActivePlayer = source
 					}
+					self.lastAcceptedSource = source
 				}
-				self.lastAcceptedSource = info.source
 			} else {
 				print("Ignoring track due to player preference")
 			}
@@ -75,8 +80,9 @@ final class UnifiedMusicManager {
 		MediaRemoteManager.shared.stop()
 
 		currentFetchingMethod = nil
+		
 		Task { @MainActor in
-			self.appState.currentActivePlayer = nil
+			appState.currentActivePlayer = nil
 		}
 	}
 

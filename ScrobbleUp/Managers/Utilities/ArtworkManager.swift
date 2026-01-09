@@ -1,24 +1,46 @@
 import AppKit
 import Foundation
 import os.lock
+import CryptoKit
 
 final class ArtworkManager: @unchecked Sendable {
-
+	
+	// MARK: - Singleton
+	
 	static let shared = ArtworkManager()
-
+	
+	// MARK: - Cache Configuration
+	
+	private static let imageCacheSizeLimit = 50 * 1024 * 1024 // 50MB
+	private static let imageCacheCountLimit = 200
+	private static let urlCacheCountLimit = 300
+	private static let artworkFetchTimeout: TimeInterval = 10.0
+	private static let imageLoadTimeout: TimeInterval = 5.0
+	
+	// MARK: - Properties
+	
+	@MainActor
 	private let imageCache = NSCache<NSString, NSImage>()
+	@MainActor
 	private let urlCache = NSCache<NSString, NSURL>()
-	private var notFoundCache = Set<String>()
+	
+	nonisolated(unsafe) private var notFoundCache = Set<String>()
 	private let notFoundLock = OSAllocatedUnfairLock<Void>(initialState: ())
+	
+	nonisolated(unsafe) private var keyToHashMap: [String: String] = [:]
+	private let hashMapLock = OSAllocatedUnfairLock<Void>(initialState: ())
 
 	private init() {
-		imageCache.totalCostLimit = 50 * 1024 * 1024
-		imageCache.countLimit = 200
-		urlCache.countLimit = 300
+		MainActor.assumeIsolated {
+			imageCache.totalCostLimit = Self.imageCacheSizeLimit
+			imageCache.countLimit = Self.imageCacheCountLimit
+			urlCache.countLimit = Self.urlCacheCountLimit
+		}
 	}
 
 	// MARK: - Public Methods
 	
+	@MainActor
 	func getCachedArtwork(artist: String, track: String, album: String? = nil) -> NSImage? {
 		let cacheKey = makeCacheKey(artist: artist, track: track, album: album)
 		
@@ -28,6 +50,14 @@ final class ArtworkManager: @unchecked Sendable {
 		
 		if isNotFound {
 			return nil
+		}
+		
+		let imageHash = hashMapLock.withLock {
+			keyToHashMap[cacheKey]
+		}
+		
+		if let hash = imageHash {
+			return imageCache.object(forKey: hash as NSString)
 		}
 		
 		return imageCache.object(forKey: cacheKey as NSString)
@@ -44,22 +74,29 @@ final class ArtworkManager: @unchecked Sendable {
 			return nil
 		}
 		
-		if let cachedImage = imageCache.object(forKey: cacheKey as NSString) {
+		let existingHash = hashMapLock.withLock {
+			keyToHashMap[cacheKey]
+		}
+		
+		if let hash = existingHash,
+		   let cachedImage = getCachedImage(forKey: hash) {
 			return cachedImage
 		}
 		
-		if let cachedURL = urlCache.object(forKey: cacheKey as NSString) as URL? {
-			if let image = await loadNSImage(from: cachedURL) {
-				let cost = Int(image.size.width * image.size.height * 4)
-				imageCache.setObject(image, forKey: cacheKey as NSString, cost: cost)
-				return image
-			}
+		if let cachedImage = getCachedImage(forKey: cacheKey) {
+			return cachedImage
+		}
+		
+		if let cachedURL = getCachedURL(forKey: cacheKey),
+		   let image = await loadNSImage(from: cachedURL) {
+			cacheImageWithHash(image, for: cacheKey)
+			return image
 		}
 		
 		let artworkSource = UserDefaults.standard.get(\.artworkSource)
 		
-		let artworkURL = await withTimeout(seconds: 10) {
-            await self.fetchArtworkURL(
+		let artworkURL = await withTimeout(seconds: Self.artworkFetchTimeout) {
+			await self.fetchArtworkURL(
 				artist: artist,
 				track: track,
 				album: album,
@@ -74,33 +111,36 @@ final class ArtworkManager: @unchecked Sendable {
 			return nil
 		}
 		
-		urlCache.setObject(artworkURL as NSURL, forKey: cacheKey as NSString)
+		cacheURL(artworkURL, forKey: cacheKey)
 		
 		guard let image = await loadNSImage(from: artworkURL) else {
 			return nil
 		}
 		
-		let cost = Int(image.size.width * image.size.height * 4)
-		imageCache.setObject(image, forKey: cacheKey as NSString, cost: cost)
+		cacheImageWithHash(image, for: cacheKey)
 		
 		return image
 	}
 
 	
+	@MainActor
 	func clearCache() {
 		imageCache.removeAllObjects()
 		urlCache.removeAllObjects()
 		notFoundLock.withLock {
 			notFoundCache.removeAll()
 		}
+		hashMapLock.withLock {
+			keyToHashMap.removeAll()
+		}
 	}
 	
-	func cacheArtwork(_ image: NSImage, artist: String, track: String, album: String?) {
+	func cacheArtwork(_ image: NSImage, artist: String, track: String, album: String?) async {
 		let cacheKey = makeCacheKey(artist: artist, track: track, album: album)
-		let cost = Int(image.size.width * image.size.height * 4)
-		imageCache.setObject(image, forKey: cacheKey as NSString, cost: cost)
+        cacheImageWithHash(image, for: cacheKey)
 	}
 
+	@MainActor
 	func placeholder() -> NSImage {
 		let size = NSSize(width: 64, height: 64)
 		let image = NSImage(size: size)
@@ -175,11 +215,14 @@ final class ArtworkManager: @unchecked Sendable {
 			try Task.checkCancellation()
 			
 			var request = URLRequest(url: url)
-			request.timeoutInterval = 5.0
+			request.timeoutInterval = Self.imageLoadTimeout
 			
 			let (data, _) = try await URLSession.shared.data(for: request)
 			try Task.checkCancellation()
-			return NSImage(data: data)
+			
+			return await MainActor.run {
+				NSImage(data: data)
+			}
 		} catch is CancellationError {
 			return nil
 		} catch {
@@ -208,5 +251,45 @@ final class ArtworkManager: @unchecked Sendable {
 			}
 			return nil
 		}
+	}
+	
+	// MARK: - Hash-based Deduplication
+	
+	@MainActor
+	private func cacheImageWithHash(_ image: NSImage, for cacheKey: String) {
+		guard let tiffData = image.tiffRepresentation else {
+			let cost = Int(image.size.width * image.size.height * 4)
+			imageCache.setObject(image, forKey: cacheKey as NSString, cost: cost)
+			return
+		}
+		
+		let hash = SHA256.hash(data: tiffData)
+		let hashString = hash.compactMap { String(format: "%02x", $0) }.joined()
+		
+		if imageCache.object(forKey: hashString as NSString) == nil {
+			let cost = Int(image.size.width * image.size.height * 4)
+			imageCache.setObject(image, forKey: hashString as NSString, cost: cost)
+		}
+		
+		hashMapLock.withLock {
+			keyToHashMap[cacheKey] = hashString
+		}
+	}
+	
+	// MARK: - Cache Helpers
+	
+	@MainActor
+	private func getCachedImage(forKey key: String) -> NSImage? {
+		return imageCache.object(forKey: key as NSString)
+	}
+	
+	@MainActor
+	private func getCachedURL(forKey key: String) -> URL? {
+		return urlCache.object(forKey: key as NSString) as URL?
+	}
+	
+	@MainActor
+	private func cacheURL(_ url: URL, forKey key: String) {
+		urlCache.setObject(url as NSURL, forKey: key as NSString)
 	}
 }

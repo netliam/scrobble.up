@@ -85,7 +85,7 @@ final class UnifiedScrobbleManager: ObservableObject {
 					}
 
 					if artworkSource == "MediaRemote", let artwork = artworkImage {
-						artworkManager.cacheArtwork(
+						await artworkManager.cacheArtwork(
 							artwork,
 							artist: entry.artist,
 							track: entry.title,

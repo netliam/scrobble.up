@@ -9,18 +9,26 @@ import Combine
 import Foundation
 import LastFM
 
+@MainActor
 final class LastFmManager: ObservableObject {
-
+	
+	// MARK: - Singleton
+	
 	static let shared = LastFmManager()
-
-	var sessionKey: String?
+	
+	// MARK: - Published Properties
+	
 	@Published private(set) var username: String?
+	
+	// MARK: - Properties
+	
+	var sessionKey: String?
 
 	private let lastFM: LastFM
-
 	private let api = "https://ws.audioscrobbler.com/2.0/"
-	private var apiKey = Secrets.lastFmApiKey
-	private var apiSecret = Secrets.lastFmApiSecret
+	private let apiKey = Secrets.lastFmApiKey
+	private let apiSecret = Secrets.lastFmApiSecret	
+	// MARK: - Initialization
 
 	private init() {
 		self.lastFM = LastFM(
@@ -36,18 +44,19 @@ final class LastFmManager: ObservableObject {
 
 	func getMobileSession(username: String, password: String) async throws {
 		do {
-            // This isn't actually deprecated, but the LastFM package marks it as such
+			// This isn't actually deprecated, but the LastFM package marks it as such
 			let session = try await lastFM.Auth.getMobileSession(
-				username: username, password: password)
+				username: username,
+				password: password
+			)
 
 			self.sessionKey = session.key
 			self.username = session.name
 			KeychainHelper.shared.set(session.key, for: "lastfm_sessionKey")
 			KeychainHelper.shared.set(username, for: "lastfm_username")
-		} catch LastFMError.NoData {
-			print("No data was returned.")
 		} catch {
-			print("Unexpected Error: \(error)")
+			print("Failed to get mobile session: \(error)")
+			throw error
 		}
 	}
 
@@ -60,44 +69,58 @@ final class LastFmManager: ObservableObject {
 
 	// MARK: - Track Functions
 
-	func updateNowPlaying(artist: String, track: String, album: String?, duration: Int?)
-		async throws
-	{
+	func updateNowPlaying(
+		artist: String,
+		track: String,
+		album: String?,
+		duration: Int?
+	) async throws {
 		guard let sk = sessionKey else { return }
+		guard let duration = duration else { return }
 
 		let trackNowPlayingParams = TrackNowPlayingParams(
-			artist: artist, track: track, album: album, duration: UInt(duration!))
+			artist: artist,
+			track: track,
+			album: album,
+			duration: UInt(duration)
+		)
 
 		do {
 			_ = try await lastFM.Track.updateNowPlaying(
-				params: trackNowPlayingParams, sessionKey: sk)
-		} catch LastFMError.LastFMServiceError(let errorType, let message) {
-			print("LastFM Error: \(errorType.rawValue) - \(message)")
+				params: trackNowPlayingParams,
+				sessionKey: sk
+			)
 		} catch {
-			print("Unexpected Error: \(error)")
+			print("Failed to update now playing: \(error)")
 		}
 	}
 
-	func scrobble(artist: String, track: String, timestamp: Int, album: String?, duration: Int?)
-		async throws
-	{
+	func scrobble(
+		artist: String,
+		track: String,
+		timestamp: Int,
+		album: String?,
+		duration: Int?
+	) async throws {
 		guard let sk = sessionKey else { return }
+		guard let duration = duration else { return }
 
 		var scrobbleParams = ScrobbleParams()
 
 		let scrobbleParamItem = ScrobbleParamItem(
-			artist: artist, track: track, timestamp: UInt(timestamp), album: album,
-			duration: UInt(duration!))
+			artist: artist,
+			track: track,
+			timestamp: UInt(timestamp),
+			album: album,
+			duration: UInt(duration)
+		)
 		try scrobbleParams.addItem(item: scrobbleParamItem)
 
 		do {
 			_ = try await lastFM.Track.scrobble(params: scrobbleParams, sessionKey: sk)
-		} catch LastFMError.LastFMServiceError(let errorType, let message) {
-			print("LastFM Error: \(errorType.rawValue) - \(message)")
 		} catch {
-			print("Unexpected Error: \(error)")
+			print("Failed to scrobble: \(error)")
 		}
-
 	}
     
 	func fetchTrackInfo(artist: String, track: String) async -> TrackInfo? {
@@ -126,12 +149,9 @@ final class LastFmManager: ObservableObject {
 
 		do {
 			try await lastFM.Track.love(params: loveTrackParams, sessionKey: sessionKey)
-		} catch LastFMError.LastFMServiceError(let errorType, let message) {
-			print("LastFM Error: \(errorType.rawValue) - \(message)")
 		} catch {
-			print("Unexpected Error: \(error)")
+			print("Failed to love track: \(error)")
 		}
-
 	}
 
 	func unloveTrack(track: String, artist: String) async throws {
@@ -141,12 +161,9 @@ final class LastFmManager: ObservableObject {
 
 		do {
 			try await lastFM.Track.unlove(params: unloveTrackParams, sessionKey: sessionKey)
-		} catch LastFMError.LastFMServiceError(let errorType, let message) {
-			print("LastFM Error: \(errorType.rawValue) - \(message)")
 		} catch {
-			print("Unexpected Error: \(error)")
+			print("Failed to unlove track: \(error)")
 		}
-
 	}
 
 	func isTrackLoved(artist: String, track: String) async -> Bool {
@@ -373,19 +390,21 @@ final class LastFmManager: ObservableObject {
 	// MARK: - Misc Functions
 
 	func fetchArtworkURL(artist: String, track: String, album: String?) async -> URL? {
-        if let album = album, !album.isEmpty {
-            let albumInfo = await fetchAlbumInfo(artist: artist, album: album)
-            if let images = albumInfo?.image,
-               let artwork = bestImageURL(images: images) {
-                return artwork
-            }
-        }
-
-			let trackInfo =  await fetchTrackInfo(artist: artist, track: track)
-			if let images = trackInfo?.album?.image,
+		// Try album artwork first if album is provided
+		if let album = album, !album.isEmpty {
+			let albumInfo = await fetchAlbumInfo(artist: artist, album: album)
+			if let images = albumInfo?.image,
 			   let artwork = bestImageURL(images: images) {
 				return artwork
 			}
+		}
+		
+		// Fallback to track artwork
+		let trackInfo = await fetchTrackInfo(artist: artist, track: track)
+		if let images = trackInfo?.album?.image,
+		   let artwork = bestImageURL(images: images) {
+			return artwork
+		}
 		
 		return nil
 	}

@@ -48,12 +48,12 @@ final class RecentTracksUpdater {
 				let cacheKey = newTrackKeys[index]
 				let isNewTrack = index >= self.lastDisplayedTracks.count || self.lastDisplayedTracks[index] != cacheKey
 				
-				// Configure the item (this will use cached artwork if available)
+				// Configure the item
 				self.configureTrackItem(item, with: entry)
 				
-				// Check if we're currently showing a placeholder (meaning no cached artwork)
+				// Check if we're currently showing a placeholder
 				let needsArtwork: Bool
-				if let view = item.view as? RecentlyPlayedMenuItemView {
+				if let _ = item.view as? RecentlyPlayedMenuItemView {
 					// If the image is the placeholder, we need to fetch artwork
 					needsArtwork = self.artworkManager.getCachedArtwork(
 						artist: entry.artist,
