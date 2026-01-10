@@ -93,7 +93,6 @@ jobs:
             -archivePath "$RUNNER_TEMP/$APP_NAME.xcarchive" \
             -exportPath "$RUNNER_TEMP/export" \
             -exportOptionsPlist ExportOptions.plist \
-            -allowProvisioningUpdates
 
       - name: Notarize
         env:
