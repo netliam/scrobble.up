@@ -7,8 +7,12 @@
       For the music
     </h3>
     <div align="center">
-      <img alt="GitHub License" src="https://img.shields.io/github/license/netliam/scrobble.up">
-      <img alt="GitHub Release" src="https://img.shields.io/github/v/release/netliam/scrobble.up">
+        <a href="https://github.com/netliam/scrobble.up/blob/main/LICENSE" target="_self">
+            <img alt="GitHub License" src="https://img.shields.io/github/license/netliam/scrobble.up">
+        </a>
+        <a href="https://github.com/netliam/scrobble.up/releases/latest" target="_self">
+            <img alt="GitHub Release" src="https://img.shields.io/github/v/release/netliam/scrobble.up">
+        </a>
     </div>
   </br>
 </h1>
@@ -33,8 +37,8 @@
 ### Screenshots
 
 <div align="center">
-<img src="Assets/Menu_Screenshot.png" width="300" alt="Menu Screenshot" >
-<img src="Assets/Desktop_Widget.png" width="200" alt="Desktop Widget" >
+    <img src="Assets/Menu_Screenshot.png" width="300" alt="Menu Screenshot" >
+    <img src="Assets/Desktop_Widget.png" width="200" alt="Desktop Widget" >
 </div>
   
 ## Installation
@@ -42,7 +46,9 @@
 - macOS **14 Sonoma** or later 
 
 ### Manual Installation (Currently the only option)
-<a href="https://github.com/netliam/scrobble.up/releases/latest/download/scrobble.up.dmg" target="_self"><img width="200" src="Assets/Download_for_MacOS.png" alt="Download for macOS" /></a>
+<a href="https://github.com/netliam/scrobble.up/releases/latest/download/scrobble.up.dmg" target="_self">
+    <img width="200" src="Assets/Download_for_MacOS.png" alt="Download for macOS" />
+</a>
 
 ---
 
@@ -64,5 +70,6 @@
 ## Credits & Acknowledgments
 
 - ### [**NowPlaying**](https://github.com/diego-castilho/NowPlaying) - The project that scrobble.up is based on.
-- ### [**boring.notch**](https://github.com/TheBoredTeam/boring.notch) - Much of the functionality for the like syncing feature comes from boring.notch. The README for scrobble.up is also based on boring.notch's.
-- ### [**LastFM.swift**](https://github.com/duhnnie/LastFM.swift) - Amazing library used for communicating with last.fm.
+- ### [**boring.notch**](https://github.com/TheBoredTeam/boring.notch) - Much of the functionality for the like syncing feature comes from boring.notch.
+- ### [**LastFM.swift**](https://github.com/duhnnie/LastFM.swift)
+- ### [**MediaRemote-Adapter**](https://github.com/ejbills/mediaremote-adapter)

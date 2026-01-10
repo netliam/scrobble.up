@@ -158,6 +158,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         
         if shouldShow {
             NSApp.setActivationPolicy(.regular)
+            if let window = appState.settingsWindowController?.window {
+                window.level = .floating
+            }
         } else {
             let settingsWasVisible = NSApp.windows.contains {
                 $0.isVisible && $0.canBecomeKey && $0.title.contains("General")
@@ -171,9 +174,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             
             if settingsWasVisible {
                 AppState.shared.openSettings()
-                if let frame = windowFrame {
-                    appState.settingsWindowController?.window?.setFrame(frame, display: false, animate: false)
+                if let window = appState.settingsWindowController?.window {
+                    window.level = .floating
+                    if let frame = windowFrame {
+                        window.setFrame(frame, display: false, animate: false)
+                    }
+                    window.orderFrontRegardless()
                 }
+                NSApp.activate(ignoringOtherApps: true)
             }
             
             NSAnimationContext.endGrouping()

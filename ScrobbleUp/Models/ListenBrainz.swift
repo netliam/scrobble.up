@@ -32,7 +32,7 @@ enum ListenBrainzError: LocalizedError {
 		case .networkError:
 			return "Network connection failed"
 		case .recordingNotFound:
-			return "Recording not found on MusicBrainz"
+			return "Track not found in MusicBrainz database. This track can still be scrobbled, but love/unlove requires a MusicBrainz entry."
 		case .apiError(let code, let message):
 			return "API error (\(code)): \(message)"
 		}

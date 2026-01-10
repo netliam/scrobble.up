@@ -28,7 +28,18 @@ struct GeneralSettingsPane: View {
 			}
 			Section("Dock") {
 				Toggle("Show icon in dock", isOn: $showIconInDock)
+					.onChange(of: showIconInDock) { oldValue, newValue in
+						if !newValue {
+							showArtworkInDock = false
+						}
+					}
 				Toggle("Show artwork in dock", isOn: $showArtworkInDock)
+					.disabled(!showIconInDock)
+                if !showIconInDock {
+                    Text("To enable show artwork in dock you must also enable show icon in dock.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
 			}
 			Section("Widget") {
 				Toggle("Show widget", isOn: $showDesktopWidget)

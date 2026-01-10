@@ -50,6 +50,9 @@ final class HTTPHelper {
     /// URL session for making requests
     let session: URLSession
     
+    /// Maximum number of retry attempts for TLS errors
+    private let maxRetries = 3
+    
     /// Creates an HTTPHelper with custom configuration
     init(userAgent: String, session: URLSession = .shared) {
         self.userAgent = userAgent
@@ -65,40 +68,86 @@ final class HTTPHelper {
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = 30
         configuration.timeoutIntervalForResource = 60
+        // Enable TLS 1.2 minimum for better compatibility
+        configuration.tlsMinimumSupportedProtocolVersion = .TLSv12
         self.session = URLSession(configuration: configuration)
+    }
+    
+    /// Helper to check if an error is a TLS error that should be retried
+    private func isTLSError(_ error: Error) -> Bool {
+        let nsError = error as NSError
+        // Check for TLS-related errors
+        if nsError.domain == NSURLErrorDomain {
+            return nsError.code == NSURLErrorSecureConnectionFailed ||  // -1200
+                   nsError.code == NSURLErrorServerCertificateUntrusted || // -1202
+                   nsError.code == NSURLErrorClientCertificateRejected     // -1205
+        }
+        return false
+    }
+    
+    /// Performs a request with retry logic for TLS errors
+    private func performWithRetry<T>(
+        maxAttempts: Int = 3,
+        operation: @escaping () async throws -> T
+    ) async throws -> T {
+        var lastError: Error?
+        
+        for attempt in 1...maxAttempts {
+            do {
+                return try await operation()
+            } catch {
+                lastError = error
+                
+                // Only retry on TLS errors
+                guard isTLSError(error), attempt < maxAttempts else {
+                    throw error
+                }
+                
+                // Exponential backoff: 0.5s, 1s, 2s
+                let delay = TimeInterval(0.5 * pow(2.0, Double(attempt - 1)))
+                print("TLS error on attempt \(attempt)/\(maxAttempts), retrying in \(delay)s...")
+                try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            }
+        }
+        
+        throw lastError ?? HTTPError.invalidResponse
     }
     
     /// Performs a GET request
     func get(url: URL, headers: [String: String]? = nil) async throws -> Data {
-        var request = URLRequest(url: url)
-        request.httpMethod = HTTPMethod.get.rawValue
-        request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-        
-        headers?.forEach { key, value in
-            request.setValue(value, forHTTPHeaderField: key)
+        return try await performWithRetry {
+            var request = URLRequest(url: url)
+            request.httpMethod = HTTPMethod.get.rawValue
+            request.setValue(self.userAgent, forHTTPHeaderField: "User-Agent")
+            request.setValue("application/json", forHTTPHeaderField: "Accept")
+            
+            headers?.forEach { key, value in
+                request.setValue(value, forHTTPHeaderField: key)
+            }
+            
+            let (data, response) = try await self.session.data(for: request)
+            try self.handleResponse(response)
+            return data
         }
-        
-        let (data, response) = try await session.data(for: request)
-        try handleResponse(response)
-        return data
     }
     
     /// Performs a POST request
     func post(url: URL, body: Data?, headers: [String: String]? = nil) async throws -> Data {
-        var request = URLRequest(url: url)
-        request.httpMethod = HTTPMethod.post.rawValue
-        request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.httpBody = body
-        
-        headers?.forEach { key, value in
-            request.setValue(value, forHTTPHeaderField: key)
+        return try await performWithRetry {
+            var request = URLRequest(url: url)
+            request.httpMethod = HTTPMethod.post.rawValue
+            request.setValue(self.userAgent, forHTTPHeaderField: "User-Agent")
+            request.setValue("application/json", forHTTPHeaderField: "Accept")
+            request.httpBody = body
+            
+            headers?.forEach { key, value in
+                request.setValue(value, forHTTPHeaderField: key)
+            }
+            
+            let (data, response) = try await self.session.data(for: request)
+            try self.handleResponse(response)
+            return data
         }
-        
-        let (data, response) = try await session.data(for: request)
-        try handleResponse(response)
-        return data
     }
     
     /// Performs a GET request and decodes the response as JSON dictionary
