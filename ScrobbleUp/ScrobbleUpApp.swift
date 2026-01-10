@@ -19,6 +19,23 @@ struct ScrobbleUpApp: App {
 		}
 		.commands {
 			CommandGroup(replacing: .newItem) {}
+            
+            CommandGroup(replacing: CommandGroupPlacement.appSettings) {
+                Button {
+                    appState.openSettings()
+                } label: {
+                    Label("Settings...", systemImage: "gear")
+                }
+                .keyboardShortcut(",", modifiers: .command)
+            }
+            
+            CommandGroup(replacing: CommandGroupPlacement.appInfo) {
+                Button {
+                    appDelegate.showAboutWindow()
+                } label: {
+                    Label("About scrobble.up", systemImage: "info.circle")
+                }
+            }
         }
 	}
 }
