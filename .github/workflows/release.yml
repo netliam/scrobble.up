@@ -22,9 +22,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Fetch tag annotations
-        run: git fetch --force --tags
-
       - name: Restore cache
         uses: actions/cache/restore@v4
         with:
@@ -113,7 +110,7 @@ jobs:
         env:
           SPARKLE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
         run: |
-          brew install create-dmg cmark xmlstarlet
+          brew install create-dmg cmark
 
           create-dmg \
             --volname "$APP_NAME" \
@@ -133,29 +130,13 @@ jobs:
           ditto -c -k --keepParent "$RUNNER_TEMP/export/$APP_NAME.app" "$RUNNER_TEMP/releases/$APP_NAME.zip"
           git tag -l --format='%(contents)' "${{ github.ref_name }}" | cmark > "$RUNNER_TEMP/releases/$APP_NAME.html"
 
-          # Fetch existing appcast to preserve history
-          curl -fsSL "https://netliam.github.io/scrobble.up/appcast.xml" -o "$RUNNER_TEMP/existing-appcast.xml" || true
-
           printf '%s' "$SPARKLE_KEY" > "$RUNNER_TEMP/sparkle_key"
-
-          # Generate new appcast for this release
           /tmp/bin/generate_appcast \
             --ed-key-file "$RUNNER_TEMP/sparkle_key" \
             --download-url-prefix "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/" \
-            -o "$RUNNER_TEMP/new-appcast.xml" \
+            -o "$RUNNER_TEMP/appcast.xml" \
             "$RUNNER_TEMP/releases"
           rm "$RUNNER_TEMP/sparkle_key"
-
-          # Merge appcasts
-          if [ -f "$RUNNER_TEMP/existing-appcast.xml" ]; then
-            # Extract new item
-            xmlstarlet sel -t -c "//channel/item" "$RUNNER_TEMP/new-appcast.xml" > "$RUNNER_TEMP/new-item.xml"
-
-            # Insert after </title> in existing appcast
-            sed -e "/<\/title>/r $RUNNER_TEMP/new-item.xml" "$RUNNER_TEMP/existing-appcast.xml" > "$RUNNER_TEMP/appcast.xml"
-          else
-            cp "$RUNNER_TEMP/new-appcast.xml" "$RUNNER_TEMP/appcast.xml"
-          fi
 
           cp "$RUNNER_TEMP/releases/$APP_NAME.zip" "$RUNNER_TEMP/$APP_NAME.zip"
 
@@ -167,7 +148,7 @@ jobs:
 
           gh release create "${{ github.ref_name }}" \
             --title "${{ github.ref_name }}" \
-            --notes "$NOTES" \
+            --notes-from-tag \
             "$RUNNER_TEMP/$APP_NAME.dmg#scrobble.up.dmg" \
             "$RUNNER_TEMP/$APP_NAME.zip#scrobble.up.zip"
 
