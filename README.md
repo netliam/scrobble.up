@@ -1,41 +1,45 @@
 <h1 align="center">
   <br>
     <img src="Assets/AppIcon.png" width="150" alt="scrobble.up Logo" />
-  <br>
+  </br>
     scrobble.up
     <h3 align="center"> 
-      For the music 
-    <h3 />
-  <br>
+      For the music
+    </h3>
+    <div align="center">
+      <img alt="GitHub License" src="https://img.shields.io/github/license/netliam/scrobble.up">
+      <img alt="GitHub Release" src="https://img.shields.io/github/v/release/netliam/scrobble.up">
+    </div>
+  </br>
 </h1>
-      
-**scrobble.up** is a lightweight free and open source scrobbler for macOS. 
+
+---
+
+**scrobble.up** is a lightweight music scrobbler for macOS that lives in your menu bar. Track your listening history across Last.fm and ListenBrainz, discover new music through Last.fm's similar tracks suggestion, and keep your favorite tracks synced across Apple Music. 
 
 ### Features
-- Lightweight (~80MB Memory Usage)
-- Scrobble to Last.fm & ListenBrainz
-- Track listens from a wide range of music players
-- Similar artists and track suggestions from Last.fm
-- Like syncing between Apple Music, ListenBrainz, and Last.fm
-- Display track artwork in dock
-- Desktop widget for displaying the current track
-- Global shortcuts 
-    - Bring Player to Front 
-    - Love Track (Works for Last.fm, ListenBrainz, Spotify, and Apple Music)
-- Free forever
+- **Lightweight & Native** - Uses ~80MB of memory, 100% Swift
+- **Universal Scrobbling** - Track listens to Last.fm and ListenBrainz simultaneously
+- **Wide Player Support** - Works with Apple Music, Spotify, and many other music players
+- **Music Discovery** - Get similar artists and tracks from Last.fm right in you menu bar
+- **Love Syncing** - Keep your favorite tracks synchronized across Apple Music, Last.fm, and ListenBrainz
+- **Rich Artwork Display** - Optionally display album art in your dock and desktop widget
+- **Desktop Widget** - Elegant widget shows what's currently playing
+- **Global Shortcuts** - Quick actions to bring your player forward or love tracks without switching apps
+- **Free & Open Source** - No subscriptions, no paid licenses, just GPLv3 forever
+
+
 
 ### Screenshots
 
-<h1 align="center">
+<div align="center">
 <img src="Assets/Menu_Screenshot.png" width="300" alt="Menu Screenshot" >
 <img src="Assets/Desktop_Widget.png" width="200" alt="Desktop Widget" >
-<h1 />
+</div>
   
 ## Installation
 **System Requirements:**  
 - macOS **14 Sonoma** or later  
-
----
 
 ### Manual Installation (Currently the only option)
 <a href="https://github.com/netliam/scrobble.up/releases/latest/download/scrobble.up.dmg" target="_self"><img width="200" src="Assets/Download_for_MacOS.png" alt="Download for macOS" /></a>
