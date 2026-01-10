@@ -128,10 +128,11 @@ jobs:
 
           mkdir -p "$RUNNER_TEMP/releases"
 
-          # Create release notes from tag message, convert markdown to HTML
-          git tag -l --format='%(contents)' "${{ github.ref_name }}" | cmark > "$RUNNER_TEMP/export/$APP_NAME.app/Contents/Resources/RELEASE_NOTES.html"
-
+          # Create ZIP (without modifying the signed app)
           ditto -c -k --keepParent "$RUNNER_TEMP/export/$APP_NAME.app" "$RUNNER_TEMP/releases/$APP_NAME.zip"
+
+          # Create release notes HTML alongside the ZIP (Sparkle looks for matching filename)
+          git tag -l --format='%(contents)' "${{ github.ref_name }}" | cmark > "$RUNNER_TEMP/releases/$APP_NAME.html"
 
           printf '%s' "$SPARKLE_KEY" > "$RUNNER_TEMP/sparkle_key"
           /tmp/bin/generate_appcast \
