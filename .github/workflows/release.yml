@@ -111,7 +111,7 @@ jobs:
         env:
           SPARKLE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
         run: |
-          brew install create-dmg
+          brew install create-dmg cmark
 
           create-dmg \
             --volname "$APP_NAME" \
@@ -128,13 +128,16 @@ jobs:
           tar -xf /tmp/Sparkle.tar.xz -C /tmp
 
           mkdir -p "$RUNNER_TEMP/releases"
+
+          # Create release notes from tag message, convert markdown to HTML
+          git tag -l --format='%(contents)' "${{ github.ref_name }}" | cmark > "$RUNNER_TEMP/export/$APP_NAME.app/Contents/Resources/RELEASE_NOTES.html"
+
           ditto -c -k --keepParent "$RUNNER_TEMP/export/$APP_NAME.app" "$RUNNER_TEMP/releases/$APP_NAME.zip"
 
           printf '%s' "$SPARKLE_KEY" > "$RUNNER_TEMP/sparkle_key"
           /tmp/bin/generate_appcast \
             --ed-key-file "$RUNNER_TEMP/sparkle_key" \
             --download-url-prefix "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/" \
-            --release-notes-url-prefix "https://github.com/${{ github.repository }}/releases/${{ github.ref_name }}" \
             -o "$RUNNER_TEMP/appcast.xml" \
             "$RUNNER_TEMP/releases"
           rm "$RUNNER_TEMP/sparkle_key"
@@ -142,13 +145,16 @@ jobs:
           cp "$RUNNER_TEMP/releases/$APP_NAME.zip" "$RUNNER_TEMP/$APP_NAME.zip"
 
       - name: GitHub Release from Tag
-        uses: ghalactic/github-release-from-tag@v6
-        with:
-          assets: |
-            - path: ${{ runner.temp }}/${{ env.APP_NAME }}.dmg
-              name: scrobble.up.dmg
-            - path: ${{ runner.temp }}/${{ env.APP_NAME }}.zip
-              name: scrobble.up.zip
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NOTES=$(git tag -l --format='%(contents)' "${{ github.ref_name }}")
+
+          gh release create "${{ github.ref_name }}" \
+            --title "${{ github.ref_name }}" \
+            --notes "$NOTES" \
+            "$RUNNER_TEMP/$APP_NAME.dmg#scrobble.up.dmg" \
+            "$RUNNER_TEMP/$APP_NAME.zip#scrobble.up.zip"
 
       - name: Deploy to GitHub Pages
         run: |
