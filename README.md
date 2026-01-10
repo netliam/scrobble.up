@@ -12,19 +12,23 @@
 **scrobble.up** is a lightweight free and open source scrobbler for macOS. 
 
 ### Features
+- Lightweight (~80MB Memory Usage)
 - Scrobble to Last.fm & ListenBrainz
 - Track listens from a wide range of music players
 - Similar artists and track suggestions from Last.fm
 - Like syncing between Apple Music, ListenBrainz, and Last.fm
 - Display track artwork in dock
 - Desktop widget for displaying the current track
-- Global shortcut for liking current track
+- Global shortcuts 
+    - Bring Player to Front 
+    - Love Track (Works for Last.fm, ListenBrainz, Spotify, and Apple Music)
 - Free forever
 
 ### Screenshots
 
 <h1 align="center">
 <img src="Assets/Menu_Screenshot.png" width="300" alt="Menu Screenshot" >
+<img src="Assets/Desktop_Widget.png" width="200" alt="Desktop Widget" >
 <h1 />
   
 ## Installation
