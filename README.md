@@ -39,7 +39,7 @@
   
 ## Installation
 **System Requirements:**  
-- macOS **14 Sonoma** or later  
+- macOS **14 Sonoma** or later 
 
 ### Manual Installation (Currently the only option)
 <a href="https://github.com/netliam/scrobble.up/releases/latest/download/scrobble.up.dmg" target="_self"><img width="200" src="Assets/Download_for_MacOS.png" alt="Download for macOS" /></a>
