@@ -10,8 +10,8 @@ import SwiftUI
 
 struct UpdateSettingsView: View {
 	@ObservedObject var updaterViewModel: UpdaterViewModel
-    
-    let version = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
+
+	let version = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
 
 	var body: some View {
 		VStack(alignment: .leading, spacing: 12) {
@@ -20,15 +20,15 @@ struct UpdateSettingsView: View {
 				"Automatically check for updates",
 				isOn: $updaterViewModel.automaticallyChecksForUpdates
 			)
-			
+
 			Button("Check for Updates…") {
 				updaterViewModel.checkForUpdates()
 			}
 			.disabled(!updaterViewModel.canCheckForUpdates)
-            Divider()
-            Text("Version: \(version ?? "Unknown")")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+			Divider()
+			Text("Version: \(version ?? "Unknown")")
+				.font(.caption)
+				.foregroundStyle(.secondary)
 		}
 	}
 }
@@ -42,7 +42,7 @@ final class UpdaterViewModel: ObservableObject {
 			updaterController.updater.automaticallyChecksForUpdates = automaticallyChecksForUpdates
 		}
 	}
-    
+
 	private let updaterController: SPUStandardUpdaterController
 	private var cancellables = Set<AnyCancellable>()
 
@@ -63,7 +63,7 @@ final class UpdaterViewModel: ObservableObject {
 		updaterController.updater.publisher(for: \.automaticallyChecksForUpdates)
 			.receive(on: DispatchQueue.main)
 			.assign(to: &$automaticallyChecksForUpdates)
-		
+
 		if automaticallyChecksForUpdates {
 			updaterController.updater.checkForUpdatesInBackground()
 		}

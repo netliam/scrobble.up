@@ -11,23 +11,23 @@ import LastFM
 
 @MainActor
 final class LastFmManager: ObservableObject {
-	
+
 	// MARK: - Singleton
-	
+
 	static let shared = LastFmManager()
-	
+
 	// MARK: - Published Properties
-	
+
 	@Published private(set) var username: String?
-	
+
 	// MARK: - Properties
-	
+
 	var sessionKey: String?
 
 	private let lastFM: LastFM
 	private let api = "https://ws.audioscrobbler.com/2.0/"
 	private let apiKey = Secrets.lastFmApiKey
-	private let apiSecret = Secrets.lastFmApiSecret	
+	private let apiSecret = Secrets.lastFmApiSecret
 	// MARK: - Initialization
 
 	private init() {
@@ -122,7 +122,7 @@ final class LastFmManager: ObservableObject {
 			print("Failed to scrobble: \(error)")
 		}
 	}
-    
+
 	func fetchTrackInfo(artist: String, track: String) async -> TrackInfo? {
 		let trackInfoParams = TrackInfoParams(artist: artist, track: track)
 
@@ -299,10 +299,10 @@ final class LastFmManager: ObservableObject {
 			return nil
 		}
 	}
-	
+
 	func fetchLovedTracksCount() async -> UInt {
 		guard let username = username else { return 0 }
-		
+
 		var components = URLComponents(string: api)!
 		components.queryItems = [
 			URLQueryItem(name: "method", value: "user.getLovedTracks"),
@@ -311,15 +311,15 @@ final class LastFmManager: ObservableObject {
 			URLQueryItem(name: "limit", value: "1"),
 			URLQueryItem(name: "format", value: "json"),
 		]
-		
+
 		guard let url = components.url else { return 0 }
-		
+
 		do {
 			let (data, _) = try await URLSession.shared.data(from: url)
 			let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
 			let lovedtracks = json?["lovedtracks"] as? [String: Any]
 			let attr = lovedtracks?["@attr"] as? [String: Any]
-			
+
 			if let totalString = attr?["total"] as? String, let total = UInt(totalString) {
 				return total
 			}
@@ -329,63 +329,64 @@ final class LastFmManager: ObservableObject {
 			return 0
 		}
 	}
-    
-    func fetchRecentTracks(limit: Int = 30) async throws -> [RecentTrack?] {
-        let recentTrackParams = RecentTracksParams(user: username ?? "", limit: UInt(limit))
 
-        do {
-            let recentTracks = try await lastFM.User.getRecentTracks(params: recentTrackParams)
+	func fetchRecentTracks(limit: Int = 30) async throws -> [RecentTrack?] {
+		let recentTrackParams = RecentTracksParams(user: username ?? "", limit: UInt(limit))
 
-            return Array(recentTracks.items)
-        } catch LastFMError.LastFMServiceError(let errorType, let message) {
-            print(errorType, message)
-            return []
-        } catch LastFMError.NoData {
-            print("No data was returned.")
-            return []
-        } catch {
-            print("An error ocurred: \(error)")
-            return []
-        }
-    }
+		do {
+			let recentTracks = try await lastFM.User.getRecentTracks(params: recentTrackParams)
 
-    func fetchTopAlbums(period: TopAlbumPeriod, limit: Int = 9) async -> [UserTopAlbum]? {
-        guard let username = username else { return nil }
-        
-        var periodParam: UserTopItemsParams.Period
-        
-        switch period {
-            case .overall:
-                periodParam = .overall
-            case .week:
-                periodParam = .last7Days
-            case .month:
-                periodParam = .last30days
-            case .quarter:
-                periodParam = .last90days
-            case .halfYear:
-                periodParam = .last180days
-            case .year:
-                periodParam = .lastYear
-        }
-        
-        let topAlbumParams = UserTopItemsParams(user: username, period: periodParam, limit: UInt(limit))
-        
-        do {
-            let topAlbums = try await lastFM.User.getTopAlbums(params: topAlbumParams)
+			return Array(recentTracks.items)
+		} catch LastFMError.LastFMServiceError(let errorType, let message) {
+			print(errorType, message)
+			return []
+		} catch LastFMError.NoData {
+			print("No data was returned.")
+			return []
+		} catch {
+			print("An error ocurred: \(error)")
+			return []
+		}
+	}
 
-            return Array(topAlbums.items)
-        } catch LastFMError.LastFMServiceError(let errorType, let message) {
-            print(errorType, message)
-            return []
-        } catch LastFMError.NoData {
-            print("No data was returned.")
-            return []
-        } catch {
-            print("An error ocurred: \(error)")
-            return []
-        }
-    }
+	func fetchTopAlbums(period: TopAlbumPeriod, limit: Int = 9) async -> [UserTopAlbum]? {
+		guard let username = username else { return nil }
+
+		var periodParam: UserTopItemsParams.Period
+
+		switch period {
+		case .overall:
+			periodParam = .overall
+		case .week:
+			periodParam = .last7Days
+		case .month:
+			periodParam = .last30days
+		case .quarter:
+			periodParam = .last90days
+		case .halfYear:
+			periodParam = .last180days
+		case .year:
+			periodParam = .lastYear
+		}
+
+		let topAlbumParams = UserTopItemsParams(
+			user: username, period: periodParam, limit: UInt(limit))
+
+		do {
+			let topAlbums = try await lastFM.User.getTopAlbums(params: topAlbumParams)
+
+			return Array(topAlbums.items)
+		} catch LastFMError.LastFMServiceError(let errorType, let message) {
+			print(errorType, message)
+			return []
+		} catch LastFMError.NoData {
+			print("No data was returned.")
+			return []
+		} catch {
+			print("An error ocurred: \(error)")
+			return []
+		}
+	}
 
 	// MARK: - Misc Functions
 
@@ -394,18 +395,20 @@ final class LastFmManager: ObservableObject {
 		if let album = album, !album.isEmpty {
 			let albumInfo = await fetchAlbumInfo(artist: artist, album: album)
 			if let images = albumInfo?.image,
-			   let artwork = bestImageURL(images: images) {
+				let artwork = bestImageURL(images: images)
+			{
 				return artwork
 			}
 		}
-		
+
 		// Fallback to track artwork
 		let trackInfo = await fetchTrackInfo(artist: artist, track: track)
 		if let images = trackInfo?.album?.image,
-		   let artwork = bestImageURL(images: images) {
+			let artwork = bestImageURL(images: images)
+		{
 			return artwork
 		}
-		
+
 		return nil
 	}
 }

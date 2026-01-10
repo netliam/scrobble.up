@@ -45,7 +45,7 @@ class TopAlbumsGridView: NSView {
 			albumViews.append(albumView)
 		}
 	}
-	
+
 	private func layoutAlbumViews() {
 		NSLayoutConstraint.deactivate(albumViewConstraints)
 		albumViewConstraints.removeAll()
@@ -100,7 +100,7 @@ class TopAlbumsGridView: NSView {
 	}
 
 	// MARK: - Overrides
-	
+
 	override func layout() {
 		super.layout()
 		layoutAlbumViews()
@@ -110,12 +110,13 @@ class TopAlbumsGridView: NSView {
 		guard bounds.width > 0 else {
 			return NSSize(width: fixedWidth, height: 280)
 		}
-		
+
 		let availableWidth = bounds.width - (2 * horizontalInset)
 		let totalSpacing = spacing * CGFloat(columns - 1)
 		let imageSize = (availableWidth - totalSpacing) / CGFloat(columns)
-		let totalHeight = (imageSize * CGFloat(rows)) + (spacing * CGFloat(rows - 1)) + (2 * verticalInset)
-		
+		let totalHeight =
+			(imageSize * CGFloat(rows)) + (spacing * CGFloat(rows - 1)) + (2 * verticalInset)
+
 		return NSSize(width: fixedWidth, height: totalHeight)
 	}
 }
@@ -213,14 +214,14 @@ class AlbumArtworkView: NSView {
 		placeholderView.isHidden = false
 		imageView.isHidden = true
 	}
-	
+
 	private func updateCornerRadius() {
 		let cornerRadius = bounds.width * 0.05
 		imageView.layer?.cornerRadius = cornerRadius
 		imageView.layer?.masksToBounds = true
 		overlayView.layer?.cornerRadius = cornerRadius
 		placeholderView.layer?.cornerRadius = cornerRadius
-		
+
 		imageView.layer?.borderWidth = max(0.5, bounds.width * 0.00625)
 		imageView.layer?.borderColor = NSColor.separatorColor.cgColor
 	}
@@ -240,17 +241,17 @@ class AlbumArtworkView: NSView {
 			context.duration = 0.15
 			overlayView.animator().alphaValue = isHovered ? 0.3 : 0
 		}
-		
+
 		if isHovered {
 			showPopover()
 		} else {
 			hidePopover()
 		}
 	}
-	
+
 	private func showPopover() {
 		guard let title = albumTitle, let artist = albumArtist else { return }
-		
+
 		// Create popover content
 		let label = NSTextField(labelWithString: "\(title)\n\(artist)")
 		label.font = .systemFont(ofSize: 11)
@@ -258,25 +259,25 @@ class AlbumArtworkView: NSView {
 		label.alignment = .center
 		label.maximumNumberOfLines = 2
 		label.lineBreakMode = .byTruncatingTail
-		
+
 		let contentView = NSView(frame: NSRect(x: 0, y: 0, width: 200, height: 44))
 		label.frame = contentView.bounds.insetBy(dx: 8, dy: 8)
 		label.autoresizingMask = [.width, .height]
 		contentView.addSubview(label)
-		
+
 		let contentVC = NSViewController()
 		contentVC.view = contentView
-		
+
 		// Create and show popover
 		let popover = NSPopover()
 		popover.contentViewController = contentVC
 		popover.behavior = .transient
 		popover.animates = true
-		
+
 		popover.show(relativeTo: bounds, of: self, preferredEdge: .maxY)
 		hoverPopover = popover
 	}
-	
+
 	private func hidePopover() {
 		hoverPopover?.close()
 		hoverPopover = nil
@@ -329,7 +330,7 @@ class AlbumArtworkView: NSView {
 	}
 
 	// MARK: - Overrides
-	
+
 	override func layout() {
 		super.layout()
 		updateCornerRadius()

@@ -171,7 +171,7 @@ struct DesktopWidgetView: View {
 
 	private func onTrackChanged() {
 		hideTask?.cancel()
-		
+
 		displayedTitle = appState.currentTrack.title
 		displayedArtist = appState.currentTrack.artist
 
@@ -182,7 +182,7 @@ struct DesktopWidgetView: View {
 		hideTask = Task { @MainActor in
 			try? await Task.sleep(nanoseconds: 5_000_000_000)
 			guard !Task.isCancelled else { return }
-			
+
 			withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
 				showFullInfo = false
 			}

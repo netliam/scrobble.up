@@ -19,24 +19,24 @@ struct ScrobbleUpApp: App {
 		}
 		.commands {
 			CommandGroup(replacing: .newItem) {}
-            
-            CommandGroup(replacing: CommandGroupPlacement.appSettings) {
-                Button {
-                    appState.openSettings()
-                } label: {
-                    Label("Settings...", systemImage: "gear")
-                }
-                .keyboardShortcut(",", modifiers: .command)
-            }
-            
-            CommandGroup(replacing: CommandGroupPlacement.appInfo) {
-                Button {
-                    appDelegate.showAboutWindow()
-                } label: {
-                    Label("About scrobble.up", systemImage: "info.circle")
-                }
-            }
-        }
+
+			CommandGroup(replacing: CommandGroupPlacement.appSettings) {
+				Button {
+					appState.openSettings()
+				} label: {
+					Label("Settings...", systemImage: "gear")
+				}
+				.keyboardShortcut(",", modifiers: .command)
+			}
+
+			CommandGroup(replacing: CommandGroupPlacement.appInfo) {
+				Button {
+					appDelegate.showAboutWindow()
+				} label: {
+					Label("About scrobble.up", systemImage: "info.circle")
+				}
+			}
+		}
 	}
 }
 
@@ -100,7 +100,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 			object: nil
 		)
 	}
-	
+
 	func showAboutWindow() {
 		if let windowController = aboutWindowController {
 			windowController.showWindow(nil)
@@ -109,7 +109,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 			NSApp.activate(ignoringOtherApps: true)
 			return
 		}
-		
+
 		let window = NSWindow(
 			contentRect: NSRect(x: 0, y: 0, width: 400, height: 500),
 			styleMask: [.titled, .closable],
@@ -119,13 +119,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 		window.center()
 		window.title = "About ScrobbleUp"
 		window.isReleasedWhenClosed = false
-		
+
 		let aboutView = AboutView()
 		window.contentView = NSHostingView(rootView: aboutView)
-		
+
 		let windowController = NSWindowController(window: window)
 		aboutWindowController = windowController
-		
+
 		windowController.showWindow(nil)
 		window.makeKeyAndOrderFront(nil)
 		NSApp.activate(ignoringOtherApps: true)
@@ -153,38 +153,38 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
 	// MARK: - Activation Policy
 
-    private func updateActivationPolicy() {
-        let shouldShow = UserDefaults.standard.get(\.showIconInDock)
-        
-        if shouldShow {
-            NSApp.setActivationPolicy(.regular)
-            if let window = appState.settingsWindowController?.window {
-                window.level = .floating
-            }
-        } else {
-            let settingsWasVisible = NSApp.windows.contains {
-                $0.isVisible && $0.canBecomeKey && $0.title.contains("General")
-            }
-            let windowFrame = appState.settingsWindowController?.window?.frame
-            
-            NSAnimationContext.beginGrouping()
-            NSAnimationContext.current.duration = 0
-            
-            NSApp.setActivationPolicy(.accessory)
-            
-            if settingsWasVisible {
-                AppState.shared.openSettings()
-                if let window = appState.settingsWindowController?.window {
-                    window.level = .floating
-                    if let frame = windowFrame {
-                        window.setFrame(frame, display: false, animate: false)
-                    }
-                    window.orderFrontRegardless()
-                }
-                NSApp.activate(ignoringOtherApps: true)
-            }
-            
-            NSAnimationContext.endGrouping()
-        }
-    }
+	private func updateActivationPolicy() {
+		let shouldShow = UserDefaults.standard.get(\.showIconInDock)
+
+		if shouldShow {
+			NSApp.setActivationPolicy(.regular)
+			if let window = appState.settingsWindowController?.window {
+				window.level = .floating
+			}
+		} else {
+			let settingsWasVisible = NSApp.windows.contains {
+				$0.isVisible && $0.canBecomeKey && $0.title.contains("General")
+			}
+			let windowFrame = appState.settingsWindowController?.window?.frame
+
+			NSAnimationContext.beginGrouping()
+			NSAnimationContext.current.duration = 0
+
+			NSApp.setActivationPolicy(.accessory)
+
+			if settingsWasVisible {
+				AppState.shared.openSettings()
+				if let window = appState.settingsWindowController?.window {
+					window.level = .floating
+					if let frame = windowFrame {
+						window.setFrame(frame, display: false, animate: false)
+					}
+					window.orderFrontRegardless()
+				}
+				NSApp.activate(ignoringOtherApps: true)
+			}
+
+			NSAnimationContext.endGrouping()
+		}
+	}
 }

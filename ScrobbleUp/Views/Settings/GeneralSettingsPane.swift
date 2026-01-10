@@ -15,8 +15,8 @@ struct GeneralSettingsPane: View {
 	@AppStorage(\.showArtworkInDock) private var showArtworkInDock
 	@AppStorage(\.showDesktopWidget) private var showDesktopWidget
 	@AppStorage(\.widgetWindowBehavior) private var widgetWindowBehavior
-    @AppStorage(\.showCurrentTrackInStatusBar) private var showCurrentTrack
-    @AppStorage(\.showAlbumNameInStatusBar) private var showAlbumName
+	@AppStorage(\.showCurrentTrackInStatusBar) private var showCurrentTrack
+	@AppStorage(\.showAlbumNameInStatusBar) private var showAlbumName
 
 	var body: some View {
 		Form {
@@ -35,11 +35,11 @@ struct GeneralSettingsPane: View {
 					}
 				Toggle("Show artwork in dock", isOn: $showArtworkInDock)
 					.disabled(!showIconInDock)
-                if !showIconInDock {
-                    Text("To enable show artwork in dock you must also enable show icon in dock.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
+				if !showIconInDock {
+					Text("To enable show artwork in dock you must also enable show icon in dock.")
+						.font(.caption)
+						.foregroundColor(.secondary)
+				}
 			}
 			Section("Widget") {
 				Toggle("Show widget", isOn: $showDesktopWidget)
@@ -57,14 +57,14 @@ struct GeneralSettingsPane: View {
 						.foregroundColor(.secondary)
 				}
 			}
-            Section("Status Bar") {
-                Toggle("Show current track in status bar", isOn: $showCurrentTrack)
-                
-                if showCurrentTrack {
-                    Toggle("Show album name", isOn: $showAlbumName)
-                        .padding(.leading, 20)
-                }
-            }
+			Section("Status Bar") {
+				Toggle("Show current track in status bar", isOn: $showCurrentTrack)
+
+				if showCurrentTrack {
+					Toggle("Show album name", isOn: $showAlbumName)
+						.padding(.leading, 20)
+				}
+			}
 		}
 		.formStyle(.grouped)
 		.frame(width: 450)

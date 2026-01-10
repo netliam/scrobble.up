@@ -32,7 +32,8 @@ enum ListenBrainzError: LocalizedError {
 		case .networkError:
 			return "Network connection failed"
 		case .recordingNotFound:
-			return "Track not found in MusicBrainz database. This track can still be scrobbled, but love/unlove requires a MusicBrainz entry."
+			return
+				"Track not found in MusicBrainz database. This track can still be scrobbled, but love/unlove requires a MusicBrainz entry."
 		case .apiError(let code, let message):
 			return "API error (\(code)): \(message)"
 		}
@@ -46,25 +47,27 @@ enum FeedbackScore: Int {
 }
 
 struct ListenBrainzTopAlbum {
-    let releaseName: String
-    let artistName: String
-    let listenCount: Int
-    let releaseGroupMbid: String?
-    let caaId: Int?
-    let caaReleaseMbid: String?
-    
-    /// Returns the Cover Art Archive URL for this album's artwork, if available
-    var artworkURL: URL? {
-        if let caaReleaseMbid = caaReleaseMbid, let caaId = caaId {
-            return URL(string: "https://coverartarchive.org/release/\(caaReleaseMbid)/\(caaId)-250.jpg")
-        } else if let releaseGroupMbid = releaseGroupMbid {
-            return URL(string: "https://coverartarchive.org/release-group/\(releaseGroupMbid)/front-250")
-        }
-        return nil
-    }
+	let releaseName: String
+	let artistName: String
+	let listenCount: Int
+	let releaseGroupMbid: String?
+	let caaId: Int?
+	let caaReleaseMbid: String?
+
+	/// Returns the Cover Art Archive URL for this album's artwork, if available
+	var artworkURL: URL? {
+		if let caaReleaseMbid = caaReleaseMbid, let caaId = caaId {
+			return URL(
+				string: "https://coverartarchive.org/release/\(caaReleaseMbid)/\(caaId)-250.jpg")
+		} else if let releaseGroupMbid = releaseGroupMbid {
+			return URL(
+				string: "https://coverartarchive.org/release-group/\(releaseGroupMbid)/front-250")
+		}
+		return nil
+	}
 }
 
 struct ListenBrainzUserStats {
-    let listenCount: UInt
-    let lovedTracksCount: UInt
+	let listenCount: UInt
+	let lovedTracksCount: UInt
 }

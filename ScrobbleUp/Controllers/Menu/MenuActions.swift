@@ -23,10 +23,10 @@ final class MenuActions: NSObject {
 	@objc func openSettings() {
 		appState.openSettings()
 	}
-    
-    @objc func openAbout() {
-        AppDelegate.shared?.showAboutWindow()
-    }
+
+	@objc func openAbout() {
+		AppDelegate.shared?.showAboutWindow()
+	}
 
 	// MARK: - Player Selection
 
@@ -97,32 +97,33 @@ final class MenuActions: NSObject {
 			await LinkManager.shared.openTrack(artist: artist, track: title)
 		}
 	}
-	
-    // MARK: - Last.fm Actions
-    
-    @objc func openLastFmProfile() {
-        guard let username = LastFmManager.shared.username else { return }
-        if let url = URL(string: "https://www.last.fm/user/\(username)") {
-            NSWorkspace.shared.open(url)
-        }
-    }
-    
-    // MARK: - ListenBrainz Actions
-    
-    @objc func openListenBrainzProfile() {
-        guard let username = ListenBrainzManager.shared.username else { return }
-        let baseURL = ListenBrainzManager.shared.baseURL
-        // Handle both listenbrainz.org and custom instances
-        let profileURL: String
-        if baseURL.contains("api.listenbrainz.org") {
-            profileURL = "https://listenbrainz.org/user/\(username)"
-        } else {
-            // Custom instance - try to derive web URL from API URL
-            let webURL = baseURL.replacingOccurrences(of: "/api", with: "").replacingOccurrences(of: "api.", with: "")
-            profileURL = "\(webURL)/user/\(username)"
-        }
-        if let url = URL(string: profileURL) {
-            NSWorkspace.shared.open(url)
-        }
-    }
+
+	// MARK: - Last.fm Actions
+
+	@objc func openLastFmProfile() {
+		guard let username = LastFmManager.shared.username else { return }
+		if let url = URL(string: "https://www.last.fm/user/\(username)") {
+			NSWorkspace.shared.open(url)
+		}
+	}
+
+	// MARK: - ListenBrainz Actions
+
+	@objc func openListenBrainzProfile() {
+		guard let username = ListenBrainzManager.shared.username else { return }
+		let baseURL = ListenBrainzManager.shared.baseURL
+		// Handle both listenbrainz.org and custom instances
+		let profileURL: String
+		if baseURL.contains("api.listenbrainz.org") {
+			profileURL = "https://listenbrainz.org/user/\(username)"
+		} else {
+			// Custom instance - try to derive web URL from API URL
+			let webURL = baseURL.replacingOccurrences(of: "/api", with: "").replacingOccurrences(
+				of: "api.", with: "")
+			profileURL = "\(webURL)/user/\(username)"
+		}
+		if let url = URL(string: profileURL) {
+			NSWorkspace.shared.open(url)
+		}
+	}
 }

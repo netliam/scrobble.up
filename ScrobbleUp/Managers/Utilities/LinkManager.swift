@@ -157,18 +157,18 @@ final class LinkManager {
 	// MARK: - Last.Fm Links
 
 	private func fetchArtistLinkLastFm(artist: String) async -> URL? {
-        if let url = await lastFm.fetchArtistInfo(artist: artist)?.url {
-            return url
-        }
-        return nil
+		if let url = await lastFm.fetchArtistInfo(artist: artist)?.url {
+			return url
+		}
+		return nil
 	}
 
 	private func fetchTrackLinkLastFm(artist: String, track: String) async -> URL? {
-        if let url = await lastFm.fetchTrackInfo(artist: artist, track: track)?.url {
-            return url
-        }
-        
-        return nil
+		if let url = await lastFm.fetchTrackInfo(artist: artist, track: track)?.url {
+			return url
+		}
+
+		return nil
 	}
 
 	private func fetchAlbumLinkLastFm(artist: String, album: String) async -> URL? {

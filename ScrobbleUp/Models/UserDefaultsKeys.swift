@@ -17,9 +17,11 @@ enum Keys {
 	static let showDesktopWidget = UserDefaultsKey("showDesktopWidget", defaultValue: false)
 	static let widgetWindowBehavior = UserDefaultsKey(
 		"widgetWindowBehavior", defaultValue: WidgetWindowBehavior.desktop)
-    
-    static let showCurrentTrackInStatusBar = UserDefaultsKey("showCurrentTrackInStatusBar", defaultValue: false)
-    static let showAlbumNameInStatusBar = UserDefaultsKey("showAlbumNameInStatusBar", defaultValue: false)
+
+	static let showCurrentTrackInStatusBar = UserDefaultsKey(
+		"showCurrentTrackInStatusBar", defaultValue: false)
+	static let showAlbumNameInStatusBar = UserDefaultsKey(
+		"showAlbumNameInStatusBar", defaultValue: false)
 
 	static let ratingAndLoveStatus = UserDefaultsKey("ratingAndLoveStatus", defaultValue: true)
 	static let infoCopiedToClipboard = UserDefaultsKey("infoCopiedToClipboard", defaultValue: true)
@@ -32,7 +34,7 @@ enum Keys {
 		"trackFetchingMethod", defaultValue: TrackFetchingMethod.mediaRemote)
 	static let openLinksWith = UserDefaultsKey(
 		"openLinksWith", defaultValue: OpenLinksWith.alwaysInAppleMusic)
-    static let artworkSource = UserDefaultsKey("artworkSource", defaultValue: ArtworkSource.lastFm)
+	static let artworkSource = UserDefaultsKey("artworkSource", defaultValue: ArtworkSource.lastFm)
 
 	static let syncLikes = UserDefaultsKey("syncLikes", defaultValue: true)
 	static let scrobbleTrackAt = UserDefaultsKey("scrobbleTrackAt", defaultValue: 50)
@@ -40,8 +42,10 @@ enum Keys {
 	static let listenBrainzEnabled = UserDefaultsKey("listenBrainzEnabled", defaultValue: true)
 	static let listenBrainzBaseURL = UserDefaultsKey(
 		"listenBrainzBaseURL", defaultValue: "https://api.listenbrainz.org")
-    static let listenBrainzTopAlbumPeriod = UserDefaultsKey("listenBrainzTopAlbumPeriod", defaultValue: TopAlbumPeriod.overall)
+	static let listenBrainzTopAlbumPeriod = UserDefaultsKey(
+		"listenBrainzTopAlbumPeriod", defaultValue: TopAlbumPeriod.overall)
 
 	static let lastFmEnabled = UserDefaultsKey("lastFmEnabled", defaultValue: true)
-    static let lastFmTopAlbumPeriod = UserDefaultsKey("lastFmTopAlbumPeriod", defaultValue: TopAlbumPeriod.overall)
+	static let lastFmTopAlbumPeriod = UserDefaultsKey(
+		"lastFmTopAlbumPeriod", defaultValue: TopAlbumPeriod.overall)
 }

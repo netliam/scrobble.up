@@ -9,56 +9,56 @@ import Foundation
 
 /// Service for handling ListenBrainz authentication
 final class ListenBrainzAuthService {
-    private let config: ListenBrainzConfig
-    
-    init(config: ListenBrainzConfig) {
-        self.config = config
-    }
-    
-    // MARK: - Token Validation
-    
-    func validateToken(_ token: String, baseURL: String? = nil) async throws -> String {
-        let url = baseURL ?? config.baseURL
+	private let config: ListenBrainzConfig
 
-        guard let requestURL = URL(string: "\(url)/1/validate-token") else {
-            throw ListenBrainzError.invalidURL
-        }
+	init(config: ListenBrainzConfig) {
+		self.config = config
+	}
 
-        let headers = ["Authorization": "Token \(token)"]
+	// MARK: - Token Validation
 
-        do {
-            let json = try await config.http.getJSON(url: requestURL, headers: headers)
+	func validateToken(_ token: String, baseURL: String? = nil) async throws -> String {
+		let url = baseURL ?? config.baseURL
 
-            guard let valid = json["valid"] as? Bool, valid,
-                let username = json["user_name"] as? String
-            else {
-                throw ListenBrainzError.invalidToken
-            }
+		guard let requestURL = URL(string: "\(url)/1/validate-token") else {
+			throw ListenBrainzError.invalidURL
+		}
 
-            return username
-        } catch HTTPError.unauthorized {
-            throw ListenBrainzError.invalidToken
-        } catch let error as ListenBrainzError {
-            throw error
-        } catch {
-            throw ListenBrainzError.invalidToken
-        }
-    }
-    
-    // MARK: - Configuration
-    
-    func configure(token: String, username: String, baseURL: String? = nil) {
-        config.token = token
-        config.username = username
+		let headers = ["Authorization": "Token \(token)"]
 
-        if let baseURL = baseURL {
-            config.baseURL = baseURL.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-        }
-    }
-    
-    func signOut() {
-        config.token = nil
-        config.username = nil
-        config.baseURL = ListenBrainzConfig.defaultBaseURL
-    }
+		do {
+			let json = try await config.http.getJSON(url: requestURL, headers: headers)
+
+			guard let valid = json["valid"] as? Bool, valid,
+				let username = json["user_name"] as? String
+			else {
+				throw ListenBrainzError.invalidToken
+			}
+
+			return username
+		} catch HTTPError.unauthorized {
+			throw ListenBrainzError.invalidToken
+		} catch let error as ListenBrainzError {
+			throw error
+		} catch {
+			throw ListenBrainzError.invalidToken
+		}
+	}
+
+	// MARK: - Configuration
+
+	func configure(token: String, username: String, baseURL: String? = nil) {
+		config.token = token
+		config.username = username
+
+		if let baseURL = baseURL {
+			config.baseURL = baseURL.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+		}
+	}
+
+	func signOut() {
+		config.token = nil
+		config.username = nil
+		config.baseURL = ListenBrainzConfig.defaultBaseURL
+	}
 }

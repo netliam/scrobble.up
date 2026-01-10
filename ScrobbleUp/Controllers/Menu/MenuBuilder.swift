@@ -98,94 +98,97 @@ final class MenuBuilder {
 
 		return items
 	}
-    
-    // MARK: - Scrobbler Section (Unified)
-    
-    func createScrobblerSection(for service: ScrobblerService, target: AnyObject, profileAction: Selector) -> NSMenuItem {
-        let item = NSMenuItem(title: service.displayName, action: nil, keyEquivalent: "")
-        let subMenu = NSMenu()
-        subMenu.autoenablesItems = false
 
-        let width: CGFloat = 260
+	// MARK: - Scrobbler Section (Unified)
 
-        // Profile button
-        let profileItem = NSMenuItem(title: "Open profile...", action: profileAction, keyEquivalent: "")
-        profileItem.target = target
-        subMenu.addItem(profileItem)
+	func createScrobblerSection(
+		for service: ScrobblerService, target: AnyObject, profileAction: Selector
+	) -> NSMenuItem {
+		let item = NSMenuItem(title: service.displayName, action: nil, keyEquivalent: "")
+		let subMenu = NSMenu()
+		subMenu.autoenablesItems = false
 
-        // Top separator
-        subMenu.addItem(NSMenuItem.separator())
+		let width: CGFloat = 260
 
-        // Scrobbles row
-        let scrobblesRow = MenuItemStatsRowView(width: width, leftText: "Scrobbles")
-        let scrobblesItem = NSMenuItem()
-        scrobblesItem.view = scrobblesRow
-        subMenu.addItem(scrobblesItem)
+		// Profile button
+		let profileItem = NSMenuItem(
+			title: "Open profile...", action: profileAction, keyEquivalent: "")
+		profileItem.target = target
+		subMenu.addItem(profileItem)
 
-        // Artists row
-        if (service == .lastFm) {
-            let artistsRow = MenuItemStatsRowView(width: width, leftText: "Artists")
-            let artistsItem = NSMenuItem()
-            artistsItem.view = artistsRow
-            subMenu.addItem(artistsItem)
-        }
+		// Top separator
+		subMenu.addItem(NSMenuItem.separator())
 
-        // Loved tracks row
-        let lovedTracksRow = MenuItemStatsRowView(width: width, leftText: "Loved tracks")
-        let lovedTracksItem = NSMenuItem()
-        lovedTracksItem.view = lovedTracksRow
-        subMenu.addItem(lovedTracksItem)
+		// Scrobbles row
+		let scrobblesRow = MenuItemStatsRowView(width: width, leftText: "Scrobbles")
+		let scrobblesItem = NSMenuItem()
+		scrobblesItem.view = scrobblesRow
+		subMenu.addItem(scrobblesItem)
 
-        // Bottom separator
-        subMenu.addItem(NSMenuItem.separator())
+		// Artists row
+		if service == .lastFm {
+			let artistsRow = MenuItemStatsRowView(width: width, leftText: "Artists")
+			let artistsItem = NSMenuItem()
+			artistsItem.view = artistsRow
+			subMenu.addItem(artistsItem)
+		}
 
-        // Top Albums header - get period from appropriate key
-        let currentPeriod: TopAlbumPeriod
-        switch service {
-        case .lastFm:
-            currentPeriod = UserDefaults.standard.get(\.lastFmTopAlbumPeriod)
-        case .listenBrainz:
-            currentPeriod = UserDefaults.standard.get(\.listenBrainzTopAlbumPeriod)
-        }
-        
-        let topAlbumsHeader = MenuItemHeaderView(
-            width: width,
-            title: "Top Albums",
-            rightText: currentPeriod.rawValue
-        )
-        let headerItem = NSMenuItem()
-        headerItem.view = topAlbumsHeader
-        subMenu.addItem(headerItem)
+		// Loved tracks row
+		let lovedTracksRow = MenuItemStatsRowView(width: width, leftText: "Loved tracks")
+		let lovedTracksItem = NSMenuItem()
+		lovedTracksItem.view = lovedTracksRow
+		subMenu.addItem(lovedTracksItem)
 
-        // Top albums grid
-        let gridView = TopAlbumsGridView(width: width)
-        let gridItem = NSMenuItem()
-        gridItem.view = gridView
-        subMenu.addItem(gridItem)
+		// Bottom separator
+		subMenu.addItem(NSMenuItem.separator())
 
-        item.submenu = subMenu
-        return item
-    }
-    
-    // MARK: - Create More Submenu
-    
-    func createMoreSubmenu(target: AnyObject, aboutAction: Selector) -> NSMenu {
-        let subMenu = NSMenu()
-        
-        let version = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
-        let versionHeader = createSectionHeader(title: "Version: \(version ?? "Unknown")")
-        subMenu.addItem(versionHeader)
-        
-        let aboutItem = createMenuItem(
-            title: "About scrobble.up",
-            icon: "info.circle",
-            target: target,
-            action: aboutAction
-        )
-        subMenu.addItem(aboutItem)
-        
-        return subMenu
-    }
+		// Top Albums header - get period from appropriate key
+		let currentPeriod: TopAlbumPeriod
+		switch service {
+		case .lastFm:
+			currentPeriod = UserDefaults.standard.get(\.lastFmTopAlbumPeriod)
+		case .listenBrainz:
+			currentPeriod = UserDefaults.standard.get(\.listenBrainzTopAlbumPeriod)
+		}
+
+		let topAlbumsHeader = MenuItemHeaderView(
+			width: width,
+			title: "Top Albums",
+			rightText: currentPeriod.rawValue
+		)
+		let headerItem = NSMenuItem()
+		headerItem.view = topAlbumsHeader
+		subMenu.addItem(headerItem)
+
+		// Top albums grid
+		let gridView = TopAlbumsGridView(width: width)
+		let gridItem = NSMenuItem()
+		gridItem.view = gridView
+		subMenu.addItem(gridItem)
+
+		item.submenu = subMenu
+		return item
+	}
+
+	// MARK: - Create More Submenu
+
+	func createMoreSubmenu(target: AnyObject, aboutAction: Selector) -> NSMenu {
+		let subMenu = NSMenu()
+
+		let version = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
+		let versionHeader = createSectionHeader(title: "Version: \(version ?? "Unknown")")
+		subMenu.addItem(versionHeader)
+
+		let aboutItem = createMenuItem(
+			title: "About scrobble.up",
+			icon: "info.circle",
+			target: target,
+			action: aboutAction
+		)
+		subMenu.addItem(aboutItem)
+
+		return subMenu
+	}
 
 	// MARK: - Generic Menu Items
 

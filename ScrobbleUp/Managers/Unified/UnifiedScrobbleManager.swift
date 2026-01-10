@@ -67,15 +67,15 @@ final class UnifiedScrobbleManager: ObservableObject {
 					var artworkImage = nowPlaying.artwork
 					var artworkSource: String?
 
-                    if artworkImage == nil {
-                        artworkImage = await MediaRemoteManager.shared.fetchCurrentArtwork()
+					if artworkImage == nil {
+						artworkImage = await MediaRemoteManager.shared.fetchCurrentArtwork()
 						if artworkImage != nil {
 							artworkSource = "MediaRemote"
 						}
-                    } else {
+					} else {
 						artworkSource = "Player"
 					}
-                    
+
 					if artworkImage == nil {
 						artworkImage = await artworkManager.fetchArtwork(
 							artist: entry.artist, track: entry.title, album: entry.album)
@@ -93,7 +93,7 @@ final class UnifiedScrobbleManager: ObservableObject {
 						)
 					}
 
-                    appState.currentTrack.image = artworkImage
+					appState.currentTrack.image = artworkImage
 
 					await sendNowPlaying(
 						artist: artist,
@@ -204,7 +204,7 @@ final class UnifiedScrobbleManager: ObservableObject {
 			repeats: false
 		) { [weak self] _ in
 			Task { @MainActor [weak self] in
-                self?.fireScrobble()
+				self?.fireScrobble()
 			}
 		}
 	}

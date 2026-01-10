@@ -118,7 +118,7 @@ struct ListenBrainzConnectedView: View {
 	@ObservedObject var listenBrainz: ListenBrainzManager
 
 	@AppStorage(\.listenBrainzEnabled) private var listenBrainzEnabled
-    @AppStorage(\.listenBrainzTopAlbumPeriod) private var topAlbumPeriod
+	@AppStorage(\.listenBrainzTopAlbumPeriod) private var topAlbumPeriod
 
 	var body: some View {
 		Form {
@@ -165,19 +165,19 @@ struct ListenBrainzConnectedView: View {
 					"Enable ListenBrainz",
 					isOn: $listenBrainzEnabled
 				)
-                
-                Picker("Top album period", selection: $topAlbumPeriod) {
-                    Text("Overall").tag(TopAlbumPeriod.overall)
-                    Divider()
-                    Text("Week").tag(TopAlbumPeriod.week)
-                    Text("Month").tag(TopAlbumPeriod.month)
-                    Text("Quarter").tag(TopAlbumPeriod.quarter)
-                    Text("Half year").tag(TopAlbumPeriod.halfYear)
-                    Text("Year").tag(TopAlbumPeriod.year)
-                }
+
+				Picker("Top album period", selection: $topAlbumPeriod) {
+					Text("Overall").tag(TopAlbumPeriod.overall)
+					Divider()
+					Text("Week").tag(TopAlbumPeriod.week)
+					Text("Month").tag(TopAlbumPeriod.month)
+					Text("Quarter").tag(TopAlbumPeriod.quarter)
+					Text("Half year").tag(TopAlbumPeriod.halfYear)
+					Text("Year").tag(TopAlbumPeriod.year)
+				}
 			}
 		}
 		.formStyle(.grouped)
-        .frame(width: 450)
+		.frame(width: 450)
 	}
 }

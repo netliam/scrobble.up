@@ -13,8 +13,8 @@ struct ScrobblerSettingsPane: View {
 	@AppStorage(\.trackFetchingMethod) private var trackFetchingMethod
 	@AppStorage(\.openLinksWith) private var openLinksWith
 	@AppStorage(\.syncLikes) private var syncLikes
-    @AppStorage(\.artworkSource) private var artworkSource
-    @AppStorage(\.scrobbleTrackAt) private var scrobbleTrackAt
+	@AppStorage(\.artworkSource) private var artworkSource
+	@AppStorage(\.scrobbleTrackAt) private var scrobbleTrackAt
 
 	var body: some View {
 		Form {
@@ -45,28 +45,28 @@ struct ScrobblerSettingsPane: View {
 					.font(.caption)
 					.foregroundColor(.secondary)
 			}
-            Section("Integration") {
-                Toggle(
-                    "Sync likes between Apple Music and scrobbler",
-                    isOn: $syncLikes
-                )
-                VStack(alignment: .leading, spacing: 4) {
-                    Picker("Fetch artwork from", selection: $artworkSource) {
-                        Text("Last.fm").tag(ArtworkSource.lastFm)
-                        Text("MusicBrainz").tag(ArtworkSource.musicBrainz)
-                    }
-                    Text(artworkSourceDescription)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                VStack(alignment: .leading, spacing: 4) {
-                    Button("Clear Artwork Cache") {
-                        ArtworkManager.shared.clearCache()
-                    }
-                    Text("Refresh cached artwork")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
+			Section("Integration") {
+				Toggle(
+					"Sync likes between Apple Music and scrobbler",
+					isOn: $syncLikes
+				)
+				VStack(alignment: .leading, spacing: 4) {
+					Picker("Fetch artwork from", selection: $artworkSource) {
+						Text("Last.fm").tag(ArtworkSource.lastFm)
+						Text("MusicBrainz").tag(ArtworkSource.musicBrainz)
+					}
+					Text(artworkSourceDescription)
+						.font(.caption)
+						.foregroundColor(.secondary)
+				}
+				VStack(alignment: .leading, spacing: 4) {
+					Button("Clear Artwork Cache") {
+						ArtworkManager.shared.clearCache()
+					}
+					Text("Refresh cached artwork")
+						.font(.caption)
+						.foregroundColor(.secondary)
+				}
 			}
 			Section("Scrobbling") {
 				VStack(alignment: .leading, spacing: 4) {
@@ -106,13 +106,15 @@ struct ScrobblerSettingsPane: View {
 				"Uses system-wide MediaRemote to detect tracks from any music player including Tidal, Deezer, and more."
 		}
 	}
-	
+
 	private var artworkSourceDescription: String {
 		switch artworkSource {
 		case .lastFm:
-			return "Last.fm provides more accurate results than MusicBrainz, and is generally faster. Falls back to MusicBrainz if unavailable."
+			return
+				"Last.fm provides more accurate results than MusicBrainz, and is generally faster. Falls back to MusicBrainz if unavailable."
 		case .musicBrainz:
-			return "MusicBrainz is rate-limited (1 req/sec) and may not always return the most accurate artwork. Falls back to Last.fm if unavailable."
+			return
+				"MusicBrainz is rate-limited (1 req/sec) and may not always return the most accurate artwork. Falls back to Last.fm if unavailable."
 		}
 	}
 }

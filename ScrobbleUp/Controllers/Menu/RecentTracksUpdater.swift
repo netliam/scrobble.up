@@ -20,7 +20,7 @@ final class RecentTracksUpdater {
 	// MARK: - Cache
 
 	private var trackInfoCache: [String: TrackInfo] = [:]
-	private var lastDisplayedTracks: [String] = [] // Track cache keys for displayed items
+	private var lastDisplayedTracks: [String] = []  // Track cache keys for displayed items
 
 	// MARK: - Public API
 
@@ -41,40 +41,43 @@ final class RecentTracksUpdater {
 		DispatchQueue.main.async {
 			// Build array of new cache keys
 			let newTrackKeys = entries.prefix(items.count).map { self.createCacheKey(for: $0) }
-			
+
 			// Update items with entries
 			for (index, entry) in entries.prefix(items.count).enumerated() {
 				let item = items[index]
 				let cacheKey = newTrackKeys[index]
-				let isNewTrack = index >= self.lastDisplayedTracks.count || self.lastDisplayedTracks[index] != cacheKey
-				
+				let isNewTrack =
+					index >= self.lastDisplayedTracks.count
+					|| self.lastDisplayedTracks[index] != cacheKey
+
 				// Configure the item
 				self.configureTrackItem(item, with: entry)
-				
+
 				// Check if we're currently showing a placeholder
 				let needsArtwork: Bool
-				if let _ = item.view as? RecentlyPlayedMenuItemView {
+				if item.view as? RecentlyPlayedMenuItemView != nil {
 					// If the image is the placeholder, we need to fetch artwork
-					needsArtwork = self.artworkManager.getCachedArtwork(
-						artist: entry.artist,
-						track: entry.title,
-						album: entry.album
-					) == nil
+					needsArtwork =
+						self.artworkManager.getCachedArtwork(
+							artist: entry.artist,
+							track: entry.title,
+							album: entry.album
+						) == nil
 				} else {
 					needsArtwork = true
 				}
-				
+
 				// Load artwork if it's a new track OR if we don't have cached artwork
 				if isNewTrack || needsArtwork {
 					self.loadArtwork(for: entry, into: item)
 				}
-				
+
 				self.loadTrackDetails(for: entry, into: item)
 			}
 
 			// Update tracking array
 			self.lastDisplayedTracks = newTrackKeys
-			
+
 			// Hide unused items
 			for index in entries.count..<5 {
 				let item = items[index]
@@ -142,9 +145,9 @@ final class RecentTracksUpdater {
 					// Verify this item still represents the same track before updating
 					let currentKey = item.representedObject as? String
 					let entryKey = self.createCacheKey(for: entry)
-					
+
 					guard currentKey == entryKey else { return }
-					
+
 					if let view = item.view as? RecentlyPlayedMenuItemView {
 						view.image = artwork.styled(
 							size: NSSize(width: 32, height: 32),
@@ -168,15 +171,15 @@ final class RecentTracksUpdater {
 
 		Task { [weak self] in
 			guard let self else { return }
-				if let info = await lastFm.fetchTrackInfo(
-					artist: entry.artist,
-					track: entry.title
-				) {
-					self.trackInfoCache[key] = info
-					await MainActor.run {
-						self.buildSubmenu(for: entry, trackInfo: info, item: item)
-					}
+			if let info = await lastFm.fetchTrackInfo(
+				artist: entry.artist,
+				track: entry.title
+			) {
+				self.trackInfoCache[key] = info
+				await MainActor.run {
+					self.buildSubmenu(for: entry, trackInfo: info, item: item)
 				}
+			}
 		}
 	}
 

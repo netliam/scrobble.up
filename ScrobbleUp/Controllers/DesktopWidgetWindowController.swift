@@ -10,8 +10,8 @@ import Combine
 import SwiftUI
 
 final class DesktopWidgetWindow: NSWindow {
-    override var canBecomeKey: Bool { true }
-    override var canBecomeMain: Bool { true }
+	override var canBecomeKey: Bool { true }
+	override var canBecomeMain: Bool { true }
 }
 
 @MainActor
@@ -57,30 +57,30 @@ final class DesktopWidgetWindowController {
 			return
 		}
 
-        let contentView = DesktopWidgetView(appState: .shared)
-        let hostingView = NSHostingView(rootView: contentView)
-        hostingView.frame = NSRect(x: 0, y: 0, width: 200, height: 200)
+		let contentView = DesktopWidgetView(appState: .shared)
+		let hostingView = NSHostingView(rootView: contentView)
+		hostingView.frame = NSRect(x: 0, y: 0, width: 200, height: 200)
 
-        let newWindow = DesktopWidgetWindow(
-            contentRect: NSRect(x: 100, y: 100, width: 200, height: 200),
-            styleMask: [.borderless],
-            backing: .buffered,
-            defer: false
-        )
+		let newWindow = DesktopWidgetWindow(
+			contentRect: NSRect(x: 100, y: 100, width: 200, height: 200),
+			styleMask: [.borderless],
+			backing: .buffered,
+			defer: false
+		)
 
-        newWindow.contentView = hostingView
-        newWindow.isOpaque = false
-        newWindow.backgroundColor = .clear
-        newWindow.hasShadow = true
-        newWindow.isMovableByWindowBackground = true
-        newWindow.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
-        
-        newWindow.ignoresMouseEvents = false
-        newWindow.acceptsMouseMovedEvents = true
+		newWindow.contentView = hostingView
+		newWindow.isOpaque = false
+		newWindow.backgroundColor = .clear
+		newWindow.hasShadow = true
+		newWindow.isMovableByWindowBackground = true
+		newWindow.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
 
-        self.window = newWindow
-        updateWindowLevel()
-        newWindow.orderFrontRegardless()
+		newWindow.ignoresMouseEvents = false
+		newWindow.acceptsMouseMovedEvents = true
+
+		self.window = newWindow
+		updateWindowLevel()
+		newWindow.orderFrontRegardless()
 	}
 
 	func hideWindow() {
@@ -103,7 +103,8 @@ final class DesktopWidgetWindowController {
 			)
 
 		case .desktop:
-            window.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.desktopIconWindow)) + 1)
+			window.level = NSWindow.Level(
+				rawValue: Int(CGWindowLevelForKey(.desktopIconWindow)) + 1)
 		case .standardWindow:
 			window.level = .normal
 		}

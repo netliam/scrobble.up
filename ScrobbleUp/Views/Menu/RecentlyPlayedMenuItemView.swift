@@ -26,7 +26,7 @@ class RecentlyPlayedMenuItemView: NSView {
 		let view = NSVisualEffectView()
 		view.translatesAutoresizingMaskIntoConstraints = false
 		view.material = .selection
-        view.isEmphasized = true
+		view.isEmphasized = true
 		view.state = .active
 		view.wantsLayer = true
 		view.layer?.cornerRadius = 6

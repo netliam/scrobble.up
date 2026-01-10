@@ -11,20 +11,20 @@ import Foundation
 import ScriptingBridge
 
 final class UnifiedMusicManager {
-	
+
 	// MARK: - Singleton
-	
+
 	static let shared = UnifiedMusicManager()
-	
+
 	// MARK: - Properties
-	
+
 	private let appState: AppState = .shared
 	private var lastAcceptedSource: MusicSource?
 	private var currentFetchingMethod: TrackFetchingMethod?
 	private var currentHandler: ((MusicInfo) -> Void)?
-	private var cancellables = Set<AnyCancellable>()	
+	private var cancellables = Set<AnyCancellable>()
 	// MARK: - Initialization
-	
+
 	private init() {
 		setupObservers()
 	}
@@ -52,7 +52,7 @@ final class UnifiedMusicManager {
 
 			if self.shouldAcceptTrack(info) {
 				handler(info)
-				
+
 				if let source = info.source {
 					Task { @MainActor in
 						self.appState.currentActivePlayer = source
@@ -80,7 +80,7 @@ final class UnifiedMusicManager {
 		MediaRemoteManager.shared.stop()
 
 		currentFetchingMethod = nil
-		
+
 		Task { @MainActor in
 			appState.currentActivePlayer = nil
 		}
@@ -173,7 +173,7 @@ final class UnifiedMusicManager {
 		guard let app = SBApplication(bundleIdentifier: "com.spotify.client") else {
 			return false
 		}
-		
+
 		let spotify = app as SpotifyApplication
 		if let state = spotify.playerState {
 			return state == "playing"
