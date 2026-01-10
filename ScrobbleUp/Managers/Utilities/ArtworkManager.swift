@@ -11,9 +11,9 @@ final class ArtworkManager: @unchecked Sendable {
 	
 	// MARK: - Cache Configuration
 	
-	private static let imageCacheSizeLimit = 50 * 1024 * 1024 // 50MB
-	private static let imageCacheCountLimit = 200
-	private static let urlCacheCountLimit = 300
+	private static let imageCacheSizeLimit = 20 * 1024 * 1024
+	private static let imageCacheCountLimit = 100
+	private static let urlCacheCountLimit = 150
 	private static let artworkFetchTimeout: TimeInterval = 10.0
 	private static let imageLoadTimeout: TimeInterval = 5.0
 	
