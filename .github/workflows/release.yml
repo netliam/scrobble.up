@@ -22,6 +22,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Fetch tag annotations
+        run: git fetch --force --tags
+
       - name: Restore cache
         uses: actions/cache/restore@v4
         with:
