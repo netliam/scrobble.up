@@ -1,0 +1,85 @@
+{
+  "fill-specializations" : [
+    {
+      "value" : {
+        "linear-gradient" : [
+          "display-p3:0.99608,0.32549,0.46667,1.00000",
+          "srgb:0.99608,0.02353,0.20000,1.00000"
+        ],
+        "orientation" : {
+          "start" : {
+            "x" : 0.5,
+            "y" : 0
+          },
+          "stop" : {
+            "x" : 0.5,
+            "y" : 0.7
+          }
+        }
+      }
+    },
+    {
+      "appearance" : "dark",
+      "value" : "system-dark"
+    }
+  ],
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "blend-mode" : "normal",
+          "fill-specializations" : [
+            {
+              "value" : {
+                "solid" : "extended-gray:1.00000,1.00000"
+              }
+            },
+            {
+              "appearance" : "dark",
+              "value" : {
+                "linear-gradient" : [
+                  "display-p3:1.00000,0.30196,0.41569,1.00000",
+                  "display-p3:1.00000,0.00000,0.18067,1.00000"
+                ],
+                "orientation" : {
+                  "start" : {
+                    "x" : 0.49999999999999983,
+                    "y" : 0.10053124688762977
+                  },
+                  "stop" : {
+                    "x" : 0.5,
+                    "y" : 1.0435459144452959
+                  }
+                }
+              }
+            }
+          ],
+          "glass" : true,
+          "image-name" : "Asset 5.svg",
+          "name" : "Asset 5",
+          "position" : {
+            "scale" : 0.35,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}

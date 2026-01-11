@@ -1,0 +1,604 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2D050FCB2EFDCEAE00DFE18C /* Settings in Frameworks */ = {isa = PBXBuildFile; productRef = 2D050FCA2EFDCEAE00DFE18C /* Settings */; };
+		2D050FDA2EFDD70800DFE18C /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 2D050FD92EFDD70800DFE18C /* LaunchAtLogin */; };
+		2D07ACB72F04458600CDCF93 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 2D07ACB62F04458600CDCF93 /* README.md */; };
+		2D469F632F0865FD002F379B /* swift-format.json in Resources */ = {isa = PBXBuildFile; fileRef = 2D469F622F0865F7002F379B /* swift-format.json */; };
+		2D46A35B2F09A3A1002F379B /* MediaRemoteAdapter in Frameworks */ = {isa = PBXBuildFile; productRef = 2D46A35A2F09A3A1002F379B /* MediaRemoteAdapter */; };
+		2D46A35E2F09A457002F379B /* MediaRemoteAdapter in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 2D46A35A2F09A3A1002F379B /* MediaRemoteAdapter */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		2D5CDFEB2F061DA00056B4CF /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 2D5CDFEA2F061DA00056B4CF /* Sparkle */; };
+		2DB6C9B22F076BF100B52B00 /* ExportOptions.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2DB6C9B12F076BEA00B52B00 /* ExportOptions.plist */; };
+		2DF0282F2EFDE34B00AE9026 /* LastFM in Frameworks */ = {isa = PBXBuildFile; productRef = 2DF0282E2EFDE34B00AE9026 /* LastFM */; };
+		2DF028452EFE25EF00AE9026 /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = 2DF028442EFE25EF00AE9026 /* KeyboardShortcuts */; };
+		9F4C57C72EA31C66000ED6A2 /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F4C57C62EA31C66000ED6A2 /* ServiceManagement.framework */; };
+		9F4C57C92EA31C6F000ED6A2 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F4C57C82EA31C6F000ED6A2 /* CoreServices.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		2D46A35F2F09A457002F379B /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				2D46A35E2F09A457002F379B /* MediaRemoteAdapter in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		2D07AC2D2F0310D100CDCF93 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		2D07ACB62F04458600CDCF93 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		2D469F622F0865F7002F379B /* swift-format.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "swift-format.json"; sourceTree = "<group>"; };
+		2DB6C9B12F076BEA00B52B00 /* ExportOptions.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = ExportOptions.plist; sourceTree = "<group>"; };
+		9F3642A22E7E538B00D4E680 /* scrobble.up.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = scrobble.up.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9F4C57C62EA31C66000ED6A2 /* ServiceManagement.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ServiceManagement.framework; path = System/Library/Frameworks/ServiceManagement.framework; sourceTree = SDKROOT; };
+		9F4C57C82EA31C6F000ED6A2 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		2D8C683A2F01DA3B0003EAA9 /* Exceptions for "Configs" folder in "scrobble.up" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Secrets.example.xcconfig,
+				Secrets.xcconfig,
+			);
+			target = 9F3642A12E7E538B00D4E680 /* scrobble.up */;
+		};
+		2D8C683B2F01DA3B0003EAA9 /* Exceptions for "ScrobbleUp" folder in "scrobble.up" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 9F3642A12E7E538B00D4E680 /* scrobble.up */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		2DE33E8A2EFCEB5F002E2BBF /* Configs */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				2D8C683A2F01DA3B0003EAA9 /* Exceptions for "Configs" folder in "scrobble.up" target */,
+			);
+			path = Configs;
+			sourceTree = "<group>";
+		};
+		9F3642A42E7E538B00D4E680 /* ScrobbleUp */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				2D8C683B2F01DA3B0003EAA9 /* Exceptions for "ScrobbleUp" folder in "scrobble.up" target */,
+			);
+			path = ScrobbleUp;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		9F36429F2E7E538B00D4E680 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2D5CDFEB2F061DA00056B4CF /* Sparkle in Frameworks */,
+				2DF0282F2EFDE34B00AE9026 /* LastFM in Frameworks */,
+				2D050FCB2EFDCEAE00DFE18C /* Settings in Frameworks */,
+				9F4C57C72EA31C66000ED6A2 /* ServiceManagement.framework in Frameworks */,
+				2D050FDA2EFDD70800DFE18C /* LaunchAtLogin in Frameworks */,
+				9F4C57C92EA31C6F000ED6A2 /* CoreServices.framework in Frameworks */,
+				2DF028452EFE25EF00AE9026 /* KeyboardShortcuts in Frameworks */,
+				2D46A35B2F09A3A1002F379B /* MediaRemoteAdapter in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		9F3642992E7E538B00D4E680 = {
+			isa = PBXGroup;
+			children = (
+				2D469F622F0865F7002F379B /* swift-format.json */,
+				2DB6C9B12F076BEA00B52B00 /* ExportOptions.plist */,
+				2DE33E8A2EFCEB5F002E2BBF /* Configs */,
+				9F3642A42E7E538B00D4E680 /* ScrobbleUp */,
+				9F3642A32E7E538B00D4E680 /* Products */,
+				9F4C57C52EA31C65000ED6A2 /* Frameworks */,
+				2D07AC2D2F0310D100CDCF93 /* .gitignore */,
+				2D07ACB62F04458600CDCF93 /* README.md */,
+			);
+			sourceTree = "<group>";
+		};
+		9F3642A32E7E538B00D4E680 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9F3642A22E7E538B00D4E680 /* scrobble.up.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9F4C57C52EA31C65000ED6A2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				9F4C57C82EA31C6F000ED6A2 /* CoreServices.framework */,
+				9F4C57C62EA31C66000ED6A2 /* ServiceManagement.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		9F3642A12E7E538B00D4E680 /* scrobble.up */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9F3642AD2E7E538C00D4E680 /* Build configuration list for PBXNativeTarget "scrobble.up" */;
+			buildPhases = (
+				9F36429E2E7E538B00D4E680 /* Sources */,
+				9F36429F2E7E538B00D4E680 /* Frameworks */,
+				9F3642A02E7E538B00D4E680 /* Resources */,
+				2D46A35F2F09A457002F379B /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				2DE33E8A2EFCEB5F002E2BBF /* Configs */,
+				9F3642A42E7E538B00D4E680 /* ScrobbleUp */,
+			);
+			name = scrobble.up;
+			packageProductDependencies = (
+				2D050FCA2EFDCEAE00DFE18C /* Settings */,
+				2D050FD92EFDD70800DFE18C /* LaunchAtLogin */,
+				2DF0282E2EFDE34B00AE9026 /* LastFM */,
+				2DF028442EFE25EF00AE9026 /* KeyboardShortcuts */,
+				2D5CDFEA2F061DA00056B4CF /* Sparkle */,
+				2D46A35A2F09A3A1002F379B /* MediaRemoteAdapter */,
+			);
+			productName = NowPlaying;
+			productReference = 9F3642A22E7E538B00D4E680 /* scrobble.up.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9F36429A2E7E538B00D4E680 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2600;
+				LastUpgradeCheck = 2620;
+				TargetAttributes = {
+					9F3642A12E7E538B00D4E680 = {
+						CreatedOnToolsVersion = 26.0;
+						LastSwiftMigration = 2620;
+					};
+				};
+			};
+			buildConfigurationList = 9F36429D2E7E538B00D4E680 /* Build configuration list for PBXProject "ScrobbleUp" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 9F3642992E7E538B00D4E680;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				2D050FC92EFDCEAE00DFE18C /* XCRemoteSwiftPackageReference "Settings" */,
+				2D050FD82EFDD70800DFE18C /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
+				2DF0282D2EFDE34B00AE9026 /* XCRemoteSwiftPackageReference "LastFM" */,
+				2DF028432EFE25EF00AE9026 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
+				2D5CDFE92F061DA00056B4CF /* XCRemoteSwiftPackageReference "Sparkle" */,
+				2D46A3592F09A3A1002F379B /* XCRemoteSwiftPackageReference "mediaremote-adapter" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 9F3642A32E7E538B00D4E680 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				9F3642A12E7E538B00D4E680 /* scrobble.up */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		9F3642A02E7E538B00D4E680 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2D469F632F0865FD002F379B /* swift-format.json in Resources */,
+				2D07ACB72F04458600CDCF93 /* README.md in Resources */,
+				2DB6C9B22F076BF100B52B00 /* ExportOptions.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		9F36429E2E7E538B00D4E680 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		9F3642AB2E7E538C00D4E680 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 2DE33E8A2EFCEB5F002E2BBF /* Configs */;
+			baseConfigurationReferenceRelativePath = Secrets.xcconfig;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = F83F7B693P;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		9F3642AC2E7E538C00D4E680 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 2DE33E8A2EFCEB5F002E2BBF /* Configs */;
+			baseConfigurationReferenceRelativePath = Secrets.xcconfig;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = F83F7B693P;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		9F3642AE2E7E538C00D4E680 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 2DE33E8A2EFCEB5F002E2BBF /* Configs */;
+			baseConfigurationReferenceRelativePath = Secrets.xcconfig;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				AUTOMATION_APPLE_EVENTS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_USE_OPTIMIZATION_PROFILE = YES;
+				CODE_SIGN_ENTITLEMENTS = ScrobbleUp/ScrobbleUp.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1.2.2;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = 4AKWR35Q2Q;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = NO;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ScrobbleUp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = scrobble.up;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSAppleEventsUsageDescription = "scrobble.up needs the permission to get info about currently playing music.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
+				MARKETING_VERSION = 1.2.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.netliam.ScrobbleUp;
+				PRODUCT_DEFINITION_PLIST = ScrobbleUp/Info.plist;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				REGISTER_APP_GROUPS = YES;
+				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = NO;
+				RUNTIME_EXCEPTION_ALLOW_JIT = YES;
+				RUNTIME_EXCEPTION_ALLOW_UNSIGNED_EXECUTABLE_MEMORY = YES;
+				RUNTIME_EXCEPTION_DEBUGGING_TOOL = NO;
+				RUNTIME_EXCEPTION_DISABLE_EXECUTABLE_PAGE_PROTECTION = YES;
+				RUNTIME_EXCEPTION_DISABLE_LIBRARY_VALIDATION = NO;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		9F3642AF2E7E538C00D4E680 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 2DE33E8A2EFCEB5F002E2BBF /* Configs */;
+			baseConfigurationReferenceRelativePath = Secrets.xcconfig;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				AUTOMATION_APPLE_EVENTS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_USE_OPTIMIZATION_PROFILE = YES;
+				CODE_SIGN_ENTITLEMENTS = ScrobbleUp/ScrobbleUp.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1.2.2;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = 4AKWR35Q2Q;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = NO;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ScrobbleUp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = scrobble.up;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSAppleEventsUsageDescription = "scrobble.up needs the permission to get info about currently playing music.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
+				MARKETING_VERSION = 1.2.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.netliam.ScrobbleUp;
+				PRODUCT_DEFINITION_PLIST = ScrobbleUp/Info.plist;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				REGISTER_APP_GROUPS = YES;
+				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = NO;
+				RUNTIME_EXCEPTION_ALLOW_JIT = YES;
+				RUNTIME_EXCEPTION_ALLOW_UNSIGNED_EXECUTABLE_MEMORY = YES;
+				RUNTIME_EXCEPTION_DEBUGGING_TOOL = NO;
+				RUNTIME_EXCEPTION_DISABLE_EXECUTABLE_PAGE_PROTECTION = YES;
+				RUNTIME_EXCEPTION_DISABLE_LIBRARY_VALIDATION = NO;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		9F36429D2E7E538B00D4E680 /* Build configuration list for PBXProject "ScrobbleUp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9F3642AB2E7E538C00D4E680 /* Debug */,
+				9F3642AC2E7E538C00D4E680 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9F3642AD2E7E538C00D4E680 /* Build configuration list for PBXNativeTarget "scrobble.up" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9F3642AE2E7E538C00D4E680 /* Debug */,
+				9F3642AF2E7E538C00D4E680 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		2D050FC92EFDCEAE00DFE18C /* XCRemoteSwiftPackageReference "Settings" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/Settings";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.1.2;
+			};
+		};
+		2D050FD82EFDD70800DFE18C /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/LaunchAtLogin-Modern";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+		2D46A3592F09A3A1002F379B /* XCRemoteSwiftPackageReference "mediaremote-adapter" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ejbills/mediaremote-adapter.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+		2D5CDFE92F061DA00056B4CF /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.8.1;
+			};
+		};
+		2DF0282D2EFDE34B00AE9026 /* XCRemoteSwiftPackageReference "LastFM" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/duhnnie/LastFM.swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.5.4;
+			};
+		};
+		2DF028432EFE25EF00AE9026 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.4.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2D050FCA2EFDCEAE00DFE18C /* Settings */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2D050FC92EFDCEAE00DFE18C /* XCRemoteSwiftPackageReference "Settings" */;
+			productName = Settings;
+		};
+		2D050FD92EFDD70800DFE18C /* LaunchAtLogin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2D050FD82EFDD70800DFE18C /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */;
+			productName = LaunchAtLogin;
+		};
+		2D46A35A2F09A3A1002F379B /* MediaRemoteAdapter */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2D46A3592F09A3A1002F379B /* XCRemoteSwiftPackageReference "mediaremote-adapter" */;
+			productName = MediaRemoteAdapter;
+		};
+		2D5CDFEA2F061DA00056B4CF /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2D5CDFE92F061DA00056B4CF /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+		2DF0282E2EFDE34B00AE9026 /* LastFM */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2DF0282D2EFDE34B00AE9026 /* XCRemoteSwiftPackageReference "LastFM" */;
+			productName = LastFM;
+		};
+		2DF028442EFE25EF00AE9026 /* KeyboardShortcuts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2DF028432EFE25EF00AE9026 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
+			productName = KeyboardShortcuts;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 9F36429A2E7E538B00D4E680 /* Project object */;
+}

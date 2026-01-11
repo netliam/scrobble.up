@@ -1,0 +1,16 @@
+{
+    "blankLineBetweenMembers" : {
+        "ignoreSingleLineProperties" : true
+    },
+    "indentation" : {
+        "tabs" : 1
+    },
+    "indentConditionalCompilationBlocks" : true,
+    "lineBreakBeforeControlFlowKeywords" : false,
+    "lineBreakBeforeEachArgument" : false,
+    "lineLength" : 100,
+    "maximumBlankLines" : 1,
+    "respectsExistingLineBreaks" : true,
+    "tabWidth" : 4,
+    "version" : 1
+}
