@@ -4,7 +4,7 @@ class RecentlyPlayedMenuItemView: NSView {
 
 	private let fixedWidth: CGFloat
 
-	private let contentInsets = NSEdgeInsets(top: 6, left: 15, bottom: 6, right: 12)
+	private let contentInsets = NSEdgeInsets(top: 6, left: 15, bottom: 6, right: 16)
 	private var titleLeadingWithImage: NSLayoutConstraint?
 	private var titleLeadingWithoutImage: NSLayoutConstraint?
 	private var imageWidthConstraint: NSLayoutConstraint?
@@ -67,6 +67,14 @@ class RecentlyPlayedMenuItemView: NSView {
 		return label
 	}()
 
+	private let statusIndicator: NSImageView = {
+		let iv = NSImageView()
+		iv.translatesAutoresizingMaskIntoConstraints = false
+		iv.imageScaling = .scaleProportionallyDown
+        iv.contentTintColor = .labelColor
+		return iv
+	}()
+
 	public var image: NSImage? {
 		didSet {
 			imageView.image = image
@@ -89,6 +97,12 @@ class RecentlyPlayedMenuItemView: NSView {
 				subtitleLabel.stringValue = ""
 				subtitleLabel.isHidden = true
 			}
+		}
+	}
+
+	public var isScrobbled: Bool = false {
+		didSet {
+			updateStatusIndicator()
 		}
 	}
 
@@ -117,6 +131,7 @@ class RecentlyPlayedMenuItemView: NSView {
 		addSubview(imageView)
 		addSubview(titleLabel)
 		addSubview(subtitleLabel)
+		addSubview(statusIndicator)
 
 		titleLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
 		subtitleLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
@@ -153,8 +168,14 @@ class RecentlyPlayedMenuItemView: NSView {
 			imageWidthConstraint!,
 			imageHeightConstraint!,
 
-			titleLabel.trailingAnchor.constraint(
+			statusIndicator.trailingAnchor.constraint(
 				equalTo: trailingAnchor, constant: -contentInsets.right),
+			statusIndicator.centerYAnchor.constraint(equalTo: centerYAnchor),
+			statusIndicator.widthAnchor.constraint(equalToConstant: 16),
+			statusIndicator.heightAnchor.constraint(equalToConstant: 16),
+
+			titleLabel.trailingAnchor.constraint(
+				equalTo: statusIndicator.leadingAnchor, constant: -8),
 			titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: contentInsets.top),
 
 			subtitleLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
@@ -201,15 +222,27 @@ class RecentlyPlayedMenuItemView: NSView {
 		if isHovered {
 			titleLabel.textColor = NSColor.selectedMenuItemTextColor
 			subtitleLabel.textColor = NSColor.selectedMenuItemTextColor.withAlphaComponent(0.75)
+            statusIndicator.contentTintColor = .selectedMenuItemTextColor
 		} else {
 			titleLabel.textColor = NSColor.labelColor
 			subtitleLabel.textColor = NSColor.secondaryLabelColor
+            statusIndicator.contentTintColor = .labelColor
+		}
+	}
+
+	private func updateStatusIndicator() {
+		if isScrobbled {
+			statusIndicator.image = NSImage(systemSymbolName: "checkmark.circle.fill", accessibilityDescription: "Scrobbled")
+            statusIndicator.contentTintColor = .labelColor
+			statusIndicator.isHidden = false
+		} else {
+			statusIndicator.isHidden = true
 		}
 	}
 
 	// MARK: - Public Methods
 
-	public func configure(title: String, subtitle: String?, image: NSImage?) {
+	public func configure(title: String, subtitle: String?, image: NSImage?, isScrobbled: Bool? = false) {
 		self.title = title
 		self.subtitle = subtitle
 		if let img = image {
@@ -217,6 +250,7 @@ class RecentlyPlayedMenuItemView: NSView {
 		} else {
 			self.image = nil
 		}
+		self.isScrobbled = isScrobbled ?? false
 		updateImageVisibility()
 	}
 

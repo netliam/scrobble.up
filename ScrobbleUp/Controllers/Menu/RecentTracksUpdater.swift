@@ -27,7 +27,7 @@ final class RecentTracksUpdater {
 	func removeDuplicates(from entries: [LogEntry]) -> [LogEntry] {
 		var seen = Set<String>()
 		return entries.filter { entry in
-			let key = createCacheKey(for: entry)
+			let key = CacheHelpers.makeCacheKey(for: entry)
 			if seen.contains(key) {
 				return false
 			} else {
@@ -40,7 +40,7 @@ final class RecentTracksUpdater {
 	func updateRecentTrackItems(_ items: [NSMenuItem], with entries: [LogEntry]) {
 		DispatchQueue.main.async {
 			// Build array of new cache keys
-			let newTrackKeys = entries.prefix(items.count).map { self.createCacheKey(for: $0) }
+			let newTrackKeys = entries.prefix(items.count).map { CacheHelpers.makeCacheKey(for: $0) }
 
 			// Update items with entries
 			for (index, entry) in entries.prefix(items.count).enumerated() {
@@ -91,7 +91,7 @@ final class RecentTracksUpdater {
 	private func configureTrackItem(_ item: NSMenuItem, with entry: LogEntry) {
 		item.target = nil
 		item.action = nil
-		item.representedObject = createCacheKey(for: entry)
+		item.representedObject = CacheHelpers.makeCacheKey(for: entry)
 		item.isHidden = false
 		item.isEnabled = true
 
@@ -102,22 +102,16 @@ final class RecentTracksUpdater {
 			track: entry.title,
 			album: entry.album
 		) {
-			artwork = cachedArtwork.styled(
-				size: NSSize(width: 32, height: 32),
-				cornerRadius: 4
-			)
+			artwork = ImageHelpers.styleForMenu(cachedArtwork)
 		} else {
-			artwork = artworkManager.placeholder().styled(
-				size: NSSize(width: 32, height: 32),
-				cornerRadius: 4
-			)
+			artwork = ImageHelpers.styleForMenu(artworkManager.placeholder())
 		}
 
 		if let view = item.view as? RecentlyPlayedMenuItemView {
-			view.configure(title: entry.title, subtitle: entry.artist, image: artwork)
+			view.configure(title: entry.title, subtitle: entry.artist, image: artwork, isScrobbled: entry.scrobbled)
 		} else {
 			let view = RecentlyPlayedMenuItemView(width: 260)
-			view.configure(title: entry.title, subtitle: entry.artist, image: artwork)
+			view.configure(title: entry.title, subtitle: entry.artist, image: artwork, isScrobbled: entry.scrobbled)
 			item.view = view
 		}
 	}
@@ -144,15 +138,12 @@ final class RecentTracksUpdater {
 				await MainActor.run {
 					// Verify this item still represents the same track before updating
 					let currentKey = item.representedObject as? String
-					let entryKey = self.createCacheKey(for: entry)
+					let entryKey = CacheHelpers.makeCacheKey(for: entry)
 
 					guard currentKey == entryKey else { return }
 
 					if let view = item.view as? RecentlyPlayedMenuItemView {
-						view.image = artwork.styled(
-							size: NSSize(width: 32, height: 32),
-							cornerRadius: 4
-						)
+						view.image = ImageHelpers.styleForMenu(artwork)
 					}
 				}
 			}
@@ -162,7 +153,7 @@ final class RecentTracksUpdater {
 	// MARK: - Track Details & Submenu
 
 	private func loadTrackDetails(for entry: LogEntry, into item: NSMenuItem) {
-		let key = createCacheKey(for: entry)
+		let key = CacheHelpers.makeCacheKey(for: entry)
 
 		if let cached = trackInfoCache[key] {
 			buildSubmenu(for: entry, trackInfo: cached, item: item)
@@ -364,11 +355,5 @@ final class RecentTracksUpdater {
 				insertIndex += 1
 			}
 		}
-	}
-
-	// MARK: - Helpers
-
-	private func createCacheKey(for entry: LogEntry) -> String {
-		"\(entry.artist.lowercased())|\(entry.title.lowercased())|\((entry.album ?? "").lowercased())"
 	}
 }
