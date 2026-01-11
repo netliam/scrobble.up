@@ -42,7 +42,7 @@ final class ArtworkManager: @unchecked Sendable {
 
 	@MainActor
 	func getCachedArtwork(artist: String, track: String, album: String? = nil) -> NSImage? {
-		let cacheKey = makeCacheKey(artist: artist, track: track, album: album)
+		let cacheKey = CacheHelpers.makeCacheKey(artist: artist, track: track, album: album)
 
 		let isNotFound = notFoundLock.withLock {
 			notFoundCache.contains(cacheKey)
@@ -64,7 +64,7 @@ final class ArtworkManager: @unchecked Sendable {
 	}
 
 	func fetchArtwork(artist: String, track: String, album: String? = nil) async -> NSImage? {
-		let cacheKey = makeCacheKey(artist: artist, track: track, album: album)
+		let cacheKey = CacheHelpers.makeCacheKey(artist: artist, track: track, album: album)
 
 		let isNotFound = notFoundLock.withLock {
 			notFoundCache.contains(cacheKey)
@@ -137,7 +137,7 @@ final class ArtworkManager: @unchecked Sendable {
 	}
 
 	func cacheArtwork(_ image: NSImage, artist: String, track: String, album: String?) async {
-		let cacheKey = makeCacheKey(artist: artist, track: track, album: album)
+		let cacheKey = CacheHelpers.makeCacheKey(artist: artist, track: track, album: album)
 		cacheImageWithHash(image, for: cacheKey)
 	}
 
@@ -159,13 +159,6 @@ final class ArtworkManager: @unchecked Sendable {
 	}
 
 	// MARK: - Private Methods
-
-	private func makeCacheKey(artist: String, track: String, album: String?) -> String {
-		if let album = album, !album.isEmpty {
-			return "\(artist)|\(track)|\(album)".lowercased()
-		}
-		return "\(artist)|\(track)".lowercased()
-	}
 
 	private func fetchArtworkURL(
 		artist: String,

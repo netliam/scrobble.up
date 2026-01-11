@@ -179,106 +179,79 @@ final class LinkManager {
 	// MARK: - Apple Music Links
 
 	private func fetchArtistLinkMusic(artist: String) async -> URL? {
-		let query = artist.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-		let searchURL = "https://itunes.apple.com/search?term=\(query)&entity=allArtist&limit=1"
-
-		guard let url = URL(string: searchURL) else { return nil }
-
-		do {
-			let (data, _) = try await URLSession.shared.data(from: url)
-			let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
-
-			guard let results = json?["results"] as? [[String: Any]],
-				let firstResult = results.first,
-				let artistID = firstResult["artistId"] as? Int
-			else {
-				return nil
-			}
-
-			return URL(string: "music://music.apple.com/artist/\(artistID)")
-		} catch {
-			print("Error fetching Apple Music artist: \(error)")
+		guard let url = URLHelpers.makeITunesSearchURL(query: artist, entity: "allArtist") else {
 			return nil
 		}
+
+		if let json = await JSONHelpers.fetchJSON(from: url),
+		   let results = json["results"] as? [[String: Any]],
+		   let firstResult = results.first,
+		   let artistID = firstResult["artistId"] as? Int {
+			return URL(string: "music://music.apple.com/artist/\(artistID)")
+		}
+		
+		return nil
 	}
 
 	private func fetchTrackLinkMusic(artist: String, track: String, album: String? = nil) async
 		-> URL?
 	{
-		var searchTerm = "\(artist) \(track)"
-		if let album = album, !album.isEmpty {
-			searchTerm += " \(album)"
+		var searchTerms = [artist, track]
+		if let album = album, album.isNotEmpty {
+			searchTerms.append(album)
 		}
-
-		let query = searchTerm.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-		let searchURL = "https://itunes.apple.com/search?term=\(query)&entity=song&limit=1"
-
-		guard let url = URL(string: searchURL) else { return nil }
-
-		do {
-			let (data, _) = try await URLSession.shared.data(from: url)
-			let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
-
-			guard let results = json?["results"] as? [[String: Any]],
-				let firstResult = results.first,
-				let trackID = firstResult["trackId"] as? Int
-			else {
-				return nil
-			}
-
-			return URL(string: "music://music.apple.com/song/\(trackID)")
-		} catch {
-			print("Error fetching Apple Music track: \(error)")
+		
+		let query = searchTerms.joined(separator: " ")
+		guard let url = URLHelpers.makeITunesSearchURL(query: query, entity: "song") else {
 			return nil
 		}
+
+		if let json = await JSONHelpers.fetchJSON(from: url),
+		   let results = json["results"] as? [[String: Any]],
+		   let firstResult = results.first,
+		   let trackID = firstResult["trackId"] as? Int {
+			return URL(string: "music://music.apple.com/song/\(trackID)")
+		}
+		
+		return nil
 	}
 
 	private func fetchAlbumLinkMusic(artist: String, album: String) async -> URL? {
-		let searchTerm = "\(artist) \(album)"
-		let query = searchTerm.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-		let searchURL = "https://itunes.apple.com/search?term=\(query)&entity=album&limit=1"
-
-		guard let url = URL(string: searchURL) else { return nil }
-
-		do {
-			let (data, _) = try await URLSession.shared.data(from: url)
-			let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
-
-			guard let results = json?["results"] as? [[String: Any]],
-				let firstResult = results.first,
-				let collectionID = firstResult["collectionId"] as? Int
-			else {
-				return nil
-			}
-
-			return URL(string: "music://music.apple.com/album/\(collectionID)")
-		} catch {
-			print("Error fetching Apple Music album: \(error)")
+		let query = "\(artist) \(album)"
+		guard let url = URLHelpers.makeITunesSearchURL(query: query, entity: "album") else {
 			return nil
 		}
+
+		if let json = await JSONHelpers.fetchJSON(from: url),
+		   let results = json["results"] as? [[String: Any]],
+		   let firstResult = results.first,
+		   let collectionID = firstResult["collectionId"] as? Int {
+			return URL(string: "music://music.apple.com/album/\(collectionID)")
+		}
+		
+		return nil
 	}
 
 	// MARK: - Spotify Links
 
 	private func fetchArtistLinkSpotify(artist: String) async -> URL? {
-		let query = artist.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+		let query = URLHelpers.encodeSearchQuery(artist)
 		return URL(string: "spotify:search:\(query)")
 	}
 
 	private func fetchTrackLinkSpotify(artist: String, title: String, album: String? = nil) async
 		-> URL?
 	{
-		var query = "\(artist) \(title)"
+		var searchTerms = [artist, title]
 		if let album = album {
-			query += " \(album)"
+			searchTerms.append(album)
 		}
-		let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+		let encoded = URLHelpers.encodeSearchQuery(searchTerms.joined(separator: " "))
 		return URL(string: "spotify:search:\(encoded)")
 	}
 
 	private func fetchAlbumLinkSpotify(artist: String, album: String) async -> URL? {
-		let query = "\(artist) \(album)"
-		let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-		return URL(string: "spotify:search:\(encoded)")
+		let query = URLHelpers.encodeSearchQuery(artist, album)
+		return URL(string: "spotify:search:\(query)")
 	}
 }

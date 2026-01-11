@@ -28,6 +28,7 @@ final class LastFmManager: ObservableObject {
 	private let api = "https://ws.audioscrobbler.com/2.0/"
 	private let apiKey = Secrets.lastFmApiKey
 	private let apiSecret = Secrets.lastFmApiSecret
+    
 	// MARK: - Initialization
 
 	private init() {
