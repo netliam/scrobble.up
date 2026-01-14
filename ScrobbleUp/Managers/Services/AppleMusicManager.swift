@@ -93,12 +93,13 @@ final class AppleMusicManager: ObservableObject {
 		return nil
 	}
 
+    @MainActor
 	func setFavorite(_ favorite: Bool) async -> Bool? {
 		let script = """
 			tell application "Music"
 			    try
-			        set loved of current track to \(favorite)
-			        return loved of current track
+			        set favorited of current track to \(favorite)
+			        return favorited of current track
 			    end try
 			end tell
 			"""
