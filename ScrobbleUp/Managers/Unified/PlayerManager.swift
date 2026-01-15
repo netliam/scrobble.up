@@ -24,9 +24,9 @@ final class PlayerManager: ObservableObject {
 
 	// MARK: - Published State
 
-	@Published private(set) var isCurrentTrackLoved: Bool = false
+	@Published private(set) var isCurrentTrackFavorited: Bool = false
 
-	@Published private(set) var loveState: TrackLoveState = .init()
+	@Published private(set) var favoriteState: TrackFavoriteState = .init()
 
 	@Published private(set) var isLoading: Bool = false
 
@@ -38,79 +38,100 @@ final class PlayerManager: ObservableObject {
 
 	// MARK: - Public API
 
-	func toggleLoveCurrentTrack() {
-		guard hasCurrentTrack else { return }
-
-		let newLoveState = !isCurrentTrackLoved
-
-		Task {
-			await setLoveState(loved: newLoveState)
-		}
-	}
-
-	func setLoveState(loved: Bool) async {
-		let track = appState.currentTrack
-		guard !track.title.isEmpty, track.title != "-" else { return }
-
-		isLoading = true
-		defer { isLoading = false }
-
-		notifications.loveTrack(
-			trackName: track.title,
-			loved: loved,
-			artwork: track.image
-		)
-
-		var results = LoveOperationResults()
-
-		if UserDefaults.standard.get(\.syncLikes) {
-			_ = await appleMusic.requestAutomationPermissionIfNeeded()
-			_ = await appleMusic.setFavorite(loved)
-			results.appleMusicSuccess = true
-		}
+	func setFavoriteState(favorited: Bool? = nil, title: String? = nil, artist: String? = nil) async {
+        let trackTitle: String
+        let trackArtist: String
+        let isCurrentTrack: Bool
+        
+        if let title = title, let artist = artist {
+            trackTitle = title
+            trackArtist = artist
+            isCurrentTrack = false
+        } else {
+            let track = appState.currentTrack
+            trackTitle = track.title
+            trackArtist = track.artist
+            isCurrentTrack = true
+        }
+        
+        guard !trackTitle.isEmpty, trackTitle != "-" else { return }
+        
+        // If favorited is nil, toggle the current state
+        let targetFavorited = favorited ?? !isCurrentTrackFavorited
+        
+        if isCurrentTrack {
+            isLoading = true
+        }
+        defer { 
+            if isCurrentTrack {
+                isLoading = false
+            }
+        }
+        
+        if isCurrentTrack {
+            notifications.favoriteTrack(
+                trackName: trackTitle,
+                loved: targetFavorited,
+                artwork: appState.currentTrack.image
+            )
+        }
+        
+        var results = FavoriteOperationResults()
+        
+        if UserDefaults.standard.get(\.syncLikes) && isCurrentTrack {
+            let authorized = await appleMusic.ensureAuthorization()
+            if authorized {
+                let success = await appleMusic.setFavorite(targetFavorited, track: appState.currentTrack)
+                results.appleMusicSuccess = success
+            }
+        }
 
 		if UserDefaults.standard.get(\.lastFmEnabled) && lastFm.username != nil {
 			do {
-				if loved {
-					try await lastFm.loveTrack(track: track.title, artist: track.artist)
+				if targetFavorited {
+					try await lastFm.loveTrack(track: trackTitle, artist: trackArtist)
 				} else {
-					try await lastFm.unloveTrack(track: track.title, artist: track.artist)
+					try await lastFm.unloveTrack(track: trackTitle, artist: trackArtist)
 				}
 				results.lastFmSuccess = true
-				loveState.lastFm = loved
+				if isCurrentTrack {
+					favoriteState.lastFm = targetFavorited
+				}
 			} catch {
 				results.lastFmError = error.localizedDescription
 				print("Last.fm love/unlove error: \(error.localizedDescription)")
 			}
 		}
 
-		if UserDefaults.standard.get(\.lastFmEnabled) && listenBrainz.username != nil {
+		if UserDefaults.standard.get(\.listenBrainzEnabled) && listenBrainz.username != nil {
 			do {
-				if loved {
-					try await listenBrainz.loveTrack(artist: track.artist, track: track.title)
+				if targetFavorited {
+					try await listenBrainz.loveTrack(artist: trackArtist, track: trackTitle)
 				} else {
-					try await listenBrainz.unloveTrack(artist: track.artist, track: track.title)
+					try await listenBrainz.unloveTrack(artist: trackArtist, track: trackTitle)
 				}
 				results.listenBrainzSuccess = true
-				loveState.listenBrainz = loved
+				if isCurrentTrack {
+					favoriteState.listenBrainz = targetFavorited
+				}
 			} catch {
 				results.listenBrainzError = error.localizedDescription
 				print("ListenBrainz love/unlove error: \(error.localizedDescription)")
 			}
 		}
 
-		if results.anySuccess {
-			isCurrentTrackLoved = loved
-			loveState.local = loved
+		if results.anySuccess && isCurrentTrack {
+			isCurrentTrackFavorited = targetFavorited
+			favoriteState.local = targetFavorited
 		}
 	}
 
-	func fetchLoveStateForCurrentTrack() async {
-		let track = appState.currentTrack
-		guard !track.title.isEmpty, track.title != "-" else {
-			resetLoveState()
-			return
-		}
+	func fetchFavoriteStateForCurrentTrack() async {
+        let track = appState.currentTrack
+        guard !track.title.isEmpty, track.title != "-" else {
+            resetFavoriteState()
+            return
+        }
 
 		let trackKey = makeTrackKey(artist: track.artist, title: track.title)
 
@@ -122,7 +143,7 @@ final class PlayerManager: ObservableObject {
 		isLoading = true
 		defer { isLoading = false }
 
-		var newState = TrackLoveState()
+		var newState = TrackFavoriteState()
 
 		if UserDefaults.standard.get(\.lastFmEnabled) && lastFm.username != nil {
 			let isLoved = await lastFm.isTrackLoved(artist: track.artist, track: track.title)
@@ -134,18 +155,18 @@ final class PlayerManager: ObservableObject {
 			newState.listenBrainz = isLoved
 		}
 
-		if UserDefaults.standard.get(\.syncLikes) {
-			let isLoved = await appleMusic.currentFavoriteState()
-			newState.appleMusic = isLoved ?? false
-		}
+        if UserDefaults.standard.get(\.syncLikes) {
+            let isLoved = await appleMusic.currentFavoriteState(track: track)
+            newState.appleMusic = isLoved ?? false
+        }
 
-		loveState = newState
-		isCurrentTrackLoved = newState.isLovedOnAnyService
+		favoriteState = newState
+		isCurrentTrackFavorited = newState.isFavoritedOnAnyService
 	}
 
 	func onTrackChanged() {
 		currentTrackKey = nil
-		resetLoveState()
+		resetFavoriteState()
 	}
 
 	func bringPlayerToFront() {
@@ -170,51 +191,12 @@ final class PlayerManager: ObservableObject {
 		return !track.title.isEmpty && track.title != "-"
 	}
 
-	private func resetLoveState() {
-		loveState = .init()
-		isCurrentTrackLoved = false
+	private func resetFavoriteState() {
+		favoriteState = .init()
+		isCurrentTrackFavorited = false
 	}
 
 	private func makeTrackKey(artist: String, title: String) -> String {
 		"\(artist.lowercased())|\(title.lowercased())"
-	}
-}
-
-// MARK: - Supporting Types
-
-struct TrackLoveState {
-	var local: Bool = false
-	var lastFm: Bool = false
-	var listenBrainz: Bool = false
-	var appleMusic: Bool = false
-
-	var isLovedOnAnyService: Bool {
-		lastFm || listenBrainz || appleMusic || local
-	}
-
-	var isLovedOnAllServices: Bool {
-		isLovedOnAnyService
-	}
-}
-
-struct LoveOperationResults {
-	var appleMusicSuccess: Bool = false
-	var lastFmSuccess: Bool = false
-	var listenBrainzSuccess: Bool = false
-
-	var appleMusicError: String?
-	var lastFmError: String?
-	var listenBrainzError: String?
-
-	var anySuccess: Bool {
-		appleMusicSuccess || lastFmSuccess || listenBrainzSuccess
-	}
-
-	var allSuccess: Bool {
-		appleMusicError == nil && lastFmError == nil && listenBrainzError == nil
-	}
-
-	var errors: [String] {
-		[appleMusicError, lastFmError, listenBrainzError].compactMap { $0 }
 	}
 }

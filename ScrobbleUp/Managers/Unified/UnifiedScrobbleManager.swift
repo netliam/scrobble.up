@@ -102,7 +102,7 @@ final class UnifiedScrobbleManager: ObservableObject {
 						duration: duration
 					)
 
-					await playerManager.fetchLoveStateForCurrentTrack()
+					await playerManager.fetchFavoriteStateForCurrentTrack()
 
 					if UserDefaults.standard.get(\.showArtworkInDock) {
 						DockIconManager.shared.updateDockIcon(

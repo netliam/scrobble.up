@@ -74,7 +74,7 @@ final class MenuActions: NSObject {
 		let text = "\(artist) — \(title)"
 		NSPasteboard.general.clearContents()
 		NSPasteboard.general.setString(text, forType: .string)
-		notifications.infoCopiedToClipboard(type: .artistTitle)
+		notifications.infoCopied(type: .artistTitle)
 	}
 
 	@objc func openArtistPage(_ sender: NSMenuItem) {

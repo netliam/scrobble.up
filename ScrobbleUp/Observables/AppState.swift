@@ -25,8 +25,8 @@ class AppState: ObservableObject {
 	@Published var currentTrack = CurrentTrack()
 	@Published var currentActivePlayer: MusicSource?
 
-	var isCurrentTrackLoved: Bool {
-		PlayerManager.shared.isCurrentTrackLoved
+	var isCurrentTrackFavorited: Bool {
+		PlayerManager.shared.isCurrentTrackFavorited
 	}
 
 	private let lastFm: LastFmManager = .shared
@@ -37,7 +37,9 @@ class AppState: ObservableObject {
 
 	init() {
 		KeyboardShortcuts.onKeyUp(for: .loveTrack) { [self] in
-			playerManager.toggleLoveCurrentTrack()
+            Task {
+                await playerManager.setFavoriteState()
+            }
 		}
 		KeyboardShortcuts.onKeyUp(for: .bringPlayerToFront) { [self] in
 			playerManager.bringPlayerToFront()

@@ -119,9 +119,9 @@ struct DesktopWidgetView: View {
 				Button {
 					loveCurrentTrack()
 				} label: {
-					Image(systemName: playerManager.isCurrentTrackLoved ? "heart.fill" : "heart")
+					Image(systemName: playerManager.isCurrentTrackFavorited ? "heart.fill" : "heart")
 						.font(.system(size: 16, weight: .medium))
-						.foregroundStyle(playerManager.isCurrentTrackLoved ? .pink : .white)
+						.foregroundStyle(playerManager.isCurrentTrackFavorited ? .pink : .white)
 						.padding(8)
 						.background(
 							ZStack {
@@ -152,15 +152,11 @@ struct DesktopWidgetView: View {
 	}
 
 	private func loveCurrentTrack() {
-		let source = appState.currentActivePlayer
+        _ = appState.currentActivePlayer
 
-		if source == .appleMusic || source == .spotify {
-			playerManager.toggleLoveCurrentTrack()
-		} else {
-			Task {
-				await playerManager.setLoveState(loved: !playerManager.isCurrentTrackLoved)
-			}
-		}
+        Task {
+            await playerManager.setFavoriteState()
+        }
 	}
 
 	private func updateVisibility() {

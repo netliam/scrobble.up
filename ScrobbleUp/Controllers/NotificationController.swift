@@ -35,8 +35,8 @@ class NotificationController: NSObject, UNUserNotificationCenterDelegate {
 
 	// MARK: - HUD Notifications
 
-	func loveTrack(trackName: String, loved: Bool, artwork: NSImage? = nil) {
-		guard UserDefaults.standard.get(\.ratingAndLoveStatus) else { return }
+	func favoriteTrack(trackName: String, loved: Bool, artwork: NSImage? = nil) {
+		guard UserDefaults.standard.get(\.ratingStatus) else { return }
 		if loved {
 			showHUD(symbol: "heart", text: "Loved", subtitle: trackName, artwork: artwork)
 		} else {
@@ -45,8 +45,8 @@ class NotificationController: NSObject, UNUserNotificationCenterDelegate {
 
 	}
 
-	func infoCopiedToClipboard(type: CopiedLink) {
-		guard UserDefaults.standard.get(\.infoCopiedToClipboard) else { return }
+	func infoCopied(type: CopiedLink) {
+		guard UserDefaults.standard.get(\.infoCopied) else { return }
 		var text: String
 
 		switch type {
