@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>LSMinimumSystemVersion</key>
-	<string>14.6</string>
+	<string>15</string>
 	<key>LastFmApiKey</key>
 	<string>$(LASTFM_API_KEY)</string>
 	<key>LastFmApiSecret</key>
@@ -14,36 +14,36 @@
 		<dict>
 			<key>coverartarchive.org</key>
 			<dict>
+				<key>NSExceptionRequiresForwardSecrecy</key>
+				<true/>
 				<key>NSIncludesSubdomains</key>
 				<true/>
 				<key>NSTemporaryExceptionMinimumTLSVersion</key>
 				<string>TLSv1.2</string>
-				<key>NSExceptionRequiresForwardSecrecy</key>
-				<true/>
-			</dict>
-			<key>musicbrainz.org</key>
-			<dict>
-				<key>NSIncludesSubdomains</key>
-				<true/>
-				<key>NSTemporaryExceptionMinimumTLSVersion</key>
-				<string>TLSv1.2</string>
-				<key>NSExceptionRequiresForwardSecrecy</key>
-				<true/>
 			</dict>
 			<key>listenbrainz.org</key>
 			<dict>
+				<key>NSExceptionRequiresForwardSecrecy</key>
+				<true/>
 				<key>NSIncludesSubdomains</key>
 				<true/>
 				<key>NSTemporaryExceptionMinimumTLSVersion</key>
 				<string>TLSv1.2</string>
+			</dict>
+			<key>musicbrainz.org</key>
+			<dict>
 				<key>NSExceptionRequiresForwardSecrecy</key>
 				<true/>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+				<key>NSTemporaryExceptionMinimumTLSVersion</key>
+				<string>TLSv1.2</string>
 			</dict>
 		</dict>
 	</dict>
 	<key>SMAuthorizedClients</key>
 	<array>
-		<string>identifier &quot;$(PRODUCT_BUNDLE_IDENTIFIER)&quot; and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = &quot;$(AppIdentifierPrefix)&quot;</string>
+		<string>identifier "$(PRODUCT_BUNDLE_IDENTIFIER)" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = "$(AppIdentifierPrefix)"</string>
 	</array>
 	<key>SUEnableInstallerLauncherService</key>
 	<true/>

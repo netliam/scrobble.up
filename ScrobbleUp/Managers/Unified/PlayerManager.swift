@@ -126,42 +126,71 @@ final class PlayerManager: ObservableObject {
 		}
 	}
 
-	func fetchFavoriteStateForCurrentTrack() async {
-        let track = appState.currentTrack
-        guard !track.title.isEmpty, track.title != "-" else {
-            resetFavoriteState()
-            return
-        }
-
-		let trackKey = makeTrackKey(artist: track.artist, title: track.title)
-
-		if trackKey == currentTrackKey {
-			return
+	func fetchFavoriteState(title: String? = nil, artist: String? = nil) async -> TrackFavoriteState {
+		let trackTitle: String
+		let trackArtist: String
+		let isCurrentTrack: Bool
+		
+		if let title = title, let artist = artist {
+			trackTitle = title
+			trackArtist = artist
+			isCurrentTrack = false
+		} else {
+			let track = appState.currentTrack
+			guard !track.title.isEmpty, track.title != "-" else {
+				resetFavoriteState()
+				return TrackFavoriteState()
+			}
+			trackTitle = track.title
+			trackArtist = track.artist
+			isCurrentTrack = true
 		}
 
-		currentTrackKey = trackKey
-		isLoading = true
-		defer { isLoading = false }
+		let trackKey = makeTrackKey(artist: trackArtist, title: trackTitle)
+
+		// Only check cache and skip if this is for the current track
+		if isCurrentTrack {
+			if trackKey == currentTrackKey {
+				return favoriteState
+			}
+			currentTrackKey = trackKey
+			isLoading = true
+		}
+		
+		defer {
+			if isCurrentTrack {
+				isLoading = false
+			}
+		}
 
 		var newState = TrackFavoriteState()
 
 		if UserDefaults.standard.get(\.lastFmEnabled) && lastFm.username != nil {
-			let isLoved = await lastFm.isTrackLoved(artist: track.artist, track: track.title)
+			let isLoved = await lastFm.isTrackLoved(artist: trackArtist, track: trackTitle)
 			newState.lastFm = isLoved
 		}
 
 		if UserDefaults.standard.get(\.listenBrainzEnabled) && listenBrainz.username != nil {
-			let isLoved = await listenBrainz.isTrackLoved(artist: track.artist, track: track.title)
+			let isLoved = await listenBrainz.isTrackLoved(artist: trackArtist, track: trackTitle)
 			newState.listenBrainz = isLoved
 		}
 
-        if UserDefaults.standard.get(\.syncLikes) {
-            let isLoved = await appleMusic.currentFavoriteState(track: track)
-            newState.appleMusic = isLoved ?? false
-        }
+		if UserDefaults.standard.get(\.syncLikes) && isCurrentTrack {
+			let track = appState.currentTrack
+			let isLoved = await appleMusic.currentFavoriteState(track: track)
+			newState.appleMusic = isLoved ?? false
+		}
 
-		favoriteState = newState
-		isCurrentTrackFavorited = newState.isFavoritedOnAnyService
+		if isCurrentTrack {
+			favoriteState = newState
+			isCurrentTrackFavorited = newState.isFavoritedOnAnyService
+		}
+		
+		return newState
+	}
+	
+	func fetchFavoriteStateForCurrentTrack() async {
+		_ = await fetchFavoriteState()
 	}
 
 	func onTrackChanged() {

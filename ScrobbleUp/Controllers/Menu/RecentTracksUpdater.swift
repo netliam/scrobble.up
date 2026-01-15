@@ -14,6 +14,7 @@ final class RecentTracksUpdater {
 
 	private let lastFm: LastFmManager = .shared
 	private let artworkManager: ArtworkManager = .shared
+    private let playerManager: PlayerManager = .shared
 	private let notifications: NotificationController = .shared
 	private let menuActions = MenuActions()
 
@@ -176,7 +177,7 @@ final class RecentTracksUpdater {
 
 	private func buildSubmenu(for entry: LogEntry, trackInfo: TrackInfo, item: NSMenuItem) {
 		let subMenu = NSMenu()
-
+        subMenu.minimumWidth = 260
 		// Copy action
 		let copyItem = NSMenuItem(
 			title: "Copy Artist & Title",
@@ -186,6 +187,37 @@ final class RecentTracksUpdater {
 		copyItem.target = menuActions
 		copyItem.representedObject = ["artist": entry.artist, "title": entry.title]
 		subMenu.addItem(copyItem)
+
+		let loveItem = NSMenuItem(
+			title: "Loading…",
+			action: nil,
+			keyEquivalent: ""
+		)
+		loveItem.isEnabled = false
+		subMenu.addItem(loveItem)
+
+		Task { [weak self] in
+			guard let self else { return }
+            let isFavorited = await playerManager.fetchFavoriteState(title: trackInfo.name, artist: trackInfo.artist.name)
+			
+			await MainActor.run {
+                loveItem.title = isFavorited.isFavoritedOnAnyService ? "Unfavorite Track" : "Favorite Track"
+				loveItem.action = #selector(MenuActions.toggleTrackLove(_:))
+				loveItem.target = self.menuActions
+				loveItem.representedObject = [
+					"artist": entry.artist,
+					"title": entry.title
+                ]
+				
+				let heartIcon = NSImage(
+                    systemSymbolName: isFavorited.isFavoritedOnAnyService ? "heart.fill" : "heart",
+					accessibilityDescription: nil
+				)?.configureForMenu(size: 16)
+				loveItem.image = heartIcon
+				
+				loveItem.isEnabled = true
+			}
+		}
 
 		subMenu.addItem(NSMenuItem.separator())
 

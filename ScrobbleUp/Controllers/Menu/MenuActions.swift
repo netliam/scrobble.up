@@ -13,6 +13,7 @@ final class MenuActions: NSObject {
 
 	private let appState: AppState = .shared
 	private let notifications: NotificationController = .shared
+    private let playerManager: PlayerManager = .shared
 
 	// MARK: - App Actions
 
@@ -75,6 +76,38 @@ final class MenuActions: NSObject {
 		NSPasteboard.general.clearContents()
 		NSPasteboard.general.setString(text, forType: .string)
 		notifications.infoCopied(type: .artistTitle)
+	}
+
+	@objc func toggleTrackLove(_ sender: NSMenuItem) {
+		guard let payload = sender.representedObject as? [String: Any],
+			let artist = payload["artist"] as? String,
+			let title = payload["title"] as? String
+		else { return }
+
+		Task {
+			await playerManager.setFavoriteState(
+				title: title,
+				artist: artist
+			)
+            
+            let isFavorited = await playerManager.fetchFavoriteState(title: title, artist: artist)
+			
+			await MainActor.run {
+                let newIsFavorited = !isFavorited.isFavoritedOnAnyService
+				sender.title = newIsFavorited ? "Unfavorite Track" : "Favorite Track"
+				
+				let heartIcon = NSImage(
+					systemSymbolName: newIsFavorited ? "heart.fill" : "heart",
+					accessibilityDescription: nil
+				)?.configureForMenu(size: 16)
+				sender.image = heartIcon
+				
+				if var newPayload = sender.representedObject as? [String: Any] {
+					newPayload["isFavorited"] = newIsFavorited
+					sender.representedObject = newPayload
+				}
+			}
+		}
 	}
 
 	@objc func openArtistPage(_ sender: NSMenuItem) {
