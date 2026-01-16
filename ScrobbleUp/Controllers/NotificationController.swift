@@ -35,9 +35,9 @@ class NotificationController: NSObject, UNUserNotificationCenterDelegate {
 
 	// MARK: - HUD Notifications
 
-	func favoriteTrack(trackName: String, loved: Bool, artwork: NSImage? = nil) {
+	func favoriteTrack(trackName: String, favorited: Bool, artwork: NSImage? = nil) {
 		guard UserDefaults.standard.get(\.ratingStatus) else { return }
-		if loved {
+		if favorited {
 			showHUD(symbol: "heart", text: "Loved", subtitle: trackName, artwork: artwork)
 		} else {
 			showHUD(symbol: "heart.slash", text: "Removed", subtitle: trackName, artwork: artwork)

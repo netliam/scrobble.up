@@ -56,7 +56,6 @@ final class PlayerManager: ObservableObject {
         
         guard !trackTitle.isEmpty, trackTitle != "-" else { return }
         
-        // If favorited is nil, toggle the current state
         let targetFavorited = favorited ?? !isCurrentTrackFavorited
         
         if isCurrentTrack {
@@ -68,14 +67,12 @@ final class PlayerManager: ObservableObject {
             }
         }
         
-        if isCurrentTrack {
             notifications.favoriteTrack(
                 trackName: trackTitle,
-                loved: targetFavorited,
+                favorited: targetFavorited,
                 artwork: appState.currentTrack.image
             )
-        }
-        
+                
         var results = FavoriteOperationResults()
         
         if UserDefaults.standard.get(\.syncLikes) && isCurrentTrack {
@@ -148,7 +145,6 @@ final class PlayerManager: ObservableObject {
 
 		let trackKey = makeTrackKey(artist: trackArtist, title: trackTitle)
 
-		// Only check cache and skip if this is for the current track
 		if isCurrentTrack {
 			if trackKey == currentTrackKey {
 				return favoriteState
