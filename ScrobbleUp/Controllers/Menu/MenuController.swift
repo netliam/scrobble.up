@@ -46,6 +46,7 @@ final class MenuController: NSObject, NSApplicationDelegate, NSWindowDelegate {
 	private var isMenuBuilt = false
 
 	private var contextObserver: NSObjectProtocol?
+	private var favoriteStateObserver: NSObjectProtocol?
 	private var lastFmPeriodObserver: AnyCancellable?
 	private var listenBrainzPeriodObserver: AnyCancellable?
 	private var showCurrentTrackObserver: AnyCancellable?
@@ -69,11 +70,15 @@ final class MenuController: NSObject, NSApplicationDelegate, NSWindowDelegate {
 		startObservingPeriodChanges()
 		startObservingStatusBarSettings()
 		startObservingCurrentTrack()
+		startObservingFavoriteStateChanges()
 	}
 
 	deinit {
 		if let contextObserver {
 			NotificationCenter.default.removeObserver(contextObserver)
+		}
+		if let favoriteStateObserver {
+			NotificationCenter.default.removeObserver(favoriteStateObserver)
 		}
 		lastFmPeriodObserver?.cancel()
 		listenBrainzPeriodObserver?.cancel()
@@ -167,6 +172,45 @@ final class MenuController: NSObject, NSApplicationDelegate, NSWindowDelegate {
 			.sink { [weak self] _ in
 				self?.updateStatusBarTitle()
 			}
+	}
+
+	private func startObservingFavoriteStateChanges() {
+		favoriteStateObserver = NotificationCenter.default.addObserver(
+			forName: .currentTrackFavoriteStateChanged,
+			object: nil,
+			queue: .main
+		) { [weak self] notification in
+			self?.updateFirstRecentTrackFavoriteButton(notification: notification)
+		}
+	}
+
+	private func updateFirstRecentTrackFavoriteButton(notification: Notification) {
+		guard let userInfo = notification.userInfo,
+			let isFavorited = userInfo["isFavorited"] as? Bool,
+			let artist = userInfo["artist"] as? String,
+			let title = userInfo["title"] as? String,
+			let firstTrackItem = recentTrackItems.first,
+			let submenu = firstTrackItem.submenu
+		else {
+			return
+		}
+
+		// Find the love/favorite menu item (it should be the second item after "Copy Artist & Title")
+		guard submenu.items.count > 1 else { return }
+		let loveMenuItem = submenu.items[1]
+
+		// Update the menu item
+		loveMenuItem.title = isFavorited ? "Unfavorite Track" : "Favorite Track"
+		loveMenuItem.image = NSImage(
+			systemSymbolName: isFavorited ? "heart.fill" : "heart",
+			accessibilityDescription: nil
+		)?.configureForMenu(size: 16)
+
+		// Update the represented object if needed
+		if var payload = loveMenuItem.representedObject as? [String: Any] {
+			payload["isFavorited"] = isFavorited
+			loveMenuItem.representedObject = payload
+		}
 	}
 
 	// MARK: - Menu Lifecycle

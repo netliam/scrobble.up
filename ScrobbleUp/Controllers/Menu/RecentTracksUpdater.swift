@@ -14,14 +14,13 @@ final class RecentTracksUpdater {
 
 	private let lastFm: LastFmManager = .shared
 	private let artworkManager: ArtworkManager = .shared
-    private let playerManager: PlayerManager = .shared
-	private let notifications: NotificationController = .shared
+	private let playerManager: PlayerManager = .shared
 	private let menuActions = MenuActions()
 
 	// MARK: - Cache
 
 	private var trackInfoCache: [String: TrackInfo] = [:]
-	private var lastDisplayedTracks: [String] = []  // Track cache keys for displayed items
+	private var lastDisplayedTracks: [String] = []
 
 	// MARK: - Public API
 
@@ -40,35 +39,22 @@ final class RecentTracksUpdater {
 
 	func updateRecentTrackItems(_ items: [NSMenuItem], with entries: [LogEntry]) {
 		DispatchQueue.main.async {
-			// Build array of new cache keys
-			let newTrackKeys = entries.prefix(items.count).map { CacheHelpers.makeCacheKey(for: $0) }
+			let visibleEntries = Array(entries.prefix(items.count))
+			let newTrackKeys = visibleEntries.map { CacheHelpers.makeCacheKey(for: $0) }
 
 			// Update items with entries
-			for (index, entry) in entries.prefix(items.count).enumerated() {
+			for (index, entry) in visibleEntries.enumerated() {
 				let item = items[index]
 				let cacheKey = newTrackKeys[index]
 				let isNewTrack =
 					index >= self.lastDisplayedTracks.count
 					|| self.lastDisplayedTracks[index] != cacheKey
 
-				// Configure the item
 				self.configureTrackItem(item, with: entry)
 
-				// Check if we're currently showing a placeholder
-				let needsArtwork: Bool
-				if item.view as? RecentlyPlayedMenuItemView != nil {
-					// If the image is the placeholder, we need to fetch artwork
-					needsArtwork =
-						self.artworkManager.getCachedArtwork(
-							artist: entry.artist,
-							track: entry.title,
-							album: entry.album
-						) == nil
-				} else {
-					needsArtwork = true
-				}
+				// Check if artwork is needed
+				let needsArtwork = self.shouldFetchArtwork(for: entry, in: item)
 
-				// Load artwork if it's a new track OR if we don't have cached artwork
 				if isNewTrack || needsArtwork {
 					self.loadArtwork(for: entry, into: item)
 				}
@@ -76,15 +62,22 @@ final class RecentTracksUpdater {
 				self.loadTrackDetails(for: entry, into: item)
 			}
 
-			// Update tracking array
 			self.lastDisplayedTracks = newTrackKeys
 
 			// Hide unused items
-			for index in entries.count..<5 {
-				let item = items[index]
-				self.configureEmptyTrackItem(item)
+			items.dropFirst(entries.count).prefix(5 - entries.count).forEach {
+				self.configureEmptyTrackItem($0)
 			}
 		}
+	}
+
+	private func shouldFetchArtwork(for entry: LogEntry, in item: NSMenuItem) -> Bool {
+		guard item.view as? RecentlyPlayedMenuItemView != nil else { return true }
+		return artworkManager.getCachedArtwork(
+			artist: entry.artist,
+			track: entry.title,
+			album: entry.album
+		) == nil
 	}
 
 	// MARK: - Item Configuration
@@ -96,25 +89,31 @@ final class RecentTracksUpdater {
 		item.isHidden = false
 		item.isEnabled = true
 
-		// Check cache synchronously first for instant display
-		let artwork: NSImage?
-		if let cachedArtwork = artworkManager.getCachedArtwork(
-			artist: entry.artist,
-			track: entry.title,
-			album: entry.album
-		) {
-			artwork = ImageHelpers.styleForMenu(cachedArtwork)
-		} else {
-			artwork = ImageHelpers.styleForMenu(artworkManager.placeholder())
-		}
+		let artwork = getStyledArtwork(for: entry)
+		let view = getOrCreateView(for: item)
+		view.configure(
+			title: entry.title, subtitle: entry.artist, image: artwork, isScrobbled: entry.scrobbled
+		)
+	}
 
-		if let view = item.view as? RecentlyPlayedMenuItemView {
-			view.configure(title: entry.title, subtitle: entry.artist, image: artwork, isScrobbled: entry.scrobbled)
-		} else {
-			let view = RecentlyPlayedMenuItemView(width: 260)
-			view.configure(title: entry.title, subtitle: entry.artist, image: artwork, isScrobbled: entry.scrobbled)
-			item.view = view
+	private func getStyledArtwork(for entry: LogEntry) -> NSImage {
+		let cachedArtwork =
+			artworkManager.getCachedArtwork(
+				artist: entry.artist,
+				track: entry.title,
+				album: entry.album
+			) ?? artworkManager.placeholder()
+
+		return ImageHelpers.styleForMenu(cachedArtwork)
+	}
+
+	private func getOrCreateView(for item: NSMenuItem) -> RecentlyPlayedMenuItemView {
+		if let existingView = item.view as? RecentlyPlayedMenuItemView {
+			return existingView
 		}
+		let view = RecentlyPlayedMenuItemView(width: 260)
+		item.view = view
+		return view
 	}
 
 	private func configureEmptyTrackItem(_ item: NSMenuItem) {
@@ -129,26 +128,29 @@ final class RecentTracksUpdater {
 	// MARK: - Artwork Loading
 
 	private func loadArtwork(for entry: LogEntry, into item: NSMenuItem) {
-		// Always attempt to fetch - fetchArtwork will return immediately if cached
 		Task {
 			if let artwork = await artworkManager.fetchArtwork(
 				artist: entry.artist,
 				track: entry.title,
 				album: entry.album
 			) {
-				await MainActor.run {
-					// Verify this item still represents the same track before updating
-					let currentKey = item.representedObject as? String
-					let entryKey = CacheHelpers.makeCacheKey(for: entry)
-
-					guard currentKey == entryKey else { return }
-
-					if let view = item.view as? RecentlyPlayedMenuItemView {
-						view.image = ImageHelpers.styleForMenu(artwork)
-					}
-				}
+				updateItemArtwork(item, with: artwork, for: entry)
 			}
 		}
+	}
+
+	@MainActor
+	private func updateItemArtwork(_ item: NSMenuItem, with artwork: NSImage, for entry: LogEntry) {
+		guard verifyItemMatchesEntry(item, entry: entry),
+			let view = item.view as? RecentlyPlayedMenuItemView
+		else { return }
+		view.image = ImageHelpers.styleForMenu(artwork)
+	}
+
+	private func verifyItemMatchesEntry(_ item: NSMenuItem, entry: LogEntry) -> Bool {
+		let currentKey = item.representedObject as? String
+		let entryKey = CacheHelpers.makeCacheKey(for: entry)
+		return currentKey == entryKey
 	}
 
 	// MARK: - Track Details & Submenu
@@ -177,74 +179,25 @@ final class RecentTracksUpdater {
 
 	private func buildSubmenu(for entry: LogEntry, trackInfo: TrackInfo, item: NSMenuItem) {
 		let subMenu = NSMenu()
-        subMenu.minimumWidth = 260
+		subMenu.minimumWidth = 260
+
 		// Copy action
-		let copyItem = NSMenuItem(
-			title: "Copy Artist & Title",
-			action: #selector(MenuActions.copyArtistAndTitle(_:)),
-			keyEquivalent: ""
-		)
-		copyItem.target = menuActions
-		copyItem.representedObject = ["artist": entry.artist, "title": entry.title]
-		subMenu.addItem(copyItem)
+		addCopyMenuItem(to: subMenu, entry: entry)
 
-		let loveItem = NSMenuItem(
-			title: "Loading…",
-			action: nil,
-			keyEquivalent: ""
-		)
-		loveItem.isEnabled = false
-		subMenu.addItem(loveItem)
-
-		Task { [weak self] in
-			guard let self else { return }
-            let isFavorited = await playerManager.fetchFavoriteState(title: trackInfo.name, artist: trackInfo.artist.name)
-			
-			await MainActor.run {
-                loveItem.title = isFavorited.isFavoritedOnAnyService ? "Unfavorite Track" : "Favorite Track"
-				loveItem.action = #selector(MenuActions.toggleTrackLove(_:))
-				loveItem.target = self.menuActions
-				loveItem.representedObject = [
-					"artist": entry.artist,
-					"title": entry.title
-                ]
-				
-				let heartIcon = NSImage(
-                    systemSymbolName: isFavorited.isFavoritedOnAnyService ? "heart.fill" : "heart",
-					accessibilityDescription: nil
-				)?.configureForMenu(size: 16)
-				loveItem.image = heartIcon
-				
-				loveItem.isEnabled = true
-			}
-		}
+		// Love/Favorite action
+		_ = addLoveMenuItem(to: subMenu, entry: entry, trackInfo: trackInfo)
 
 		subMenu.addItem(NSMenuItem.separator())
 
-		// Similar Artists header
-		let artistsHeader = NSMenuItem(title: "Similar Artists", action: nil, keyEquivalent: "")
-		artistsHeader.isEnabled = false
-		subMenu.addItem(artistsHeader)
-
-		let artistsLoading = NSMenuItem(title: "Loading…", action: nil, keyEquivalent: "")
-		artistsLoading.isEnabled = false
-		subMenu.addItem(artistsLoading)
-
+		// Similar content sections
+		let (artistsHeader, artistsLoading) = addSectionHeaders(
+			to: subMenu, title: "Similar Artists")
 		subMenu.addItem(NSMenuItem.separator())
-
-		// Similar Tracks header
-		let tracksHeader = NSMenuItem(title: "Similar Tracks", action: nil, keyEquivalent: "")
-		tracksHeader.isEnabled = false
-		subMenu.addItem(tracksHeader)
-
-		let tracksLoading = NSMenuItem(title: "Loading…", action: nil, keyEquivalent: "")
-		tracksLoading.isEnabled = false
-		subMenu.addItem(tracksLoading)
+		let (tracksHeader, tracksLoading) = addSectionHeaders(to: subMenu, title: "Similar Tracks")
 
 		item.isEnabled = true
 		item.submenu = subMenu
 
-		// Load similar artists & tracks
 		loadSimilarContent(
 			for: entry,
 			subMenu: subMenu,
@@ -253,6 +206,67 @@ final class RecentTracksUpdater {
 			tracksHeader: tracksHeader,
 			tracksLoading: tracksLoading
 		)
+	}
+
+	private func addCopyMenuItem(to menu: NSMenu, entry: LogEntry) {
+		let copyItem = NSMenuItem(
+			title: "Copy Artist & Title",
+			action: #selector(MenuActions.copyArtistAndTitle(_:)),
+			keyEquivalent: ""
+		)
+		copyItem.target = menuActions
+		copyItem.representedObject = ["artist": entry.artist, "title": entry.title]
+		menu.addItem(copyItem)
+	}
+
+	private func addLoveMenuItem(to menu: NSMenu, entry: LogEntry, trackInfo: TrackInfo)
+		-> NSMenuItem
+	{
+		let loveItem = NSMenuItem(title: "Loading…", action: nil, keyEquivalent: "")
+		loveItem.isEnabled = false
+		menu.addItem(loveItem)
+
+		Task { [weak self] in
+			guard let self else { return }
+			let isFavorited = await playerManager.fetchFavoriteState(
+				title: trackInfo.name,
+				artist: trackInfo.artist.name
+			)
+
+			self.updateLoveMenuItem(loveItem, isFavorited: isFavorited, entry: entry)
+		}
+
+		return loveItem
+	}
+
+	@MainActor
+	private func updateLoveMenuItem(
+		_ item: NSMenuItem, isFavorited: TrackFavoriteState, entry: LogEntry
+	) {
+		let isFavorite = isFavorited.isFavoritedOnAnyService
+		item.title = isFavorite ? "Unfavorite Track" : "Favorite Track"
+		item.action = #selector(MenuActions.toggleTrackLove(_:))
+		item.target = menuActions
+		item.representedObject = ["artist": entry.artist, "title": entry.title]
+		item.image = NSImage(
+			systemSymbolName: isFavorite ? "heart.fill" : "heart",
+			accessibilityDescription: nil
+		)?.configureForMenu(size: 16)
+		item.isEnabled = true
+	}
+
+	private func addSectionHeaders(to menu: NSMenu, title: String) -> (
+		header: NSMenuItem, loading: NSMenuItem
+	) {
+		let header = NSMenuItem(title: title, action: nil, keyEquivalent: "")
+		header.isEnabled = false
+		menu.addItem(header)
+
+		let loading = NSMenuItem(title: "Loading…", action: nil, keyEquivalent: "")
+		loading.isEnabled = false
+		menu.addItem(loading)
+
+		return (header, loading)
 	}
 
 	private func loadSimilarContent(
@@ -266,31 +280,24 @@ final class RecentTracksUpdater {
 		Task { [weak self] in
 			guard let self = self else { return }
 
-			let artists: [ArtistSimilar]? = await lastFm.fetchSimilarArtists(
+			async let artistsTask = lastFm.fetchSimilarArtists(
 				artist: entry.artist,
 				autocorrect: true,
 				limit: 7
 			)
-			let tracks: [TrackSimilar]? = await lastFm.fetchSimilarTracks(
+			async let tracksTask = lastFm.fetchSimilarTracks(
 				artist: entry.artist,
 				track: entry.title,
 				autocorrect: true,
 				limit: 7
 			)
 
-			let similarArtists = artists
-			let similarTracks = tracks
+			let (similarArtists, similarTracks) = await (artistsTask, tracksTask)
 
 			await MainActor.run {
-				// Remove loading indicators
-				if let index = subMenu.items.firstIndex(of: artistsLoading) {
-					subMenu.removeItem(at: index)
-				}
-				if let index = subMenu.items.firstIndex(of: tracksLoading) {
-					subMenu.removeItem(at: index)
-				}
+				subMenu.removeItem(artistsLoading)
+				subMenu.removeItem(tracksLoading)
 
-				// Insert similar artists
 				self.insertSimilarArtists(
 					similarArtists ?? [],
 					into: subMenu,
@@ -298,7 +305,6 @@ final class RecentTracksUpdater {
 					before: tracksHeader
 				)
 
-				// Insert similar tracks
 				self.insertSimilarTracks(
 					similarTracks ?? [],
 					into: subMenu,
@@ -316,34 +322,15 @@ final class RecentTracksUpdater {
 	) {
 		guard let headerIndex = subMenu.items.firstIndex(of: header) else { return }
 
-		// Clear previous items
-		let index = headerIndex + 1
-		while index < subMenu.items.count,
-			subMenu.items[index] !== tracksHeader,
-			!subMenu.items[index].isSeparatorItem
-		{
-			subMenu.removeItem(at: index)
-		}
+		// Clear previous items between header and tracksHeader
+		clearMenuItems(in: subMenu, startingAt: headerIndex + 1, until: tracksHeader)
 
-		var insertIndex = headerIndex + 1
+		let insertIndex = headerIndex + 1
+
 		if artists.isEmpty {
-			let noResults = NSMenuItem(title: "No similar artists", action: nil, keyEquivalent: "")
-			noResults.isEnabled = false
-			subMenu.insertItem(noResults, at: insertIndex)
+			insertEmptyMessage("No similar artists", into: subMenu, at: insertIndex)
 		} else {
-			for artist in artists {
-				let menuItem = NSMenuItem(
-					title: artist.name,
-					action: #selector(MenuActions.openArtistPage(_:)),
-					keyEquivalent: ""
-				)
-				menuItem.target = menuActions
-				menuItem.representedObject = ["artist": artist.name]
-				menuItem.isEnabled = true
-				menuItem.truncateTitle(maxWidth: 200)
-				subMenu.insertItem(menuItem, at: insertIndex)
-				insertIndex += 1
-			}
+			insertArtistMenuItems(artists, into: subMenu, startingAt: insertIndex)
 		}
 	}
 
@@ -354,38 +341,85 @@ final class RecentTracksUpdater {
 	) {
 		guard let headerIndex = subMenu.items.firstIndex(of: header) else { return }
 
-		// Clear previous items
-		let index = headerIndex + 1
-		while index < subMenu.items.count, !subMenu.items[index].isSeparatorItem {
-			subMenu.removeItem(at: index)
-		}
+		// Clear previous items after header
+		clearMenuItems(in: subMenu, startingAt: headerIndex + 1, untilSeparator: true)
 
-		var insertIndex = headerIndex + 1
+		let insertIndex = headerIndex + 1
+
 		if tracks.isEmpty {
-			let noResults = NSMenuItem(title: "No similar tracks", action: nil, keyEquivalent: "")
-			noResults.isEnabled = false
-			subMenu.insertItem(noResults, at: insertIndex)
+			insertEmptyMessage("No similar tracks", into: subMenu, at: insertIndex)
 		} else {
-			for track in tracks {
-				let menuItem = NSMenuItem(
-					title: track.name,
-					action: #selector(MenuActions.openTrackPage(_:)),
-					keyEquivalent: ""
-				)
-				menuItem.target = menuActions
-				menuItem.representedObject = [
-					"artist": track.artist.name,
-					"title": track.name,
-				]
-				menuItem.isEnabled = true
+			insertTrackMenuItems(tracks, into: subMenu, startingAt: insertIndex)
+		}
+	}
 
-				let view = RecentlyPlayedMenuItemView(width: 260)
-				view.configure(title: track.name, subtitle: track.artist.name, image: nil)
-				menuItem.view = view
+	private func clearMenuItems(
+		in menu: NSMenu, startingAt startIndex: Int, until stopItem: NSMenuItem
+	) {
+		let index = startIndex
+		while index < menu.items.count,
+			menu.items[index] !== stopItem,
+			!menu.items[index].isSeparatorItem
+		{
+			menu.removeItem(at: index)
+		}
+	}
 
-				subMenu.insertItem(menuItem, at: insertIndex)
-				insertIndex += 1
-			}
+	private func clearMenuItems(in menu: NSMenu, startingAt startIndex: Int, untilSeparator: Bool) {
+		let index = startIndex
+		while index < menu.items.count, !menu.items[index].isSeparatorItem {
+			menu.removeItem(at: index)
+		}
+	}
+
+	private func insertEmptyMessage(_ message: String, into menu: NSMenu, at index: Int) {
+		let item = NSMenuItem(title: message, action: nil, keyEquivalent: "")
+		item.isEnabled = false
+		menu.insertItem(item, at: index)
+	}
+
+	private func insertArtistMenuItems(
+		_ artists: [ArtistSimilar], into menu: NSMenu, startingAt startIndex: Int
+	) {
+		var insertIndex = startIndex
+		for artist in artists {
+			let menuItem = NSMenuItem(
+				title: artist.name,
+				action: #selector(MenuActions.openArtistPage(_:)),
+				keyEquivalent: ""
+			)
+			menuItem.target = menuActions
+			menuItem.representedObject = ["artist": artist.name]
+			menuItem.isEnabled = true
+			menuItem.truncateTitle(maxWidth: 200)
+			menu.insertItem(menuItem, at: insertIndex)
+			insertIndex += 1
+		}
+	}
+
+	private func insertTrackMenuItems(
+		_ tracks: [TrackSimilar], into menu: NSMenu, startingAt startIndex: Int
+	) {
+		var insertIndex = startIndex
+		for track in tracks {
+			let menuItem = NSMenuItem(
+				title: track.name,
+				action: #selector(MenuActions.openTrackPage(_:)),
+				keyEquivalent: ""
+			)
+			menuItem.target = menuActions
+			menuItem.representedObject = [
+				"artist": track.artist.name,
+				"title": track.name,
+			]
+			menuItem.isEnabled = true
+
+			let view = RecentlyPlayedMenuItemView(width: 260)
+			view.configure(title: track.name, subtitle: track.artist.name, image: nil)
+			menuItem.view = view
+
+			menu.insertItem(menuItem, at: insertIndex)
+			insertIndex += 1
 		}
 	}
 }

@@ -23,6 +23,8 @@ enum Keys {
 	static let showAlbumNameInStatusBar = UserDefaultsKey(
 		"showAlbumNameInStatusBar", defaultValue: false)
 
+	static let showNotifications = UserDefaultsKey("showNotifications", defaultValue: true)
+	static let updateNotifications = UserDefaultsKey("updateNotifications", defaultValue: true)
 	static let ratingStatus = UserDefaultsKey("ratingStatus", defaultValue: true)
 	static let infoCopied = UserDefaultsKey("infoCopied", defaultValue: true)
 	static let playerChanged = UserDefaultsKey("playerChanged", defaultValue: true)

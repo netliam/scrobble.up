@@ -59,11 +59,15 @@ struct GeneralSettingsPane: View {
 			}
 			Section("Status Bar") {
 				Toggle("Show current track in status bar", isOn: $showCurrentTrack)
+					.onChange(of: showCurrentTrack) { oldValue, newValue in
+						if !newValue {
+							showAlbumName = false
+						}
+					}
 
-				if showCurrentTrack {
-					Toggle("Show album name", isOn: $showAlbumName)
-						.padding(.leading, 20)
-				}
+				Toggle("Show album name", isOn: $showAlbumName)
+					.padding(.leading, 20)
+					.disabled(!showCurrentTrack)
 			}
 		}
 		.formStyle(.grouped)

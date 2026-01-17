@@ -184,12 +184,13 @@ final class LinkManager {
 		}
 
 		if let json = await JSONHelpers.fetchJSON(from: url),
-		   let results = json["results"] as? [[String: Any]],
-		   let firstResult = results.first,
-		   let artistID = firstResult["artistId"] as? Int {
+			let results = json["results"] as? [[String: Any]],
+			let firstResult = results.first,
+			let artistID = firstResult["artistId"] as? Int
+		{
 			return URL(string: "music://music.apple.com/artist/\(artistID)")
 		}
-		
+
 		return nil
 	}
 
@@ -200,19 +201,20 @@ final class LinkManager {
 		if let album = album, album.isNotEmpty {
 			searchTerms.append(album)
 		}
-		
+
 		let query = searchTerms.joined(separator: " ")
 		guard let url = URLHelpers.makeITunesSearchURL(query: query, entity: "song") else {
 			return nil
 		}
 
 		if let json = await JSONHelpers.fetchJSON(from: url),
-		   let results = json["results"] as? [[String: Any]],
-		   let firstResult = results.first,
-		   let trackID = firstResult["trackId"] as? Int {
+			let results = json["results"] as? [[String: Any]],
+			let firstResult = results.first,
+			let trackID = firstResult["trackId"] as? Int
+		{
 			return URL(string: "music://music.apple.com/song/\(trackID)")
 		}
-		
+
 		return nil
 	}
 
@@ -223,12 +225,13 @@ final class LinkManager {
 		}
 
 		if let json = await JSONHelpers.fetchJSON(from: url),
-		   let results = json["results"] as? [[String: Any]],
-		   let firstResult = results.first,
-		   let collectionID = firstResult["collectionId"] as? Int {
+			let results = json["results"] as? [[String: Any]],
+			let firstResult = results.first,
+			let collectionID = firstResult["collectionId"] as? Int
+		{
 			return URL(string: "music://music.apple.com/album/\(collectionID)")
 		}
-		
+
 		return nil
 	}
 

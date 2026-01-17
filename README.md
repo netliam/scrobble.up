@@ -70,6 +70,6 @@
 ## Credits & Acknowledgments
 
 - ### [**NowPlaying**](https://github.com/diego-castilho/NowPlaying) - The project that scrobble.up is based on.
-- ### [**boring.notch**](https://github.com/TheBoredTeam/boring.notch) - Much of the functionality for the like syncing feature comes from boring.notch.
+- ### [**boring.notch**](https://github.com/TheBoredTeam/boring.notch) - The AppleScriptHelper from boring.notch is used.
 - ### [**LastFM.swift**](https://github.com/duhnnie/LastFM.swift)
 - ### [**MediaRemote-Adapter**](https://github.com/ejbills/mediaremote-adapter)

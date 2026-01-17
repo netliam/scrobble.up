@@ -1,28 +1,56 @@
 //
-//  NotificationManager.swift
+//  NotificationsManager.swift
 //  ScrobbleUp
 //
 //  Created by Liam Smith-Gales on 12/27/25.
 //
 
 import AppKit
+import Sparkle
 import SwiftUI
 import UserNotifications
 
-class NotificationController: NSObject, UNUserNotificationCenterDelegate {
-	static let shared = NotificationController()
+class NotificationsController: NSObject, UNUserNotificationCenterDelegate,
+	SPUStandardUserDriverDelegate
+{
+	static let shared = NotificationsController()
 
 	private var hudWindow: NSWindow?
 	private var hudTimer: Timer?
 
 	private override init() {
 		super.init()
+		setupNotificationCategories()
 		requestNotificationPermission()
 	}
 
 	// MARK: - Permission
 
+	private func setupNotificationCategories() {
+		let installAction = UNNotificationAction(
+			identifier: "INSTALL_UPDATE",
+			title: "Install",
+			options: [.foreground]
+		)
+
+		let laterAction = UNNotificationAction(
+			identifier: "LATER",
+			title: "Later",
+			options: []
+		)
+
+		let updateCategory = UNNotificationCategory(
+			identifier: "UPDATE_AVAILABLE",
+			actions: [installAction, laterAction],
+			intentIdentifiers: [],
+			options: []
+		)
+
+		UNUserNotificationCenter.current().setNotificationCategories([updateCategory])
+	}
+
 	private func requestNotificationPermission() {
+		guard UserDefaults.standard.get(\.showNotifications) else { return }
 		UNUserNotificationCenter.current().delegate = self
 		UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) {
 			granted, error in
@@ -30,6 +58,49 @@ class NotificationController: NSObject, UNUserNotificationCenterDelegate {
 				print("Notification permission error: \(error)")
 			}
 			print("Notification permission granted: \(granted)")
+		}
+	}
+
+	// MARK: - SPUStandardUserDriverDelegate
+
+	var supportsGentleScheduledUpdateReminders: Bool {
+		return UserDefaults.standard.get(\.updateNotifications)
+	}
+
+	func standardUserDriverShouldHandleShowingScheduledUpdate(
+		_ update: SUAppcastItem,
+		andInImmediateFocus immediateFocus: Bool
+	) -> Bool {
+		guard UserDefaults.standard.get(\.updateNotifications) else {
+			return true
+		}
+
+		if !immediateFocus {
+			showUpdateNotification(for: update)
+			return false
+		}
+
+		return true
+	}
+
+	private func showUpdateNotification(for update: SUAppcastItem) {
+		let content = UNMutableNotificationContent()
+		content.title = "Update Available"
+		content.body = "Version \(update.displayVersionString) is ready to install"
+		content.sound = .default
+		content.categoryIdentifier = "UPDATE_AVAILABLE"
+		content.userInfo = ["updateItem": update.versionString]
+
+		let request = UNNotificationRequest(
+			identifier: "sparkle-update-\(update.versionString)",
+			content: content,
+			trigger: nil
+		)
+
+		UNUserNotificationCenter.current().add(request) { error in
+			if let error = error {
+				print("Failed to show update notification: \(error)")
+			}
 		}
 	}
 
@@ -146,6 +217,22 @@ class NotificationController: NSObject, UNUserNotificationCenterDelegate {
 			@escaping (UNNotificationPresentationOptions) -> Void
 	) {
 		completionHandler([.banner, .sound])
+	}
+
+	func userNotificationCenter(
+		_ center: UNUserNotificationCenter,
+		didReceive response: UNNotificationResponse,
+		withCompletionHandler completionHandler: @escaping () -> Void
+	) {
+		defer { completionHandler() }
+
+		if response.notification.request.content.categoryIdentifier == "UPDATE_AVAILABLE" {
+			if response.actionIdentifier == "INSTALL_UPDATE" {
+				// Trigger the update installation
+				AppDelegate.shared?.updaterController?.checkForUpdates(nil)
+			}
+			// "LATER" action or default tap - do nothing
+		}
 	}
 }
 

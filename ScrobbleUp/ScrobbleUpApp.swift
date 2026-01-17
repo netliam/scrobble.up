@@ -40,7 +40,7 @@ struct ScrobbleUpApp: App {
 	}
 }
 
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
 	static weak var shared: AppDelegate?
 
 	private var widgetController: DesktopWidgetWindowController?
@@ -55,10 +55,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
 	var scrobbleManager: UnifiedScrobbleManager!
 
+	private(set) var updaterController: SPUStandardUpdaterController!
+
 	func applicationDidFinishLaunching(_ notification: Notification) {
 		AppDelegate.shared = self
 
 		updateActivationPolicy()
+
+		updaterController = SPUStandardUpdaterController(
+			startingUpdater: true,
+			updaterDelegate: self,
+			userDriverDelegate: NotificationsController.shared
+		)
 
 		scrobbleManager = UnifiedScrobbleManager(
 			context: core.container.viewContext,

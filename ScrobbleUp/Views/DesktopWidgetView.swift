@@ -119,16 +119,18 @@ struct DesktopWidgetView: View {
 				Button {
 					loveCurrentTrack()
 				} label: {
-					Image(systemName: playerManager.isCurrentTrackFavorited ? "heart.fill" : "heart")
-						.font(.system(size: 16, weight: .medium))
-						.foregroundStyle(playerManager.isCurrentTrackFavorited ? .pink : .white)
-						.padding(8)
-						.background(
-							ZStack {
-								Color.black.opacity(0.3)
-							}
-						)
-						.clipShape(Circle())
+					Image(
+						systemName: playerManager.isCurrentTrackFavorited ? "heart.fill" : "heart"
+					)
+					.font(.system(size: 16, weight: .medium))
+					.foregroundStyle(playerManager.isCurrentTrackFavorited ? .pink : .white)
+					.padding(8)
+					.background(
+						ZStack {
+							Color.black.opacity(0.3)
+						}
+					)
+					.clipShape(Circle())
 				}
 				.buttonStyle(.plain)
 				.padding(8)
@@ -152,11 +154,11 @@ struct DesktopWidgetView: View {
 	}
 
 	private func loveCurrentTrack() {
-        _ = appState.currentActivePlayer
+		_ = appState.currentActivePlayer
 
-        Task {
-            await playerManager.setFavoriteState()
-        }
+		Task {
+			await playerManager.setFavoriteState()
+		}
 	}
 
 	private func updateVisibility() {

@@ -6,38 +6,38 @@
 //
 
 struct TrackFavoriteState {
-    var local: Bool = false
-    var lastFm: Bool = false
-    var listenBrainz: Bool = false
-    var appleMusic: Bool = false
+	var local: Bool = false
+	var lastFm: Bool = false
+	var listenBrainz: Bool = false
+	var appleMusic: Bool = false
 
-    var isFavoritedOnAnyService: Bool {
-        lastFm || listenBrainz || appleMusic || local
-    }
+	var isFavoritedOnAnyService: Bool {
+		lastFm || listenBrainz || appleMusic || local
+	}
 
-    var isFavoritedOnAllServices: Bool {
-        isFavoritedOnAnyService
-    }
+	var isFavoritedOnAllServices: Bool {
+		isFavoritedOnAnyService
+	}
 }
 
 struct FavoriteOperationResults {
-    var appleMusicSuccess: Bool = false
-    var lastFmSuccess: Bool = false
-    var listenBrainzSuccess: Bool = false
+	var appleMusicSuccess: Bool = false
+	var lastFmSuccess: Bool = false
+	var listenBrainzSuccess: Bool = false
 
-    var appleMusicError: String?
-    var lastFmError: String?
-    var listenBrainzError: String?
+	var appleMusicError: String?
+	var lastFmError: String?
+	var listenBrainzError: String?
 
-    var anySuccess: Bool {
-        appleMusicSuccess || lastFmSuccess || listenBrainzSuccess
-    }
+	var anySuccess: Bool {
+		appleMusicSuccess || lastFmSuccess || listenBrainzSuccess
+	}
 
-    var allSuccess: Bool {
-        appleMusicError == nil && lastFmError == nil && listenBrainzError == nil
-    }
+	var allSuccess: Bool {
+		appleMusicError == nil && lastFmError == nil && listenBrainzError == nil
+	}
 
-    var errors: [String] {
-        [appleMusicError, lastFmError, listenBrainzError].compactMap { $0 }
-    }
+	var errors: [String] {
+		[appleMusicError, lastFmError, listenBrainzError].compactMap { $0 }
+	}
 }

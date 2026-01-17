@@ -71,7 +71,7 @@ class RecentlyPlayedMenuItemView: NSView {
 		let iv = NSImageView()
 		iv.translatesAutoresizingMaskIntoConstraints = false
 		iv.imageScaling = .scaleProportionallyDown
-        iv.contentTintColor = .labelColor
+		iv.contentTintColor = .labelColor
 		return iv
 	}()
 
@@ -222,18 +222,19 @@ class RecentlyPlayedMenuItemView: NSView {
 		if isHovered {
 			titleLabel.textColor = NSColor.selectedMenuItemTextColor
 			subtitleLabel.textColor = NSColor.selectedMenuItemTextColor.withAlphaComponent(0.75)
-            statusIndicator.contentTintColor = .selectedMenuItemTextColor
+			statusIndicator.contentTintColor = .selectedMenuItemTextColor
 		} else {
 			titleLabel.textColor = NSColor.labelColor
 			subtitleLabel.textColor = NSColor.secondaryLabelColor
-            statusIndicator.contentTintColor = .labelColor
+			statusIndicator.contentTintColor = .labelColor
 		}
 	}
 
 	private func updateStatusIndicator() {
 		if isScrobbled {
-			statusIndicator.image = NSImage(systemSymbolName: "checkmark.circle.fill", accessibilityDescription: "Scrobbled")
-            statusIndicator.contentTintColor = .labelColor
+			statusIndicator.image = NSImage(
+				systemSymbolName: "checkmark.circle.fill", accessibilityDescription: "Scrobbled")
+			statusIndicator.contentTintColor = .labelColor
 			statusIndicator.isHidden = false
 		} else {
 			statusIndicator.isHidden = true
@@ -242,7 +243,9 @@ class RecentlyPlayedMenuItemView: NSView {
 
 	// MARK: - Public Methods
 
-	public func configure(title: String, subtitle: String?, image: NSImage?, isScrobbled: Bool? = false) {
+	public func configure(
+		title: String, subtitle: String?, image: NSImage?, isScrobbled: Bool? = false
+	) {
 		self.title = title
 		self.subtitle = subtitle
 		if let img = image {

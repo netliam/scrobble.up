@@ -9,6 +9,11 @@ import AppKit
 import Combine
 import Foundation
 
+extension Notification.Name {
+	static let currentTrackFavoriteStateChanged = Notification.Name(
+		"currentTrackFavoriteStateChanged")
+}
+
 @MainActor
 final class PlayerManager: ObservableObject {
 
@@ -20,7 +25,7 @@ final class PlayerManager: ObservableObject {
 	private let lastFm: LastFmManager = .shared
 	private let listenBrainz: ListenBrainzManager = .shared
 	private let appleMusic: AppleMusicManager = .shared
-	private let notifications: NotificationController = .shared
+	private let notifications: NotificationsController = .shared
 
 	// MARK: - Published State
 
@@ -38,50 +43,52 @@ final class PlayerManager: ObservableObject {
 
 	// MARK: - Public API
 
-	func setFavoriteState(favorited: Bool? = nil, title: String? = nil, artist: String? = nil) async {
-        let trackTitle: String
-        let trackArtist: String
-        let isCurrentTrack: Bool
-        
-        if let title = title, let artist = artist {
-            trackTitle = title
-            trackArtist = artist
-            isCurrentTrack = false
-        } else {
-            let track = appState.currentTrack
-            trackTitle = track.title
-            trackArtist = track.artist
-            isCurrentTrack = true
-        }
-        
-        guard !trackTitle.isEmpty, trackTitle != "-" else { return }
-        
-        let targetFavorited = favorited ?? !isCurrentTrackFavorited
-        
-        if isCurrentTrack {
-            isLoading = true
-        }
-        defer { 
-            if isCurrentTrack {
-                isLoading = false
-            }
-        }
-        
-            notifications.favoriteTrack(
-                trackName: trackTitle,
-                favorited: targetFavorited,
-                artwork: appState.currentTrack.image
-            )
-                
-        var results = FavoriteOperationResults()
-        
-        if UserDefaults.standard.get(\.syncLikes) && isCurrentTrack {
-            let authorized = await appleMusic.ensureAuthorization()
-            if authorized {
-                let success = await appleMusic.setFavorite(targetFavorited, track: appState.currentTrack)
-                results.appleMusicSuccess = success
-            }
-        }
+	func setFavoriteState(favorited: Bool? = nil, title: String? = nil, artist: String? = nil) async
+	{
+		let trackTitle: String
+		let trackArtist: String
+		let isCurrentTrack: Bool
+
+		if let title = title, let artist = artist {
+			trackTitle = title
+			trackArtist = artist
+			isCurrentTrack = false
+		} else {
+			let track = appState.currentTrack
+			trackTitle = track.title
+			trackArtist = track.artist
+			isCurrentTrack = true
+		}
+
+		guard !trackTitle.isEmpty, trackTitle != "-" else { return }
+
+		let targetFavorited = favorited ?? !isCurrentTrackFavorited
+
+		if isCurrentTrack {
+			isLoading = true
+		}
+		defer {
+			if isCurrentTrack {
+				isLoading = false
+			}
+		}
+
+		notifications.favoriteTrack(
+			trackName: trackTitle,
+			favorited: targetFavorited,
+			artwork: appState.currentTrack.image
+		)
+
+		var results = FavoriteOperationResults()
+
+		if UserDefaults.standard.get(\.syncLikes) && isCurrentTrack {
+			let authorized = await appleMusic.ensureAuthorization()
+			if authorized {
+				let success = await appleMusic.setFavorite(
+					targetFavorited, track: appState.currentTrack)
+				results.appleMusicSuccess = success
+			}
+		}
 
 		if UserDefaults.standard.get(\.lastFmEnabled) && lastFm.username != nil {
 			do {
@@ -120,14 +127,23 @@ final class PlayerManager: ObservableObject {
 		if results.anySuccess && isCurrentTrack {
 			isCurrentTrackFavorited = targetFavorited
 			favoriteState.local = targetFavorited
+
+			NotificationCenter.default.post(
+				name: .currentTrackFavoriteStateChanged,
+				object: nil,
+				userInfo: [
+					"isFavorited": targetFavorited, "artist": trackArtist, "title": trackTitle,
+				]
+			)
 		}
 	}
 
-	func fetchFavoriteState(title: String? = nil, artist: String? = nil) async -> TrackFavoriteState {
+	func fetchFavoriteState(title: String? = nil, artist: String? = nil) async -> TrackFavoriteState
+	{
 		let trackTitle: String
 		let trackArtist: String
 		let isCurrentTrack: Bool
-		
+
 		if let title = title, let artist = artist {
 			trackTitle = title
 			trackArtist = artist
@@ -152,7 +168,7 @@ final class PlayerManager: ObservableObject {
 			currentTrackKey = trackKey
 			isLoading = true
 		}
-		
+
 		defer {
 			if isCurrentTrack {
 				isLoading = false
@@ -181,10 +197,10 @@ final class PlayerManager: ObservableObject {
 			favoriteState = newState
 			isCurrentTrackFavorited = newState.isFavoritedOnAnyService
 		}
-		
+
 		return newState
 	}
-	
+
 	func fetchFavoriteStateForCurrentTrack() async {
 		_ = await fetchFavoriteState()
 	}

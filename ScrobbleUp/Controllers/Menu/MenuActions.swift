@@ -12,8 +12,8 @@ final class MenuActions: NSObject {
 	// MARK: - Dependencies
 
 	private let appState: AppState = .shared
-	private let notifications: NotificationController = .shared
-    private let playerManager: PlayerManager = .shared
+	private let notifications: NotificationsController = .shared
+	private let playerManager: PlayerManager = .shared
 
 	// MARK: - App Actions
 
@@ -89,19 +89,19 @@ final class MenuActions: NSObject {
 				title: title,
 				artist: artist
 			)
-            
-            let isFavorited = await playerManager.fetchFavoriteState(title: title, artist: artist)
-			
+
+			let isFavorited = await playerManager.fetchFavoriteState(title: title, artist: artist)
+
 			await MainActor.run {
-                let newIsFavorited = !isFavorited.isFavoritedOnAnyService
+				let newIsFavorited = !isFavorited.isFavoritedOnAnyService
 				sender.title = newIsFavorited ? "Unfavorite Track" : "Favorite Track"
-				
+
 				let heartIcon = NSImage(
 					systemSymbolName: newIsFavorited ? "heart.fill" : "heart",
 					accessibilityDescription: nil
 				)?.configureForMenu(size: 16)
 				sender.image = heartIcon
-				
+
 				if var newPayload = sender.representedObject as? [String: Any] {
 					newPayload["isFavorited"] = newIsFavorited
 					sender.representedObject = newPayload

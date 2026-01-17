@@ -32,14 +32,14 @@ class AppState: ObservableObject {
 	private let lastFm: LastFmManager = .shared
 	private let listenBrainz: ListenBrainzManager = .shared
 	private let appleMusic: AppleMusicManager = .shared
-	private let notifications: NotificationController = .shared
+	private let notifications: NotificationsController = .shared
 	private let playerManager: PlayerManager = .shared
 
 	init() {
 		KeyboardShortcuts.onKeyUp(for: .loveTrack) { [self] in
-            Task {
-                await playerManager.setFavoriteState()
-            }
+			Task {
+				await playerManager.setFavoriteState()
+			}
 		}
 		KeyboardShortcuts.onKeyUp(for: .bringPlayerToFront) { [self] in
 			playerManager.bringPlayerToFront()

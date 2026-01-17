@@ -39,37 +39,39 @@ final class UpdaterViewModel: ObservableObject {
 	@Published var canCheckForUpdates = false
 	@Published var automaticallyChecksForUpdates = false {
 		didSet {
-			updaterController.updater.automaticallyChecksForUpdates = automaticallyChecksForUpdates
+			updaterController?.updater.automaticallyChecksForUpdates = automaticallyChecksForUpdates
 		}
 	}
 
-	private let updaterController: SPUStandardUpdaterController
+	private var updaterController: SPUStandardUpdaterController? {
+		AppDelegate.shared?.updaterController
+	}
 	private var cancellables = Set<AnyCancellable>()
 
 	init() {
-		updaterController = SPUStandardUpdaterController(
-			startingUpdater: true,
-			updaterDelegate: nil,
-			userDriverDelegate: nil
-		)
+		DispatchQueue.main.async { [weak self] in
+			guard let self = self, let updater = self.updaterController?.updater else {
+				return
+			}
 
-		automaticallyChecksForUpdates = updaterController.updater.automaticallyChecksForUpdates
+			self.automaticallyChecksForUpdates = updater.automaticallyChecksForUpdates
 
-		updaterController.updater.publisher(for: \.canCheckForUpdates)
-			.receive(on: DispatchQueue.main)
-			.assign(to: &$canCheckForUpdates)
+			updater.publisher(for: \.canCheckForUpdates)
+				.receive(on: DispatchQueue.main)
+				.assign(to: &self.$canCheckForUpdates)
 
-		updaterController.updater.publisher(for: \.automaticallyChecksForUpdates)
-			.receive(on: DispatchQueue.main)
-			.assign(to: &$automaticallyChecksForUpdates)
+			updater.publisher(for: \.automaticallyChecksForUpdates)
+				.receive(on: DispatchQueue.main)
+				.assign(to: &self.$automaticallyChecksForUpdates)
 
-		if automaticallyChecksForUpdates {
-			updaterController.updater.checkForUpdatesInBackground()
+			if self.automaticallyChecksForUpdates {
+				updater.checkForUpdatesInBackground()
+			}
 		}
 	}
 
 	func checkForUpdates() {
-		updaterController.checkForUpdates(nil)
+		updaterController?.checkForUpdates(nil)
 	}
 
 }
