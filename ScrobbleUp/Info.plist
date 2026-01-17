@@ -43,7 +43,7 @@
 	</dict>
 	<key>SMAuthorizedClients</key>
 	<array>
-		<string>identifier "$(PRODUCT_BUNDLE_IDENTIFIER)" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = "$(AppIdentifierPrefix)"</string>
+		<string>identifier &quot;$(PRODUCT_BUNDLE_IDENTIFIER)&quot; and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = &quot;$(AppIdentifierPrefix)&quot;</string>
 	</array>
 	<key>SUEnableInstallerLauncherService</key>
 	<true/>
@@ -51,5 +51,7 @@
 	<string>https://netliam.github.io/scrobble.up/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>m8uUvgDKoeV0Rgz/EtnVOKDsUsPcoUOLLeLjWpTD8o0=</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>scrobble.up uses access to Music to add and remove tracks from your favorites.</string>
 </dict>
 </plist>
