@@ -412,7 +412,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15;
-				MARKETING_VERSION = 1.2.2;
+				MARKETING_VERSION = 1.2.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.netliam.ScrobbleUp;
 				PRODUCT_DEFINITION_PLIST = ScrobbleUp/Info.plist;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -479,7 +479,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15;
-				MARKETING_VERSION = 1.2.2;
+				MARKETING_VERSION = 1.2.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.netliam.ScrobbleUp;
 				PRODUCT_DEFINITION_PLIST = ScrobbleUp/Info.plist;
 				PRODUCT_NAME = "$(TARGET_NAME)";
