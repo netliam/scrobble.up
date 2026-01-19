@@ -13,7 +13,6 @@ import SwiftUI
 struct ShortcutSettingsPane: View {
 
 	var body: some View {
-
 		Form {
 			Section("Scrobbler") {
 				KeyboardShortcuts.Recorder("Love/Unlove Track", name: .loveTrack)

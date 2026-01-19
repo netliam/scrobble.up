@@ -66,7 +66,6 @@ struct GeneralSettingsPane: View {
 					}
 
 				Toggle("Show album name", isOn: $showAlbumName)
-					.padding(.leading, 20)
 					.disabled(!showCurrentTrack)
 			}
 		}
