@@ -205,7 +205,6 @@ final class LastFmManager: ObservableObject {
 
 		do {
 			let similarTracks = try await lastFM.Track.getSimilar(params: trackSimilarParams)
-
 			return Array(similarTracks.items)
 		} catch LastFMError.LastFMServiceError(let errorType, let message) {
 			print(errorType, message)

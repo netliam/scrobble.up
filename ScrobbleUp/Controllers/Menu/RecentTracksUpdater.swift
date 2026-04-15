@@ -293,7 +293,7 @@ final class RecentTracksUpdater {
 			)
 
 			let (similarArtists, similarTracks) = await (artistsTask, tracksTask)
-
+            
 			await MainActor.run {
 				subMenu.removeItem(artistsLoading)
 				subMenu.removeItem(tracksLoading)
