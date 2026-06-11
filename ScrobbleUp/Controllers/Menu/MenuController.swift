@@ -187,8 +187,6 @@ final class MenuController: NSObject, NSApplicationDelegate, NSWindowDelegate {
 	private func updateFirstRecentTrackFavoriteButton(notification: Notification) {
 		guard let userInfo = notification.userInfo,
 			let isFavorited = userInfo["isFavorited"] as? Bool,
-			let artist = userInfo["artist"] as? String,
-			let title = userInfo["title"] as? String,
 			let firstTrackItem = recentTrackItems.first,
 			let submenu = firstTrackItem.submenu
 		else {

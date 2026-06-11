@@ -221,7 +221,7 @@ final class PlayerManager: ObservableObject {
 			"""
 
 		Task {
-			try await AppleScriptHelper.executeVoid(script)
+            try await AppleScriptHelper.executeVoid(script)
 		}
 	}
 

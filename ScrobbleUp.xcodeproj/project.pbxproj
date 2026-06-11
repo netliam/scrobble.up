@@ -12,9 +12,10 @@
 		2D07ACB72F04458600CDCF93 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 2D07ACB62F04458600CDCF93 /* README.md */; };
 		2D3C8B682F187D31008DB90A /* MusadoraKit in Frameworks */ = {isa = PBXBuildFile; productRef = 2D3C8B672F187D31008DB90A /* MusadoraKit */; };
 		2D3C8B6C2F1889D7008DB90A /* MusicKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2D3C8B6B2F1889D7008DB90A /* MusicKit.framework */; };
-		2D3D7B092F8FFD9B00C04E3A /* MediaRemoteAdapter in Frameworks */ = {isa = PBXBuildFile; productRef = 2D3D7B082F8FFD9B00C04E3A /* MediaRemoteAdapter */; };
-		2D3D7B0A2F8FFDA200C04E3A /* MediaRemoteAdapter in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 2D3D7B082F8FFD9B00C04E3A /* MediaRemoteAdapter */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		2D469F632F0865FD002F379B /* swift-format.json in Resources */ = {isa = PBXBuildFile; fileRef = 2D469F622F0865F7002F379B /* swift-format.json */; };
+		2D4734F62FDB12CF00C67B3B /* MediaRemoteAdapter in Frameworks */ = {isa = PBXBuildFile; productRef = 2D4734F52FDB12CF00C67B3B /* MediaRemoteAdapter */; };
+		2D4734F92FDB132000C67B3B /* MediaRemoteAdapter in Frameworks */ = {isa = PBXBuildFile; productRef = 2D4734F82FDB132000C67B3B /* MediaRemoteAdapter */; };
+		2D4734FA2FDB132A00C67B3B /* MediaRemoteAdapter in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 2D4734F52FDB12CF00C67B3B /* MediaRemoteAdapter */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		2D5CDFEB2F061DA00056B4CF /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 2D5CDFEA2F061DA00056B4CF /* Sparkle */; };
 		2DB6C9B22F076BF100B52B00 /* ExportOptions.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2DB6C9B12F076BEA00B52B00 /* ExportOptions.plist */; };
 		2DF0282F2EFDE34B00AE9026 /* LastFM in Frameworks */ = {isa = PBXBuildFile; productRef = 2DF0282E2EFDE34B00AE9026 /* LastFM */; };
@@ -30,7 +31,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				2D3D7B0A2F8FFDA200C04E3A /* MediaRemoteAdapter in Embed Frameworks */,
+				2D4734FA2FDB132A00C67B3B /* MediaRemoteAdapter in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -93,8 +94,9 @@
 				2D5CDFEB2F061DA00056B4CF /* Sparkle in Frameworks */,
 				2DF0282F2EFDE34B00AE9026 /* LastFM in Frameworks */,
 				2D050FCB2EFDCEAE00DFE18C /* Settings in Frameworks */,
-				2D3D7B092F8FFD9B00C04E3A /* MediaRemoteAdapter in Frameworks */,
+				2D4734F62FDB12CF00C67B3B /* MediaRemoteAdapter in Frameworks */,
 				9F4C57C72EA31C66000ED6A2 /* ServiceManagement.framework in Frameworks */,
+				2D4734F92FDB132000C67B3B /* MediaRemoteAdapter in Frameworks */,
 				2D050FDA2EFDD70800DFE18C /* LaunchAtLogin in Frameworks */,
 				9F4C57C92EA31C6F000ED6A2 /* CoreServices.framework in Frameworks */,
 				2D3C8B682F187D31008DB90A /* MusadoraKit in Frameworks */,
@@ -166,7 +168,8 @@
 				2DF028442EFE25EF00AE9026 /* KeyboardShortcuts */,
 				2D5CDFEA2F061DA00056B4CF /* Sparkle */,
 				2D3C8B672F187D31008DB90A /* MusadoraKit */,
-				2D3D7B082F8FFD9B00C04E3A /* MediaRemoteAdapter */,
+				2D4734F52FDB12CF00C67B3B /* MediaRemoteAdapter */,
+				2D4734F82FDB132000C67B3B /* MediaRemoteAdapter */,
 			);
 			productName = NowPlaying;
 			productReference = 9F3642A22E7E538B00D4E680 /* scrobble.up.app */;
@@ -204,7 +207,7 @@
 				2DF028432EFE25EF00AE9026 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
 				2D5CDFE92F061DA00056B4CF /* XCRemoteSwiftPackageReference "Sparkle" */,
 				2D3C8B662F187D31008DB90A /* XCRemoteSwiftPackageReference "MusadoraKit" */,
-				2D3D7B072F8FFD9B00C04E3A /* XCRemoteSwiftPackageReference "mediaremote-adapter" */,
+				2D4734F72FDB132000C67B3B /* XCRemoteSwiftPackageReference "mediaremote-adapter" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9F3642A32E7E538B00D4E680 /* Products */;
@@ -383,7 +386,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1.2.5;
+				CURRENT_PROJECT_VERSION = 1.2.6;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 4AKWR35Q2Q;
 				ENABLE_APP_SANDBOX = YES;
@@ -412,7 +415,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15;
-				MARKETING_VERSION = 1.2.5;
+				MARKETING_VERSION = 1.2.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.netliam.ScrobbleUp;
 				PRODUCT_DEFINITION_PLIST = ScrobbleUp/Info.plist;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -450,7 +453,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1.2.5;
+				CURRENT_PROJECT_VERSION = 1.2.6;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 4AKWR35Q2Q;
 				ENABLE_APP_SANDBOX = YES;
@@ -479,7 +482,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15;
-				MARKETING_VERSION = 1.2.5;
+				MARKETING_VERSION = 1.2.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.netliam.ScrobbleUp;
 				PRODUCT_DEFINITION_PLIST = ScrobbleUp/Info.plist;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -549,11 +552,11 @@
 				minimumVersion = 9.0.0;
 			};
 		};
-		2D3D7B072F8FFD9B00C04E3A /* XCRemoteSwiftPackageReference "mediaremote-adapter" */ = {
+		2D4734F72FDB132000C67B3B /* XCRemoteSwiftPackageReference "mediaremote-adapter" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/ejbills/mediaremote-adapter.git";
+			repositoryURL = "https://github.com/netliam/mediaremote-adapter.git";
 			requirement = {
-				branch = master;
+				branch = "fix-race-condition-crash";
 				kind = branch;
 			};
 		};
@@ -599,9 +602,13 @@
 			package = 2D3C8B662F187D31008DB90A /* XCRemoteSwiftPackageReference "MusadoraKit" */;
 			productName = MusadoraKit;
 		};
-		2D3D7B082F8FFD9B00C04E3A /* MediaRemoteAdapter */ = {
+		2D4734F52FDB12CF00C67B3B /* MediaRemoteAdapter */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 2D3D7B072F8FFD9B00C04E3A /* XCRemoteSwiftPackageReference "mediaremote-adapter" */;
+			productName = MediaRemoteAdapter;
+		};
+		2D4734F82FDB132000C67B3B /* MediaRemoteAdapter */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2D4734F72FDB132000C67B3B /* XCRemoteSwiftPackageReference "mediaremote-adapter" */;
 			productName = MediaRemoteAdapter;
 		};
 		2D5CDFEA2F061DA00056B4CF /* Sparkle */ = {

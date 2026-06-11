@@ -71,7 +71,7 @@ struct ScrobblerSettingsPane: View {
 			Section("Scrobbling") {
 				VStack(alignment: .leading, spacing: 4) {
 					HStack {
-						Text("50%")
+						Text("0%")
 							.font(.caption)
 							.foregroundColor(.secondary)
 						Slider(
@@ -79,7 +79,7 @@ struct ScrobblerSettingsPane: View {
 								get: { Double(scrobbleTrackAt) },
 								set: { scrobbleTrackAt = Int($0) }
 							),
-							in: 50...100,
+                            in: 0.0001...100,
 							step: 5
 						)
 						Text("100%")
