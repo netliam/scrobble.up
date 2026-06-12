@@ -43,10 +43,30 @@ extension LogEntry {
 		source: String,
 		context: NSManagedObjectContext
 	) -> LogEntry {
+        let cleanArtist = artist.trimmingCharacters(in: .whitespaces)
+        let cleanTitle = title.trimmingCharacters(in: .whitespaces)
+        let cleanAlbum = album?.trimmingCharacters(in: .whitespaces)
+        
+        guard !cleanArtist.isEmpty && !cleanTitle.isEmpty else {
+            print("Warning: Attempted to create LogEntry with empty artist or title. Artist: '\(artist)', Title: '\(title)'")
+            let entry = LogEntry(context: context)
+            entry.id = UUID()
+            entry.date = Date()
+            entry.artist = cleanArtist.isEmpty ? "Unknown Artist" : cleanArtist
+            entry.title = cleanTitle.isEmpty ? "Unknown Track" : cleanTitle
+            entry.album = cleanAlbum
+            entry.source = source
+            entry.nowPlayingSent = false
+            entry.nowPlayingFailed = false
+            entry.scrobbled = false
+            entry.scrobbleFailed = false
+            return entry
+        }
+        
 		let request = NSFetchRequest<LogEntry>(entityName: "LogEntry")
 		request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
-			NSPredicate(format: "artist ==[c] %@", artist),
-			NSPredicate(format: "title ==[c] %@", title),
+			NSPredicate(format: "artist ==[c] %@", cleanArtist),
+			NSPredicate(format: "title ==[c] %@", cleanTitle),
 			NSPredicate(format: "scrobbled == NO"),
 			NSPredicate(format: "date > %@", Date().addingTimeInterval(-600) as NSDate),
 		])
@@ -60,9 +80,9 @@ extension LogEntry {
 		let entry = LogEntry(context: context)
 		entry.id = UUID()
 		entry.date = Date()
-		entry.artist = artist
-		entry.title = title
-		entry.album = album
+		entry.artist = cleanArtist
+		entry.title = cleanTitle
+		entry.album = cleanAlbum
 		entry.source = source
 		entry.nowPlayingSent = false
 		entry.nowPlayingFailed = false
@@ -71,6 +91,45 @@ extension LogEntry {
 		return entry
 	}
 }
+
+// MARK: - Validation & Sanitization
+
+extension LogEntry {
+    var isValid: Bool {
+        let artistTrimmed = artist.trimmingCharacters(in: .whitespaces)
+        let titleTrimmed = title.trimmingCharacters(in: .whitespaces)
+        
+        // Check if data looks like corrupted/placeholder data
+        let isCorrupted = (
+            artistTrimmed.isEmpty ||
+            titleTrimmed.isEmpty ||
+            artistTrimmed.count > 500 ||
+            titleTrimmed.count > 500
+        )
+        
+        return !isCorrupted && !artistTrimmed.isEmpty && !titleTrimmed.isEmpty
+    }
+    
+    var displayTitle: String {
+        let trimmed = title.trimmingCharacters(in: .whitespaces)
+        return trimmed.isEmpty || trimmed.count > 500 ? "Unknown Track" : trimmed
+    }
+    
+    var displayArtist: String {
+        let trimmed = artist.trimmingCharacters(in: .whitespaces)
+        return trimmed.isEmpty || trimmed.count > 500 ? "Unknown Artist" : trimmed
+    }
+    
+    func cleanIfCorrupted() {
+        if !isValid {
+            print("Cleaning corrupted LogEntry - Artist: '\(artist)', Title: '\(title)'")
+            artist = displayArtist
+            title = displayTitle
+            try? managedObjectContext?.save()
+        }
+    }
+}
+
 
 // MARK: - Status Updates
 

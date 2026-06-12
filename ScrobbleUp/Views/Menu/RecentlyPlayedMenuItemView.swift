@@ -177,6 +177,7 @@ class RecentlyPlayedMenuItemView: NSView {
 			titleLabel.trailingAnchor.constraint(
 				equalTo: statusIndicator.leadingAnchor, constant: -8),
 			titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: contentInsets.top),
+            titleLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 100),
 
 			subtitleLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
 			subtitleLabel.trailingAnchor.constraint(equalTo: titleLabel.trailingAnchor),
@@ -243,19 +244,22 @@ class RecentlyPlayedMenuItemView: NSView {
 
 	// MARK: - Public Methods
 
-	public func configure(
-		title: String, subtitle: String?, image: NSImage?, isScrobbled: Bool? = false
-	) {
-		self.title = title
-		self.subtitle = subtitle
-		if let img = image {
-			self.image = img
-		} else {
-			self.image = nil
-		}
-		self.isScrobbled = isScrobbled ?? false
-		updateImageVisibility()
-	}
+    public func configure(
+        title: String, subtitle: String?, image: NSImage?, isScrobbled: Bool? = false
+    ) {
+        let sanitizedTitle = title.isEmpty ? "Unknown Track" : title
+        let sanitizedSubtitle = (subtitle?.isEmpty ?? true) ? nil : subtitle
+        
+        self.title = sanitizedTitle
+        self.subtitle = sanitizedSubtitle
+        if let img = image {
+            self.image = img
+        } else {
+            self.image = nil
+        }
+        self.isScrobbled = isScrobbled ?? false
+        updateImageVisibility()
+    }
 
 	// MARK: - Overrides
 
