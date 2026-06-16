@@ -71,17 +71,21 @@ struct ScrobblerSettingsPane: View {
 			Section("Scrobbling") {
 				VStack(alignment: .leading, spacing: 4) {
 					HStack {
-						Text("0%")
+						Text("1%")
 							.font(.caption)
 							.foregroundColor(.secondary)
-						Slider(
-							value: Binding(
-								get: { Double(scrobbleTrackAt) },
-								set: { scrobbleTrackAt = Int($0) }
-							),
-                            in: 0.0001...100,
-							step: 5
-						)
+                        Slider(
+                            value: Binding(
+                                get: { Double(scrobbleTrackAt) },
+                                set: { newValue in
+                                    let snapPoints = [1.0, 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 60.0, 65.0, 70.0, 75.0, 80.0, 85.0, 90.0, 95.0, 100.0]
+                                    let closest = snapPoints.min { abs($0 - newValue) < abs($1 - newValue) } ?? newValue
+                                    scrobbleTrackAt = Int(closest)
+                                }
+                            ),
+                            in: 1...100,
+                            step: 5
+                        )
 						Text("100%")
 							.font(.caption)
 							.foregroundColor(.secondary)
