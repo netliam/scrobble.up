@@ -45,10 +45,15 @@
 **System Requirements:**  
 - macOS **15 Sequoia** or later 
 
-### Manual Installation (Currently the only option)
+### Manual Installation
 <a href="https://github.com/netliam/scrobble.up/releases/latest/download/scrobble.up.dmg" target="_self">
     <img width="200" src="Assets/Download_for_MacOS.png" alt="Download for macOS" />
 </a>
+
+### Homebrew Installation
+```
+brew install netliam/homebrew-netliam/ScrobbleUp
+```
 
 ---
 

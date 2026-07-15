@@ -172,3 +172,13 @@ jobs:
 
       - name: Deploy Pages
         uses: actions/deploy-pages@v4
+
+  update-tap:
+    runs-on: macos-latest
+    steps:
+      - run: |
+          brew tap netliam/homebrew-netliam
+          brew bump-cask-pr --version=${{ github.event.release.tag_name }} scrobbleup
+        env:
+          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.TAP_PAT }}
+    
