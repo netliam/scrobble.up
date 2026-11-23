@@ -24,18 +24,23 @@ final class RecentTracksUpdater {
 
 	// MARK: - Public API
 
-	func removeDuplicates(from entries: [LogEntry]) -> [LogEntry] {
-		var seen = Set<String>()
-		return entries.filter { entry in
-			let key = CacheHelpers.makeCacheKey(for: entry)
-			if seen.contains(key) {
-				return false
-			} else {
-				seen.insert(key)
-				return true
-			}
-		}
-	}
+    func removeDuplicates(from entries: [LogEntry]) -> [LogEntry] {
+        var seen = Set<String>()
+        return entries.filter { entry in
+            guard entry.isValid else {
+                print("Filtering out invalid LogEntry: '\(entry.title)' by '\(entry.artist)'")
+                return false
+            }
+            
+            let key = CacheHelpers.makeCacheKey(for: entry)
+            if seen.contains(key) {
+                return false
+            } else {
+                seen.insert(key)
+                return true
+            }
+        }
+    }
 
 	func updateRecentTrackItems(_ items: [NSMenuItem], with entries: [LogEntry]) {
 		DispatchQueue.main.async {
@@ -82,19 +87,25 @@ final class RecentTracksUpdater {
 
 	// MARK: - Item Configuration
 
-	private func configureTrackItem(_ item: NSMenuItem, with entry: LogEntry) {
-		item.target = nil
-		item.action = nil
-		item.representedObject = CacheHelpers.makeCacheKey(for: entry)
-		item.isHidden = false
-		item.isEnabled = true
+    private func configureTrackItem(_ item: NSMenuItem, with entry: LogEntry) {
+        item.target = nil
+        item.action = nil
+        item.representedObject = CacheHelpers.makeCacheKey(for: entry)
+        item.isHidden = false
+        item.isEnabled = true
 
-		let artwork = getStyledArtwork(for: entry)
-		let view = getOrCreateView(for: item)
-		view.configure(
-			title: entry.title, subtitle: entry.artist, image: artwork, isScrobbled: entry.scrobbled
-		)
-	}
+        entry.cleanIfCorrupted()
+
+        let artwork = getStyledArtwork(for: entry)
+        let view = getOrCreateView(for: item)
+        
+        view.configure(
+            title: entry.displayTitle,
+            subtitle: entry.displayArtist,
+            image: artwork,
+            isScrobbled: entry.scrobbled
+        )
+    }
 
 	private func getStyledArtwork(for entry: LogEntry) -> NSImage {
 		let cachedArtwork =
