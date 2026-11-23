@@ -8,7 +8,6 @@
 import AppKit
 import Combine
 import Foundation
-import ScriptingBridge
 
 final class UnifiedMusicManager {
 
@@ -19,8 +18,7 @@ final class UnifiedMusicManager {
 	// MARK: - Properties
 
 	private let appState: AppState = .shared
-	private var lastAcceptedSource: MusicSource?
-	private var currentFetchingMethod: TrackFetchingMethod?
+	private var lastState: [MusicSource: MusicState] = [:]
 	private var currentHandler: ((MusicInfo) -> Void)?
 	private var cancellables = Set<AnyCancellable>()
 	// MARK: - Initialization
@@ -45,10 +43,10 @@ final class UnifiedMusicManager {
 
 		currentHandler = handler
 		let fetchingMethod = UserDefaults.standard.get(\.trackFetchingMethod)
-		currentFetchingMethod = fetchingMethod
 
 		let filteringHandler: (MusicInfo) -> Void = { [weak self] info in
 			guard let self = self else { return }
+			if let source = info.source, let state = info.state { self.lastState[source] = state }
 
 			if self.shouldAcceptTrack(info) {
 				handler(info)
@@ -57,7 +55,6 @@ final class UnifiedMusicManager {
 					Task { @MainActor in
 						self.appState.currentActivePlayer = source
 					}
-					self.lastAcceptedSource = source
 				}
 			} else {
 				print("Ignoring track due to player preference")
@@ -78,8 +75,7 @@ final class UnifiedMusicManager {
 		AppleMusicManager.shared.stop()
 		SpotifyManager.shared.stop()
 		MediaRemoteManager.shared.stop()
-
-		currentFetchingMethod = nil
+		lastState = [:]
 
 		Task { @MainActor in
 			appState.currentActivePlayer = nil
@@ -120,64 +116,20 @@ final class UnifiedMusicManager {
 			return true
 
 		case .preferAppleMusic:
-			if source == .appleMusic {
-				return true
-			}
-			if source == .other {
-				return !isAppleMusicActive()
-			}
-			return !isAppleMusicActive()
+			return source == .appleMusic || !isPlaying(.appleMusic, bundleID: "com.apple.Music")
 
 		case .preferSpotify:
-			if source == .spotify {
-				return true
-			}
-			if source == .other {
-				return !isSpotifyActive()
-			}
-			return !isSpotifyActive()
+			return source == .spotify || !isPlaying(.spotify, bundleID: "com.spotify.client")
 		}
 	}
 
 	// MARK: - Helpers
 
-	private func isAppleMusicActive() -> Bool {
-		guard
-			!NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.Music")
-				.isEmpty
-		else {
-			return false
-		}
-
-		let script = """
-			tell application "Music"
-			    if it is running then
-			        return player state is playing
-			    else
-			        return false
-			    end if
-			end tell
-			"""
-
-		if let result = NSAppleScript(source: script)?.executeAndReturnError(nil) {
-			return result.booleanValue
-		}
-		return false
-	}
-
-	private func isSpotifyActive() -> Bool {
-		guard SpotifyManager.shared.isRunning else {
-			return false
-		}
-
-		guard let app = SBApplication(bundleIdentifier: "com.spotify.client") else {
-			return false
-		}
-
-		let spotify = app as SpotifyApplication
-		if let state = spotify.playerState {
-			return state == "playing"
-		}
-		return false
+	/// Uses the last state the player itself reported, so no AppleScript runs on the main thread.
+	// shortcut: in MediaRemote mode only the now-playing app reports, so a state can go stale
+	// until that player sends its next event or quits.
+	private func isPlaying(_ source: MusicSource, bundleID: String) -> Bool {
+		lastState[source] == .playing
+			&& !NSRunningApplication.runningApplications(withBundleIdentifier: bundleID).isEmpty
 	}
 }

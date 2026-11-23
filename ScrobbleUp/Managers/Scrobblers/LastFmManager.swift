@@ -86,14 +86,10 @@ final class LastFmManager: ObservableObject {
 			duration: UInt(duration)
 		)
 
-		do {
-			_ = try await lastFM.Track.updateNowPlaying(
-				params: trackNowPlayingParams,
-				sessionKey: sk
-			)
-		} catch {
-			print("Failed to update now playing: \(error)")
-		}
+		_ = try await lastFM.Track.updateNowPlaying(
+			params: trackNowPlayingParams,
+			sessionKey: sk
+		)
 	}
 
 	func scrobble(
@@ -117,30 +113,13 @@ final class LastFmManager: ObservableObject {
 		)
 		try scrobbleParams.addItem(item: scrobbleParamItem)
 
-		do {
-			_ = try await lastFM.Track.scrobble(params: scrobbleParams, sessionKey: sk)
-		} catch {
-			print("Failed to scrobble: \(error)")
-		}
+		_ = try await lastFM.Track.scrobble(params: scrobbleParams, sessionKey: sk)
 	}
 
 	func fetchTrackInfo(artist: String, track: String) async -> TrackInfo? {
 		let trackInfoParams = TrackInfoParams(artist: artist, track: track)
 
-		do {
-			let trackInfo = try await lastFM.Track.getInfo(params: trackInfoParams)
-
-			return trackInfo
-		} catch LastFMError.LastFMServiceError(let errorType, let message) {
-			print(errorType, message)
-			return nil
-		} catch LastFMError.NoData {
-			print("No data was returned.")
-			return nil
-		} catch {
-			print("An error ocurred: \(error)")
-			return nil
-		}
+		return try? await lastFM.Track.getInfo(params: trackInfoParams)
 	}
 
 	func loveTrack(track: String, artist: String) async throws {
@@ -148,11 +127,7 @@ final class LastFmManager: ObservableObject {
 
 		let loveTrackParams = TrackParams(track: track, artist: artist)
 
-		do {
-			try await lastFM.Track.love(params: loveTrackParams, sessionKey: sessionKey)
-		} catch {
-			print("Failed to love track: \(error)")
-		}
+		try await lastFM.Track.love(params: loveTrackParams, sessionKey: sessionKey)
 	}
 
 	func unloveTrack(track: String, artist: String) async throws {
@@ -160,11 +135,7 @@ final class LastFmManager: ObservableObject {
 
 		let unloveTrackParams = TrackParams(track: track, artist: artist)
 
-		do {
-			try await lastFM.Track.unlove(params: unloveTrackParams, sessionKey: sessionKey)
-		} catch {
-			print("Failed to unlove track: \(error)")
-		}
+		try await lastFM.Track.unlove(params: unloveTrackParams, sessionKey: sessionKey)
 	}
 
 	func isTrackLoved(artist: String, track: String) async -> Bool {
@@ -203,19 +174,7 @@ final class LastFmManager: ObservableObject {
 		let trackSimilarParams = TrackSimilarParams(
 			track: track, artist: artist, autocorrect: autocorrect, limit: UInt(limit))
 
-		do {
-			let similarTracks = try await lastFM.Track.getSimilar(params: trackSimilarParams)
-			return Array(similarTracks.items)
-		} catch LastFMError.LastFMServiceError(let errorType, let message) {
-			print(errorType, message)
-			return nil
-		} catch LastFMError.NoData {
-			print("No data was returned.")
-			return nil
-		} catch {
-			print("An error ocurred: \(error)")
-			return nil
-		}
+		return (try? await lastFM.Track.getSimilar(params: trackSimilarParams)).map { Array($0.items) }
 	}
 
 	// MARK: - Artist Functions
@@ -224,20 +183,7 @@ final class LastFmManager: ObservableObject {
 		let artistInfoParams = ArtistInfoParams(
 			term: artist, criteria: .artist, autocorrect: autocorrect)
 
-		do {
-			let artistInfo = try await lastFM.Artist.getInfo(params: artistInfoParams)
-
-			return artistInfo
-		} catch LastFMError.LastFMServiceError(let errorType, let message) {
-			print(errorType, message)
-			return nil
-		} catch LastFMError.NoData {
-			print("No data was returned.")
-			return nil
-		} catch {
-			print("An error ocurred: \(error)")
-			return nil
-		}
+		return try? await lastFM.Artist.getInfo(params: artistInfoParams)
 	}
 
 	func fetchSimilarArtists(artist: String, autocorrect: Bool, limit: Int) async
@@ -246,20 +192,7 @@ final class LastFmManager: ObservableObject {
 		let artistSimilarParams = ArtistSimilarParams(
 			artist: artist, autocorrect: autocorrect, limit: UInt(limit))
 
-		do {
-			let similarArtists = try await lastFM.Artist.getSimilar(params: artistSimilarParams)
-
-			return Array(similarArtists.items)
-		} catch LastFMError.LastFMServiceError(let errorType, let message) {
-			print(errorType, message)
-			return nil
-		} catch LastFMError.NoData {
-			print("No data was returned.")
-			return nil
-		} catch {
-			print("An error ocurred: \(error)")
-			return nil
-		}
+		return (try? await lastFM.Artist.getSimilar(params: artistSimilarParams)).map { Array($0.items) }
 	}
 
 	// MARK: - Album Functions
@@ -267,37 +200,14 @@ final class LastFmManager: ObservableObject {
 	func fetchAlbumInfo(artist: String, album: String) async -> AlbumInfo? {
 		let albumInfoParams = AlbumInfoParams(artist: artist, album: album)
 
-		do {
-			let albumInfo = try await lastFM.Album.getInfo(params: albumInfoParams)
-
-			return albumInfo
-		} catch LastFMError.LastFMServiceError(let errorType, let message) {
-			print(errorType, message)
-			return nil
-		} catch LastFMError.NoData {
-			print("No data was returned.")
-			return nil
-		} catch {
-			print("An error ocurred: \(error)")
-			return nil
-		}
+		return try? await lastFM.Album.getInfo(params: albumInfoParams)
 	}
 
 	// MARK: - User Functions
 
 	func fetchUserInfo() async -> UserInfo? {
 		guard let sessionKey = sessionKey else { return nil }
-		do {
-			let userInfo = try await lastFM.User.getInfo(sessionKey: sessionKey)
-
-			return userInfo
-		} catch LastFMError.LastFMServiceError(let errorType, let message) {
-			print(errorType, message)
-			return nil
-		} catch {
-			print("An error ocurred: \(error)")
-			return nil
-		}
+		return try? await lastFM.User.getInfo(sessionKey: sessionKey)
 	}
 
 	func fetchLovedTracksCount() async -> UInt {
@@ -333,20 +243,7 @@ final class LastFmManager: ObservableObject {
 	func fetchRecentTracks(limit: Int = 30) async throws -> [RecentTrack?] {
 		let recentTrackParams = RecentTracksParams(user: username ?? "", limit: UInt(limit))
 
-		do {
-			let recentTracks = try await lastFM.User.getRecentTracks(params: recentTrackParams)
-
-			return Array(recentTracks.items)
-		} catch LastFMError.LastFMServiceError(let errorType, let message) {
-			print(errorType, message)
-			return []
-		} catch LastFMError.NoData {
-			print("No data was returned.")
-			return []
-		} catch {
-			print("An error ocurred: \(error)")
-			return []
-		}
+		return (try? await lastFM.User.getRecentTracks(params: recentTrackParams)).map { Array($0.items) } ?? []
 	}
 
 	func fetchTopAlbums(period: TopAlbumPeriod, limit: Int = 9) async -> [UserTopAlbum]? {
@@ -372,20 +269,7 @@ final class LastFmManager: ObservableObject {
 		let topAlbumParams = UserTopItemsParams(
 			user: username, period: periodParam, limit: UInt(limit))
 
-		do {
-			let topAlbums = try await lastFM.User.getTopAlbums(params: topAlbumParams)
-
-			return Array(topAlbums.items)
-		} catch LastFMError.LastFMServiceError(let errorType, let message) {
-			print(errorType, message)
-			return []
-		} catch LastFMError.NoData {
-			print("No data was returned.")
-			return []
-		} catch {
-			print("An error ocurred: \(error)")
-			return []
-		}
+		return (try? await lastFM.User.getTopAlbums(params: topAlbumParams)).map { Array($0.items) } ?? []
 	}
 
 	// MARK: - Misc Functions

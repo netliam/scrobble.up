@@ -83,7 +83,7 @@ final class UserStatsUpdater {
 				return
 			}
 
-			let stats = await listenBrainz.fetchUserStats()
+			let stats = await listenBrainz.stats.fetchUserStats()
 
 			await MainActor.run {
 				profileItem.title = "Open \(username)'s profile..."

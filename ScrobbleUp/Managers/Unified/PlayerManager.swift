@@ -110,9 +110,9 @@ final class PlayerManager: ObservableObject {
 		if UserDefaults.standard.get(\.listenBrainzEnabled) && listenBrainz.username != nil {
 			do {
 				if targetFavorited {
-					try await listenBrainz.loveTrack(artist: trackArtist, track: trackTitle)
+					try await listenBrainz.feedback.loveTrack(artist: trackArtist, track: trackTitle)
 				} else {
-					try await listenBrainz.unloveTrack(artist: trackArtist, track: trackTitle)
+					try await listenBrainz.feedback.unloveTrack(artist: trackArtist, track: trackTitle)
 				}
 				results.listenBrainzSuccess = true
 				if isCurrentTrack {
@@ -183,7 +183,7 @@ final class PlayerManager: ObservableObject {
 		}
 
 		if UserDefaults.standard.get(\.listenBrainzEnabled) && listenBrainz.username != nil {
-			let isLoved = await listenBrainz.isTrackLoved(artist: trackArtist, track: trackTitle)
+			let isLoved = await listenBrainz.feedback.isTrackLoved(artist: trackArtist, track: trackTitle)
 			newState.listenBrainz = isLoved
 		}
 
@@ -205,11 +205,6 @@ final class PlayerManager: ObservableObject {
 		_ = await fetchFavoriteState()
 	}
 
-	func onTrackChanged() {
-		currentTrackKey = nil
-		resetFavoriteState()
-	}
-
 	func bringPlayerToFront() {
 		guard let bundleID = appState.currentActivePlayer?.rawValue else { return }
 
@@ -226,11 +221,6 @@ final class PlayerManager: ObservableObject {
 	}
 
 	// MARK: - Private Helpers
-
-	private var hasCurrentTrack: Bool {
-		let track = appState.currentTrack
-		return !track.title.isEmpty && track.title != "-"
-	}
 
 	private func resetFavoriteState() {
 		favoriteState = .init()

@@ -40,6 +40,8 @@ final class CoreDataStack {
 			attr("scrobbled", .booleanAttributeType),
 			attr("scrobbleFailed", .booleanAttributeType),
 			attr("errorMessage", .stringAttributeType, optional: true),
+			attr("lastFmPending", .booleanAttributeType, defaultValue: false),
+			attr("listenBrainzPending", .booleanAttributeType, defaultValue: false),
 		]
 		model.entities = [entity]
 

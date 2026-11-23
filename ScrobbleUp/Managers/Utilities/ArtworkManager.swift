@@ -198,7 +198,7 @@ final class ArtworkManager: @unchecked Sendable {
 				album: album
 			)
 		case .musicBrainz:
-			return await ListenBrainzManager.shared.fetchArtworkURL(
+			return await ListenBrainzManager.shared.artwork.fetchArtworkURL(
 				artist: artist,
 				track: track,
 				album: album

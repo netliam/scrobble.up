@@ -139,8 +139,9 @@ final class MenuController: NSObject, NSApplicationDelegate, NSWindowDelegate {
 			forName: .NSManagedObjectContextObjectsDidChange,
 			object: ctx,
 			queue: .main
-		) { [weak self] notification in
-			self?.refreshMenu()
+		) { [weak self] _ in
+			// Only the local log changed; stats and top albums reload when the menu opens.
+			self?.refreshRecentTracks()
 		}
 	}
 
@@ -366,14 +367,7 @@ final class MenuController: NSObject, NSApplicationDelegate, NSWindowDelegate {
 			buildMenu()
 		}
 
-		// Update recent tracks
-		let recentEntries = LogEntry.fetchRecent(context: core.container.viewContext, limit: 10)
-		let uniqueEntries = recentTracksUpdater.removeDuplicates(from: recentEntries)
-
-		recentTracksUpdater.updateRecentTrackItems(
-			recentTrackItems,
-			with: Array(uniqueEntries.prefix(5))
-		)
+		refreshRecentTracks()
 
 		// Update player selection checkmarks
 		if shouldShowPlayerSelection() {
@@ -391,6 +385,16 @@ final class MenuController: NSObject, NSApplicationDelegate, NSWindowDelegate {
 			refreshUserStats(for: .listenBrainz)
 			refreshTopAlbums(for: .listenBrainz)
 		}
+	}
+
+	private func refreshRecentTracks() {
+		let recentEntries = LogEntry.fetchRecent(context: core.container.viewContext, limit: 10)
+		let uniqueEntries = recentTracksUpdater.removeDuplicates(from: recentEntries)
+
+		recentTracksUpdater.updateRecentTrackItems(
+			recentTrackItems,
+			with: Array(uniqueEntries.prefix(5))
+		)
 	}
 
 	private func refreshUserStats(for service: ScrobblerService) {

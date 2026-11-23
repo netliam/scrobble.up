@@ -45,9 +45,8 @@ final class ListenBrainzManager: ObservableObject {
 		self.artwork = ListenBrainzArtworkService(config: config)
 	}
 
-	// MARK: - Convenience Methods (Maintain Backward Compatibility)
+	// MARK: - Authentication
 
-	// Authentication
 	func validateToken(_ token: String, baseURL: String? = nil) async throws -> String {
 		let username = try await authentication.validateToken(token, baseURL: baseURL)
 		self.username = config.username
@@ -64,47 +63,5 @@ final class ListenBrainzManager: ObservableObject {
 		authentication.signOut()
 		self.username = nil
 		self.baseURL = Self.defaultBaseURL
-	}
-
-	// Scrobbling
-	func scrobble(artist: String, track: String, timestamp: Int, album: String?, duration: Int?)
-		async throws
-	{
-		try await scrobbling.scrobble(
-			artist: artist, track: track, timestamp: timestamp, album: album, duration: duration)
-	}
-
-	func updateNowPlaying(artist: String, track: String, album: String?, duration: Int?)
-		async throws
-	{
-		try await scrobbling.updateNowPlaying(
-			artist: artist, track: track, album: album, duration: duration)
-	}
-
-	// Feedback
-	func loveTrack(artist: String, track: String) async throws {
-		try await feedback.loveTrack(artist: artist, track: track)
-	}
-
-	func unloveTrack(artist: String, track: String) async throws {
-		try await feedback.unloveTrack(artist: artist, track: track)
-	}
-
-	func isTrackLoved(artist: String, track: String) async -> Bool {
-		await feedback.isTrackLoved(artist: artist, track: track)
-	}
-
-	// Artwork
-	func fetchArtworkURL(artist: String, track: String, album: String?) async -> URL? {
-		await artwork.fetchArtworkURL(artist: artist, track: track, album: album)
-	}
-
-	// Stats
-	func fetchTopAlbums(period: TopAlbumPeriod, limit: Int = 9) async -> [ListenBrainzTopAlbum]? {
-		await stats.fetchTopAlbums(period: period, limit: limit)
-	}
-
-	func fetchUserStats() async -> ListenBrainzUserStats? {
-		await stats.fetchUserStats()
 	}
 }

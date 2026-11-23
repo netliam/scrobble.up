@@ -79,12 +79,12 @@ final class AppleMusicManager: ObservableObject {
 					source: .appleMusic
 				)
 
-				// Prefetch song in background
+				// Hand the event on first so a slow catalog search can't delay or reorder it.
+				handler(musicInfo)
+
 				if let title = name, let artist = artist, !title.isEmpty {
 					await self.prefetchSong(title: title, artist: artist, album: album)
 				}
-
-				handler(musicInfo)
 			}
 		}
 	}

@@ -50,9 +50,6 @@ final class HTTPHelper {
 	/// URL session for making requests
 	let session: URLSession
 
-	/// Maximum number of retry attempts for TLS errors
-	private let maxRetries = 3
-
 	/// Creates an HTTPHelper with custom configuration
 	init(userAgent: String, session: URLSession = .shared) {
 		self.userAgent = userAgent

@@ -19,13 +19,25 @@ final class UnifiedScrobbleManager: ObservableObject {
 	private var currentStartDate: Date?
 	private var currentDuration: Int?
 	private var currentEntry: LogEntry?
+	private var playTime = PlayTime()
+	private var didScrobble = false
 	private var scrobbleTimer: Timer?
+	private var isRetrying = false
 
 	init(context: NSManagedObjectContext) {
 		self.context = context
+		Task { await retryFailedScrobbles() }
 	}
 
 	func handle(_ nowPlaying: MusicInfo) {
+		// Players may send "stopped" without track info, so handle it before the title check.
+		if nowPlaying.state == .stopped {
+			if nowPlaying.source != nil && nowPlaying.source == currentSource {
+				endCurrentTrack()
+			}
+			return
+		}
+
 		guard let title = nowPlaying.title,
 			let artist = nowPlaying.artist,
 			let source = nowPlaying.source,
@@ -41,12 +53,15 @@ final class UnifiedScrobbleManager: ObservableObject {
 			let duration = max(0, (nowPlaying.duration ?? 0) / 1000)
 			let key = "\(artist)|\(title)|\(album ?? "")"
 
-			if key != currentTrackKey {
-				cancelTimer()
+			if key == currentTrackKey && !playTime.isRepeat(duration: duration, at: Date()) {
+				resume()
+			} else {
+				if currentTrackKey != nil { endCurrentTrack() }
 				currentSource = source
 				currentTrackKey = key
 				currentStartDate = Date()
 				currentDuration = duration
+				playTime.resume(at: Date())
 
 				let entry = LogEntry.findOrCreate(
 					artist: artist,
@@ -96,6 +111,7 @@ final class UnifiedScrobbleManager: ObservableObject {
 					appState.currentTrack.image = artworkImage
 
 					await sendNowPlaying(
+						entry: entry,
 						artist: artist,
 						track: title,
 						album: album,
@@ -110,39 +126,58 @@ final class UnifiedScrobbleManager: ObservableObject {
 						)
 					}
 				}
-				scheduleScrobbleIfNeeded(duration: duration)
+				scheduleScrobble()
 			}
 
 		case .paused:
+			guard source == currentSource, playTime.isPlaying else { return }
+			playTime.pause(at: Date())
 			cancelTimer()
-
-		case .stopped:
-			if let start = currentStartDate,
-				let duration = currentDuration,
-				duration > 0
-			{
-				let played = Int(Date().timeIntervalSince(start))
-				let threshold = min(
-					max(30, duration * UserDefaults.standard.get(\.scrobbleTrackAt) / 100),
-					240
-				)
-				if played >= threshold { fireScrobble() }
-			}
-			cancelTimer()
-			currentSource = nil
-			currentTrackKey = nil
-			currentStartDate = nil
-			currentDuration = nil
-			currentEntry = nil
 
 		default:
 			break
 		}
 	}
 
+	private func resume() {
+		guard !playTime.isPlaying else { return }  // already playing; duplicate event
+		playTime.resume(at: Date())
+		scheduleScrobble()
+	}
+
+	/// Scrobbles the current track if it played long enough, then clears all track state.
+	private func endCurrentTrack() {
+		if let duration = currentDuration, duration > 30,
+			playTime.played(at: Date()) >= threshold(for: duration)
+		{
+			fireScrobble()
+		}
+		cancelTimer()
+		currentSource = nil
+		currentTrackKey = nil
+		currentStartDate = nil
+		currentDuration = nil
+		currentEntry = nil
+		playTime = PlayTime()
+		didScrobble = false
+	}
+
+	private func threshold(for duration: Int) -> TimeInterval {
+		PlayTime.threshold(duration: duration, percent: UserDefaults.standard.get(\.scrobbleTrackAt))
+	}
+
+	private var lastFmActive: Bool {
+		UserDefaults.standard.get(\.lastFmEnabled) && lastFm.username != nil
+	}
+
+	private var listenBrainzActive: Bool {
+		UserDefaults.standard.get(\.listenBrainzEnabled) && listenBrainz.username != nil
+	}
+
 	// MARK: - Now Playing
 
 	private func sendNowPlaying(
+		entry: LogEntry,
 		artist: String,
 		track: String,
 		album: String?,
@@ -152,7 +187,7 @@ final class UnifiedScrobbleManager: ObservableObject {
 		var anySent = false
 
 		// Last.fm
-		if UserDefaults.standard.get(\.lastFmEnabled) && lastFm.username != nil {
+		if lastFmActive {
 			do {
 				try await lastFm.updateNowPlaying(
 					artist: artist,
@@ -167,9 +202,9 @@ final class UnifiedScrobbleManager: ObservableObject {
 		}
 
 		// ListenBrainz
-		if UserDefaults.standard.get(\.listenBrainzEnabled) && listenBrainz.username != nil {
+		if listenBrainzActive {
 			do {
-				try await listenBrainz.updateNowPlaying(
+				try await listenBrainz.scrobbling.updateNowPlaying(
 					artist: artist,
 					track: track,
 					album: album,
@@ -181,26 +216,23 @@ final class UnifiedScrobbleManager: ObservableObject {
 			}
 		}
 
-		if let entry = currentEntry {
-			if anySent {
-				entry.markNowPlayingSent()
-			} else if !errors.isEmpty {
-				entry.markNowPlayingFailed(errors.joined(separator: "; "))
-			}
+		if anySent {
+			entry.markNowPlayingSent()
+		} else if !errors.isEmpty {
+			entry.markNowPlayingFailed(errors.joined(separator: "; "))
 		}
 	}
 
 	// MARK: - Scrobbling
 
-	private func scheduleScrobbleIfNeeded(duration: Int) {
-		guard duration > 30 else { return }
+	/// Sets the timer for the play time still needed; call on start and on every resume.
+	private func scheduleScrobble() {
+		cancelTimer()
+		guard !didScrobble, let duration = currentDuration, duration > 30 else { return }
 
-		let threshold = min(
-			max(30, duration * UserDefaults.standard.get(\.scrobbleTrackAt) / 100),
-			240
-		)
+		let remaining = max(0, threshold(for: duration) - playTime.played(at: Date()))
 		scrobbleTimer = Timer.scheduledTimer(
-			withTimeInterval: TimeInterval(threshold),
+			withTimeInterval: remaining,
 			repeats: false
 		) { [weak self] _ in
 			Task { @MainActor [weak self] in
@@ -210,75 +242,89 @@ final class UnifiedScrobbleManager: ObservableObject {
 	}
 
 	private func fireScrobble() {
-		guard let start = currentStartDate,
+		guard !didScrobble,
+			let start = currentStartDate,
 			let duration = currentDuration,
 			let entry = currentEntry
 		else { return }
+		didScrobble = true
 
-		let artist = entry.artist
-		let title = entry.title
-		let album = entry.album
-		let timestamp = Int(start.timeIntervalSince1970)
+		guard lastFmActive || listenBrainzActive else { return }
+		entry.date = start  // the retry sends this as the scrobble time
+		entry.lastFmPending = lastFmActive
+		entry.listenBrainzPending = listenBrainzActive
 
 		Task {
-			await scrobble(
-				artist: artist,
-				track: title,
-				album: album,
-				duration: duration,
-				timestamp: timestamp
-			)
+			await submitPending(entry, duration: duration)
+			if !entry.scrobbleFailed { await retryFailedScrobbles() }
 		}
 	}
 
-	private func scrobble(
-		artist: String,
-		track: String,
-		album: String?,
-		duration: Int,
-		timestamp: Int
-	) async {
+	/// Sends the entry to each service it is still pending on, and records the result.
+	/// A service that is pending but now off or signed out is dropped.
+	private func submitPending(_ entry: LogEntry, duration: Int) async {
+		let timestamp = Int(entry.date.timeIntervalSince1970)
 		var errors: [String] = []
-		var anyScrobbled = false
 
-		// Last.fm
-		if UserDefaults.standard.get(\.lastFmEnabled) && lastFm.username != nil {
-			do {
-				try await lastFm.scrobble(
-					artist: artist,
-					track: track,
-					timestamp: timestamp,
-					album: album,
-					duration: duration
-				)
-				anyScrobbled = true
-			} catch {
-				errors.append("Last.fm: \(error.localizedDescription)")
+		if entry.lastFmPending {
+			if lastFmActive {
+				do {
+					try await lastFm.scrobble(
+						artist: entry.artist,
+						track: entry.title,
+						timestamp: timestamp,
+						album: entry.album,
+						duration: duration
+					)
+					entry.lastFmPending = false
+				} catch {
+					errors.append("Last.fm: \(error.localizedDescription)")
+				}
+			} else {
+				entry.lastFmPending = false
 			}
 		}
 
-		// ListenBrainz
-		if UserDefaults.standard.get(\.listenBrainzEnabled) && listenBrainz.username != nil {
-			do {
-				try await listenBrainz.scrobble(
-					artist: artist,
-					track: track,
-					timestamp: timestamp,
-					album: album,
-					duration: duration
-				)
-				anyScrobbled = true
-			} catch {
-				errors.append("ListenBrainz: \(error.localizedDescription)")
+		if entry.listenBrainzPending {
+			if listenBrainzActive {
+				do {
+					try await listenBrainz.scrobbling.scrobble(
+						artist: entry.artist,
+						track: entry.title,
+						timestamp: timestamp,
+						album: entry.album,
+						duration: duration
+					)
+					entry.listenBrainzPending = false
+				} catch {
+					errors.append("ListenBrainz: \(error.localizedDescription)")
+				}
+			} else {
+				entry.listenBrainzPending = false
 			}
 		}
 
-		if let entry = currentEntry {
-			if anyScrobbled {
-				entry.markScrobbled()
-			} else if !errors.isEmpty {
-				entry.markScrobbleFailed(errors.joined(separator: "; "))
-			}
+		if errors.isEmpty {
+			entry.markScrobbled()
+		} else {
+			entry.markScrobbleFailed(errors.joined(separator: "; "))
+		}
+	}
+
+	/// Resends failed scrobbles, oldest first. Stops at the first failure (likely still offline).
+	// shortcut: only runs at launch and after a successful scrobble, not when the network comes back.
+	func retryFailedScrobbles() async {
+		guard !isRetrying else { return }
+		isRetrying = true
+		defer { isRetrying = false }
+
+		let cutoff = Date().addingTimeInterval(-14 * 24 * 3600)  // Last.fm rejects older scrobbles
+		let failed = LogEntry.fetchFailed(context: context).reversed().filter {
+			($0.lastFmPending || $0.listenBrainzPending) && $0.date > cutoff
+		}
+		for entry in failed {
+			await submitPending(entry, duration: Int(entry.duration))
+			if entry.scrobbleFailed { break }
 		}
 	}
 

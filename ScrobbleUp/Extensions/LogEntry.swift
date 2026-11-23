@@ -18,6 +18,9 @@ class LogEntry: NSManagedObject {
 	@NSManaged var scrobbled: Bool
 	@NSManaged var scrobbleFailed: Bool
 	@NSManaged var errorMessage: String?
+	// Services this scrobble still has to reach; the retry resends only to these.
+	@NSManaged var lastFmPending: Bool
+	@NSManaged var listenBrainzPending: Bool
 
 	var status: Status {
 		if scrobbleFailed || nowPlayingFailed { return .failed }
@@ -48,6 +51,7 @@ extension LogEntry {
 			NSPredicate(format: "artist ==[c] %@", artist),
 			NSPredicate(format: "title ==[c] %@", title),
 			NSPredicate(format: "scrobbled == NO"),
+			NSPredicate(format: "scrobbleFailed == NO"),  // keep failed plays for the retry
 			NSPredicate(format: "date > %@", Date().addingTimeInterval(-600) as NSDate),
 		])
 		request.fetchLimit = 1

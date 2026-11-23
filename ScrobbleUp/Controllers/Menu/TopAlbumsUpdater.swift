@@ -64,7 +64,7 @@ final class TopAlbumsUpdater {
 	// MARK: - ListenBrainz
 
 	private func fetchListenBrainzAlbums(period: TopAlbumPeriod) async -> [AlbumData] {
-		guard let topAlbums = await listenBrainzManager.fetchTopAlbums(period: period, limit: 9)
+		guard let topAlbums = await listenBrainzManager.stats.fetchTopAlbums(period: period, limit: 9)
 		else {
 			return []
 		}

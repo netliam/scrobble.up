@@ -24,6 +24,16 @@
 		9F4C57C92EA31C6F000ED6A2 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F4C57C82EA31C6F000ED6A2 /* CoreServices.framework */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		AA0000000000000000000007 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9F36429A2E7E538B00D4E680 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9F3642A12E7E538B00D4E680;
+			remoteInfo = scrobble.up;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		2D46A35F2F09A457002F379B /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -47,6 +57,7 @@
 		9F3642A22E7E538B00D4E680 /* scrobble.up.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = scrobble.up.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F4C57C62EA31C66000ED6A2 /* ServiceManagement.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ServiceManagement.framework; path = System/Library/Frameworks/ServiceManagement.framework; sourceTree = SDKROOT; };
 		9F4C57C82EA31C6F000ED6A2 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
+		AA0000000000000000000001 /* ScrobbleUpTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ScrobbleUpTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -84,6 +95,11 @@
 			path = ScrobbleUp;
 			sourceTree = "<group>";
 		};
+		AA0000000000000000000002 /* ScrobbleUpTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ScrobbleUpTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,6 +121,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AA0000000000000000000005 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -115,6 +138,7 @@
 				2DB6C9B12F076BEA00B52B00 /* ExportOptions.plist */,
 				2DE33E8A2EFCEB5F002E2BBF /* Configs */,
 				9F3642A42E7E538B00D4E680 /* ScrobbleUp */,
+				AA0000000000000000000002 /* ScrobbleUpTests */,
 				9F3642A32E7E538B00D4E680 /* Products */,
 				9F4C57C52EA31C65000ED6A2 /* Frameworks */,
 				2D07AC2D2F0310D100CDCF93 /* .gitignore */,
@@ -126,6 +150,7 @@
 			isa = PBXGroup;
 			children = (
 				9F3642A22E7E538B00D4E680 /* scrobble.up.app */,
+				AA0000000000000000000001 /* ScrobbleUpTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -175,6 +200,27 @@
 			productReference = 9F3642A22E7E538B00D4E680 /* scrobble.up.app */;
 			productType = "com.apple.product-type.application";
 		};
+		AA0000000000000000000003 /* ScrobbleUpTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA000000000000000000000B /* Build configuration list for PBXNativeTarget "ScrobbleUpTests" */;
+			buildPhases = (
+				AA0000000000000000000004 /* Sources */,
+				AA0000000000000000000005 /* Frameworks */,
+				AA0000000000000000000006 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AA0000000000000000000008 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				AA0000000000000000000002 /* ScrobbleUpTests */,
+			);
+			name = ScrobbleUpTests;
+			productName = ScrobbleUpTests;
+			productReference = AA0000000000000000000001 /* ScrobbleUpTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -188,6 +234,10 @@
 					9F3642A12E7E538B00D4E680 = {
 						CreatedOnToolsVersion = 26.0;
 						LastSwiftMigration = 2620;
+					};
+					AA0000000000000000000003 = {
+						CreatedOnToolsVersion = 26.0;
+						TestTargetID = 9F3642A12E7E538B00D4E680;
 					};
 				};
 			};
@@ -215,6 +265,7 @@
 			projectRoot = "";
 			targets = (
 				9F3642A12E7E538B00D4E680 /* scrobble.up */,
+				AA0000000000000000000003 /* ScrobbleUpTests */,
 			);
 		};
 /* End PBXProject section */
@@ -230,6 +281,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AA0000000000000000000006 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -240,7 +298,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AA0000000000000000000004 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		AA0000000000000000000008 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9F3642A12E7E538B00D4E680 /* scrobble.up */;
+			targetProxy = AA0000000000000000000007 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		9F3642AB2E7E538C00D4E680 /* Debug */ = {
@@ -386,7 +459,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1.2.6;
+				CURRENT_PROJECT_VERSION = 1.2.8;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 4AKWR35Q2Q;
 				ENABLE_APP_SANDBOX = YES;
@@ -415,7 +488,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15;
-				MARKETING_VERSION = 1.2.7;
+				MARKETING_VERSION = 1.2.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.netliam.ScrobbleUp;
 				PRODUCT_DEFINITION_PLIST = ScrobbleUp/Info.plist;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -453,7 +526,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1.2.6;
+				CURRENT_PROJECT_VERSION = 1.2.8;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 4AKWR35Q2Q;
 				ENABLE_APP_SANDBOX = YES;
@@ -482,7 +555,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15;
-				MARKETING_VERSION = 1.2.7;
+				MARKETING_VERSION = 1.2.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.netliam.ScrobbleUp;
 				PRODUCT_DEFINITION_PLIST = ScrobbleUp/Info.plist;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -504,6 +577,44 @@
 			};
 			name = Release;
 		};
+		AA0000000000000000000009 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4AKWR35Q2Q;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.netliam.ScrobbleUpTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/scrobble.up.app/Contents/MacOS/scrobble.up";
+			};
+			name = Debug;
+		};
+		AA000000000000000000000A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4AKWR35Q2Q;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.netliam.ScrobbleUpTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/scrobble.up.app/Contents/MacOS/scrobble.up";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -521,6 +632,15 @@
 			buildConfigurations = (
 				9F3642AE2E7E538C00D4E680 /* Debug */,
 				9F3642AF2E7E538C00D4E680 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA000000000000000000000B /* Build configuration list for PBXNativeTarget "ScrobbleUpTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0000000000000000000009 /* Debug */,
+				AA000000000000000000000A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

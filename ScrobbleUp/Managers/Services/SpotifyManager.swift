@@ -7,33 +7,12 @@
 
 import AppKit
 import Combine
-import ScriptingBridge
-
-@objc protocol SpotifyApplication {
-	@objc optional var currentTrack: SpotifyTrack? { get }
-	@objc optional var playerState: String? { get }
-}
-
-@objc protocol SpotifyTrack {
-	@objc optional var name: String? { get }
-	@objc optional var artist: String? { get }
-	@objc optional var album: String? { get }
-	@objc optional var duration: Int { get }
-}
-
-extension SBApplication: SpotifyApplication {}
 
 final class SpotifyManager: ObservableObject {
 	static let shared = SpotifyManager()
 
 	private init() {}
 	private var observer: NSObjectProtocol?
-	private var lastTrack: MusicInfo?
-
-	private var spotify: SpotifyApplication? {
-		guard isRunning else { return nil }
-		return SBApplication(bundleIdentifier: "com.spotify.client")
-	}
 
 	var isRunning: Bool {
 		!NSRunningApplication.runningApplications(
