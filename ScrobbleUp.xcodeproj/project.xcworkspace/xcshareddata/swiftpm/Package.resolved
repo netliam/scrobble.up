@@ -1,0 +1,78 @@
+{
+  "originHash" : "4915e696b6889ce1aeaeaeb2fc85412b731fc31f98c6b288dca11ad49fcfe089",
+  "pins" : [
+    {
+      "identity" : "keyboardshortcuts",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/sindresorhus/KeyboardShortcuts",
+      "state" : {
+        "revision" : "1aef85578fdd4f9eaeeb8d53b7b4fc31bf08fe27",
+        "version" : "2.4.0"
+      }
+    },
+    {
+      "identity" : "lastfm.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/duhnnie/LastFM.swift",
+      "state" : {
+        "revision" : "ab19b1f8c81abdb5760fb06b8095a9e232af1ca1",
+        "version" : "1.6.1"
+      }
+    },
+    {
+      "identity" : "launchatlogin-modern",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/sindresorhus/LaunchAtLogin-Modern",
+      "state" : {
+        "branch" : "main",
+        "revision" : "a04ec1c363be3627734f6dad757d82f5d4fa8fcc"
+      }
+    },
+    {
+      "identity" : "mediaremote-adapter",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/netliam/mediaremote-adapter.git",
+      "state" : {
+        "branch" : "fix-race-condition-crash",
+        "revision" : "9c8794ac45e1c4fc4880f64447012047ccdd2168"
+      }
+    },
+    {
+      "identity" : "musadorakit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/rryam/MusadoraKit.git",
+      "state" : {
+        "revision" : "000263b76ee8e6929dbe4c83dcd1e388edfa5cc6",
+        "version" : "9.2.0"
+      }
+    },
+    {
+      "identity" : "settings",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/sindresorhus/Settings",
+      "state" : {
+        "revision" : "f41475771f65379ca10852c95119a7f53f0de5a5",
+        "version" : "3.1.2"
+      }
+    },
+    {
+      "identity" : "sparkle",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/sparkle-project/Sparkle",
+      "state" : {
+        "revision" : "6276ba2b404829d139c45ff98427cf90e2efc59b",
+        "version" : "2.9.2"
+      }
+    },
+    {
+      "identity" : "swiftrestclient",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/duhnnie/SwiftRestClient",
+      "state" : {
+        "revision" : "eb7b2fcf534b0293e11e139866c5117bc56e7695",
+        "version" : "0.7.1"
+      }
+    }
+  ],
+  "version" : 3
+}
